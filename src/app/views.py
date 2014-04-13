@@ -1,13 +1,15 @@
 from pyramid.response import FileResponse
 from pyramid.view import view_config
 import os
-@view_config(route_name='index')
-def index(request):
+
+@view_config(route_name='app')
+def app(request):
 	here = os.path.dirname(__file__)
-	index_html = os.path.join(here, 'ui', 'index.html')
+	spa_html = os.path.join(here, 'ui', 'pim.html')
 	response = FileResponse(
-        index_html,
+        spa_html,
         request=request,
         content_type='text/html'
         )
 	return response
+

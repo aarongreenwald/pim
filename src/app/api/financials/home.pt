@@ -1,5 +1,0 @@
-<ul>
-<tal:block repeat="action actions">
-	<li><a href="" tal:attributes="href action" tal:content="action">action</a></li>
-</tal:block>
-</ul>

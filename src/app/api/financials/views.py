@@ -36,7 +36,7 @@ def test(request):
         return HTTPNotFound('No FinCashAccounts')    
     
     return dict(data=data, parameter1 = parameter1)
- """
+
 @view_config(route_name='home', renderer='home.pt', permission=pyramid.security.NO_PERMISSION_REQUIRED)
 def home(request):
 	items=['financials/cash_accounts', 
@@ -44,7 +44,7 @@ def home(request):
 			'financials/spending_item/1',
 			'logout' ]
 	return dict(actions=items) 
- 
+ """ 
 @view_config(route_name='cash_accounts', renderer='json')
 def cash_accounts(request):
 	data = DBSession.query(m.CashAccount).all()	

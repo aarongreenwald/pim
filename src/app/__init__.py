@@ -8,8 +8,7 @@ import security.auth
 
 
 def main(global_config, **settings):
-    """ This function returns a Pyramid WSGI application.
-    """
+    
     engine = engine_from_config(settings, 'sqlalchemy.')
     authn_policy = AuthTktAuthenticationPolicy(secret = settings['auth_secret']
 							, callback = security.auth.groupfinder
@@ -37,15 +36,20 @@ def main(global_config, **settings):
     api.financials.models.Base.metadata.bind = engine
 
     #config.add_static_view('static', 'static', cache_max_age=3600)
-    config.add_static_view('', 'ui', permission='access', cache_max_age = 0)
-    config.add_route('index', '/') #messes up the base href    
+    
+
+    #for the main entry point to the SPA
+    config.add_route('app', '/') 
+    #this sets up the ui folder to be served from the root, so things like /common/...js work    
+    config.add_static_view('', 'ui', permission='access', cache_max_age = 0) 
+    
     config.add_route('login', '/login')
-    config.add_route('logout', '/logout')
-    config.add_route('home', '/home')
+    config.add_route('logout', '/logout')    
     
     config.add_route('cash_accounts', 'api/financials/cash-accounts')
     config.add_route('spending_item', 'api/financials/spending-item/{id}')
     config.add_route('spending_items', 'api/financials/spending-items')
+    
     config.scan()
 
     return config.make_wsgi_app()
