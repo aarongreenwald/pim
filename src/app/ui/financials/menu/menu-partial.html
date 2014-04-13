@@ -1,0 +1,5 @@
+
+<ul class="menu" ng-controller="menu">
+	<li ng-repeat="item in items"><menu-item id="item.id" name="item.name" /></li>
+	<li ng-repeat="page in pages"><a href="{{page.href}}">{{page.name}}</a></li>
+</ul>
