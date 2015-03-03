@@ -3,10 +3,8 @@ import os
 from setuptools import setup, find_packages
 
 here = os.path.abspath(os.path.dirname(__file__))
-with open(os.path.join(here, 'README.txt')) as f:
+with open(os.path.join(here, 'README.md')) as f:
     README = f.read()
-with open(os.path.join(here, 'CHANGES.txt')) as f:
-    CHANGES = f.read()
 
 requires = [	
     'pyramid',
@@ -17,12 +15,13 @@ requires = [
     'transaction',
     'zope.sqlalchemy',
     'waitress',
+    'psycopg2',
     ]
 
-setup(name='app',
+setup(name='pim',
       version='0.0',
       description='app',
-      long_description=README + '\n\n' + CHANGES,
+      long_description=README,
       classifiers=[
         "Programming Language :: Python",
         "Framework :: Pyramid",
@@ -36,12 +35,9 @@ setup(name='app',
       packages=find_packages(),
       include_package_data=True,
       zip_safe=False,
-      test_suite='app',
       install_requires=requires,
       entry_points="""\
       [paste.app_factory]
-      main = app:main
-      [console_scripts]
-      initialize_app_db = app.scripts.initializedb:main
+      main = pim:main
       """,
       )

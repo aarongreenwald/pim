@@ -24,7 +24,7 @@ def main(global_config, **settings):
 							#, hashalg = ['auth_hashalg']
 							)
     authz_policy = ACLAuthorizationPolicy()
-    config = Configurator(settings=settings, root_factory='app.security.root_factory.RootFactory')
+    config = Configurator(settings=settings, root_factory='pim.security.root_factory.RootFactory')
     
     config.include('pyramid_chameleon')
     
