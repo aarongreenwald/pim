@@ -7,8 +7,12 @@ pim.config(function($stateProvider, $urlRouterProvider) {
 
   $stateProvider
     .state('home', {
-      url: "/",
-      templateUrl: "home/home.html"
+      url: '/',
+      templateUrl: 'home/home.html'
+    })
+    .state('financials', {
+      url: 'financials',
+      templateUrl: 'financials/financials.html'
     })
 })
 

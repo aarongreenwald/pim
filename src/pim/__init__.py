@@ -39,10 +39,7 @@ def main(global_config, **settings):
     
 
     #for the main entry point to the SPA
-    config.add_route('app', '/') 
-    #this sets up the ui folder to be served from the root, so things like /common/...js work    
-    config.add_static_view('', 'ui', permission='access', cache_max_age = 0) 
-    
+    config.add_route('app', '/')     
     config.add_route('login', '/login')
     config.add_route('logout', '/logout')    
     
@@ -50,6 +47,9 @@ def main(global_config, **settings):
     config.add_route('spending_item', 'api/financials/spending-item/{id}')
     config.add_route('spending_items', 'api/financials/spending-items')
     
+    #this sets up the ui folder to be served from the root, so things like /common/...js work    
+    config.add_static_view('', 'ui', permission='access', cache_max_age = 0) 
+
     config.scan()
 
     return config.make_wsgi_app()

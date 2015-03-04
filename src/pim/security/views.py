@@ -18,15 +18,15 @@ from pyramid.httpexceptions import (
 
 import auth
 
-@view_config(route_name='login', renderer='templates/login.pt')
-#this is where forbidden views go. alterantively use a special view, see below.
+#this is where forbidden views go. alternatively use a special view, see below.
 @forbidden_view_config(renderer='templates/login.pt') 
+@view_config(route_name='login', renderer='templates/login.pt')
 def login(request):    
     referrer = request.url
     if referrer == request.route_url('login'):
         referrer = '/' # never use the login form itself as came_from
     came_from = request.params.get('came_from', referrer)
-    message = 'You need to be logged in!!'
+    message = ''
     login = ''
     password = ''
     if 'form.submitted' in request.params:
@@ -36,7 +36,7 @@ def login(request):
             headers = remember(request, username)
             return HTTPFound(location = came_from,
                              headers = headers)
-        message = 'Failed login!!!!!!!!!!!'
+        message = 'Invalid username or password'
 
     return dict(
         message = message,
@@ -49,12 +49,12 @@ def login(request):
 @view_config(route_name='logout')
 def logout(request):
     headers = forget(request)
-    return HTTPFound(location = request.route_url('app'),
+    return HTTPFound(location = request.route_url('login'),
                      headers = headers)
                      
 #@forbidden_view_config()
-def forbidden(request):
-    return Response('TODO')
+#def forbidden(request):
+#    return Response('TODO')
 
 from pyramid.view import notfound_view_config
 @notfound_view_config(request_method='GET')
