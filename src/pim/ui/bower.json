@@ -1,0 +1,21 @@
+{
+  "name": "pim-ui",
+  "version": "0.0.1",
+  "homepage": "https://github.com/aarongreenwald/pim",
+  "authors": [
+    "Aaron Greenwald <aaron@aarongreenwald.com>"
+  ],
+  "description": "pim ui components",
+  "license": "MIT",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "angular-ui-router": "~0.2.13"
+  }
+}
