@@ -47,6 +47,9 @@ def main(global_config, **settings):
     config.add_route('spending_item', 'api/financials/spending-item/{id}')
     config.add_route('spending_items', 'api/financials/spending-items')
     
+    config.add_route('diary_entries', 'api/diary/entries')
+    config.add_route('diary_entry', 'api/diary/entries/{id}')
+    
     #this sets up the ui folder to be served from the root, so things like /common/...js work    
     config.add_static_view('', 'ui', permission='access', cache_max_age = 0) 
 

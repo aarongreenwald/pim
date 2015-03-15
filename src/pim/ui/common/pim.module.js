@@ -1,9 +1,12 @@
 var pim = angular.module('pim', [
-	'ui.router'
-	])
+	'ui.router',
+	'pim.diary'
+])
+
+pim.diary = angular.module('pim.diary', [])
 	 
 pim.config(function($stateProvider, $urlRouterProvider) {
-  $urlRouterProvider.otherwise("/");
+  $urlRouterProvider.otherwise("/")
 
   $stateProvider
     .state('home', {
@@ -19,7 +22,7 @@ pim.config(function($stateProvider, $urlRouterProvider) {
       templateUrl: 'diary/diary.html'
     })
   .state('diary.entry', {
-      url: '{id}',
+      url: '/{diaryEntryId}',
       templateUrl: 'diary/entry.html'
     })
 })
