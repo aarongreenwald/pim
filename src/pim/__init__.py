@@ -4,6 +4,7 @@ from pyramid.authorization import ACLAuthorizationPolicy
 from sqlalchemy import engine_from_config
 
 import api.financials.models
+import api.diary.models
 import security.auth
 
 
@@ -35,6 +36,9 @@ def main(global_config, **settings):
     api.financials.models.DBSession.configure(bind=engine)
     api.financials.models.Base.metadata.bind = engine
 
+    api.diary.models.DBSession.configure(bind=engine)
+    api.diary.models.Base.metadata.bind = engine
+
     #config.add_static_view('static', 'static', cache_max_age=3600)
     
 
@@ -48,7 +52,7 @@ def main(global_config, **settings):
     config.add_route('spending_items', 'api/financials/spending-items')
     
     config.add_route('diary_entries', 'api/diary/entries')
-    config.add_route('diary_entry', 'api/diary/entries/{id}')
+    config.add_route('diary_entry', 'api/diary/entries/{id}')             
     
     #this sets up the ui folder to be served from the root, so things like /common/...js work    
     config.add_static_view('', 'ui', permission='access', cache_max_age = 0) 

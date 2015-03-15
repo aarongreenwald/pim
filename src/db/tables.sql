@@ -48,3 +48,16 @@ CREATE TABLE fin_stock_transaction (stock_transaction_id serial primary key not 
 			,quantity decimal(12,4) NOT NULL
 			,is_purchase boolean NOT NULL
 			);
+
+
+CREATE TABLE dry_entry(entry_id serial primary key not null
+			,start_datetime timestamp NOT NULL
+			,updated_datetime timestamp NOT NULL
+			,title varchar(128) NULL
+			,content text NULL
+);
+
+CREATE TABLE dry_entry_tags(entry_id int not null foreign key references dry_entry(entry_id)
+			,name varchar(20) NOT NULL
+			,primary key (entry_id, name)			
+);

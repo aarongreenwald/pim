@@ -2,7 +2,12 @@ pim.diary.controller('DiaryCtrl', ['$scope', '$http', '$state',
 	function($scope, $http, $state){
 		$scope.diary = new function(){
 			var internal = {
-				
+				init: function(){
+					$http({method: 'GET', url: 'api/diary/entries'})
+						.success(function(data){
+							console.log(data)
+						})
+				}
 			}
 				
 			var api = {
@@ -15,6 +20,7 @@ pim.diary.controller('DiaryCtrl', ['$scope', '$http', '$state',
 				}
 			}
 			
+			internal.init()
 			return api
 		}
 	}
