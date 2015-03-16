@@ -1,3 +1,5 @@
 <div ng-controller="DiaryEntryCtrl">
-	A single diary entry	
+	Title: <input ng-model="diary.entry.entry.title" />
+	Content: <input ng-model="diary.entry.entry.content" />
+	<button ng-click="diary.entry.save()">Save</button>
 </div>
