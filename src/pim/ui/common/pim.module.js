@@ -14,15 +14,15 @@ pim.config(function($stateProvider, $urlRouterProvider) {
       templateUrl: 'home/home.html'
     })
     .state('financials', {
-      url: 'financials',
+      url: '/financials',
       templateUrl: 'financials/financials.html'
     })
    .state('diary', {
-      url: 'diary',
+      url: '/diary',
       templateUrl: 'diary/diary.html'
     })
-  .state('diary.entry', {
-      url: '/{diaryEntryId}',
+  .state('diaryEntry', { //putting this route at the root level also to hide the list view when navigating to a diary entry
+      url: '/diary/{diaryEntryId}',
       templateUrl: 'diary/entry.html'
     })
 })

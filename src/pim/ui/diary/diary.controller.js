@@ -5,7 +5,7 @@ pim.diary.controller('DiaryCtrl', ['$scope', '$http', '$state',
 				init: function(){
 					$http({method: 'GET', url: 'api/diary/entries'})
 						.success(function(data){
-							console.log(data)
+							api.entries = data
 						})
 				}
 			}
@@ -14,9 +14,12 @@ pim.diary.controller('DiaryCtrl', ['$scope', '$http', '$state',
 				newDiaryEntry: function(){
 					$http({method: 'POST', url: 'api/diary/entries'})
 						.success(function(data){
-							$state.go('diary.entry', {diaryEntryId: data})
+							$state.go('diaryEntry', {diaryEntryId: data})
 						})
 						
+				},
+				openEntry: function(diaryEntryId){
+					$state.go('diaryEntry', {diaryEntryId: diaryEntryId})
 				}
 			}
 			

@@ -1,5 +1,37 @@
 <div ng-controller="DiaryEntryCtrl">
-	Title: <input ng-model="diary.entry.entry.title" />
-	Content: <input ng-model="diary.entry.entry.content" />
-	<button ng-click="diary.entry.save()">Save</button>
+	<a ui-sref="diary">Back</a>
+	<button ng-click="diaryEntry.save()">Save</button><span>Last saved: {{diaryEntry.entry.updated_datetime}} </span>
+	<div class="pim-diary-entry">	
+		<div class="title">
+			<input ng-model="diaryEntry.entry.title" placeholder="Enter title for diary entry" length="128"/>
+		</div>
+		<div class="content">
+			<textarea ng-model="diaryEntry.entry.content" rows="25" cols="75"></textarea>
+		</div>	
+	</div>
 </div>
+<style>
+	.pim-diary-entry{
+		
+	}
+	.pim-diary-entry .title {
+		margin-top: 10px;
+		width: 100%;
+	}
+	.pim-diary-entry .title input{			
+		width: 100%;		
+	}
+	.pim-diary-entry .content{		
+		width: 100%;	
+	}
+	.pim-diary-entry .content textarea{						
+		background-image: -webkit-linear-gradient(left, #fff 10px, transparent 10px), -webkit-linear-gradient(right, #fff 10px, transparent 10px), -webkit-linear-gradient(#fff 23px, #ddd 23px, #ddd 24px, #fff 24px);
+		background-size: 100% 100%, 100% 100%, 100% 24px;
+		border: 1px solid #ddd;
+		border-radius: 2px;
+		box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+		line-height: 24px;		
+		padding: 4px 9px;          
+	}
+
+</style>

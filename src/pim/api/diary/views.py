@@ -36,9 +36,8 @@ def get_entry(request):
 @view_config(route_name='diary_entry', renderer='json', request_method='PUT')
 def put_entry(request):
 	entry = DBSession.query(m.Entry).filter(m.Entry.entry_id == request.matchdict['id']).first()
-	entry.updated_datetime = datetime.datetime.now()
-	print(request.json_body['title'])
+	entry.updated_datetime = datetime.datetime.now()	
 	entry.title = request.json_body['title']
 	entry.content = request.json_body['content']
 	transaction.commit()
-	return {}
+	return utilities.serialize(entry)
