@@ -27,4 +27,8 @@ pim.config(function($stateProvider, $urlRouterProvider) {
     })
 })
 
-
+pim.filter('pmFormatDate', function(){
+  return function(date){
+    return moment(date).calendar()
+  }
+})

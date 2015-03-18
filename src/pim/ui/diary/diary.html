@@ -2,7 +2,31 @@
 	List of diary entries and a way to create a new one, perhaps a way to search entries
 	<button ng-click="diary.newDiaryEntry()">New</button>
 	
-	<div ng-repeat="entry in diary.entries" ng-click="diary.openEntry(entry.entry_id)">
-		{{entry.start_datetime}} - {{entry.title}}
+	<div ng-repeat="entry in diary.entries" ng-click="diary.openEntry(entry.entry_id)" class="pim-diary-list-item">
+		<div class="date">{{entry.start_datetime | pmFormatDate }}</div>
+		<div>
+			<div class="title">{{entry.title}}</div>
+			{{entry.content  | limitTo : 100}}
+		</div>
 	</div>
 </div>
+<style>
+	.pim-diary-list-item {
+		border: 1px solid #ddd;
+		border-radius: 2px;
+		margin: 4px;
+		cursor: pointer;
+		padding: 3px;
+		width: 400px;
+	}	
+	.pim-diary-list-item:hover{
+		background-color: #BABAE0;
+	}
+	.pim-diary-list-item .date{
+		text-align: right;
+	}
+	.pim-diary-list-item .title{
+		font-size: large;
+		color: #33d;
+	}
+</style>

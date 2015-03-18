@@ -17,6 +17,7 @@
   ],
   "dependencies": {
     "angular-ui-router": "~0.2.13",
-    "lodash": "~3.5.0"
+    "lodash": "~3.5.0",
+    "moment": "~2.9.0"
   }
 }

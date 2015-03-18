@@ -16,7 +16,7 @@ import transaction
 
 @view_config(route_name='diary_entries', renderer='json', request_method='GET')
 def get_entries(request):
-	data = DBSession.query(m.Entry).all()	
+	data = DBSession.query(m.Entry).order_by(m.Entry.start_datetime.desc()).slice(0, 10).all()
 	return utilities.serialize(data)
 
 @view_config(route_name='diary_entries',  renderer='json', request_method='POST')
