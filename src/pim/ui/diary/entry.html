@@ -1,13 +1,14 @@
 <div ng-controller="DiaryEntryCtrl">
 	<a ui-sref="diary">Back</a>
 	<button ng-click="diaryEntry.save()">Save</button>
+	<button ng-click="diaryEntry.delete()">Delete</button>
 	<span>Last saved: {{diaryEntry.entry.updated_datetime | pmFormatDate}} </span>
 	<div class="pim-diary-entry">	
 		<div class="title">			
-			<textarea ng-model="diaryEntry.entry.title" rows="1" cols="75" placeholder="Title" length="75"></textarea>
+			<textarea ng-model="diaryEntry.entry.title" rows="1" placeholder="Enter a title..." maxlength="128"></textarea>
 		</div>
 		<div class="content">
-			<textarea ng-model="diaryEntry.entry.content" rows="25" cols="75"></textarea>
+			<textarea ng-model="diaryEntry.entry.content"></textarea>
 		</div>	
 	</div>
 </div>
@@ -32,7 +33,9 @@
 		border-radius: 2px;
 		box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
 		line-height: 24px;		
-		padding: 4px 9px;          
+		padding: 4px 9px;    
+		width:calc(100% - 20px);      	
+		max-width: 700px;	
 	}
 
 	.pim-diary-entry textarea:focus {
@@ -40,4 +43,7 @@
 		outline:none;
 	}
 
+	.pim-diary-entry .content textarea {
+		height: 500px;
+	}
 </style>

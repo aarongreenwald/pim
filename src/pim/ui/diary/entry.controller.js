@@ -1,5 +1,5 @@
-pim.diary.controller('DiaryEntryCtrl', ['$scope', '$http', '$stateParams',
-	function($scope, $http, $stateParams){
+pim.diary.controller('DiaryEntryCtrl', ['$scope', '$http', '$stateParams', '$state',
+	function($scope, $http, $stateParams, $state){
 		$scope.diaryEntry = new function(){
 			var internal = {
 				init: function(){
@@ -14,9 +14,15 @@ pim.diary.controller('DiaryEntryCtrl', ['$scope', '$http', '$stateParams',
 				save: function(){
 					$http({method: 'PUT', url: 'api/diary/entries/' + $stateParams.diaryEntryId
 						, data: api.entry
+					}).success(function(data){
+						api.entry = data
 					})
+				},
+
+				delete: function(){
+					$http({method: 'DELETE', url: 'api/diary/entries/' + $stateParams.diaryEntryId})				
 						.success(function(data){
-							api.entry = data
+							$state.go('diary')
 						})
 				}
 

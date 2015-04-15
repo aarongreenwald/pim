@@ -7,7 +7,7 @@ from sqlalchemy.orm import (
         
 from zope.sqlalchemy import ZopeTransactionExtension
 
-DBSession = scoped_session(sessionmaker(extension=ZopeTransactionExtension(keep_session=True)))
+DBSession = scoped_session(sessionmaker(extension=ZopeTransactionExtension(keep_session=False)))
 Base = declarative_base()        
 
 

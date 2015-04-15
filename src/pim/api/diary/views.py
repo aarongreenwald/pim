@@ -29,7 +29,7 @@ def post_entry(request):
 	entry.start_datetime = datetime.datetime.now()
 	entry.updated_datetime = datetime.datetime.now()
 	DBSession.add(entry)
-	transaction.commit()
+	DBSession.flush()
 	return entry.entry_id
 
 @view_config(route_name='diary_entry', renderer='json', request_method='GET')
@@ -42,6 +42,11 @@ def put_entry(request):
 	entry = DBSession.query(m.Entry).filter(m.Entry.entry_id == request.matchdict['id']).first()
 	entry.updated_datetime = datetime.datetime.now()	
 	entry.title = request.json_body['title']
-	entry.content = request.json_body['content']
-	transaction.commit()
+	entry.content = request.json_body['content']	
 	return utilities.serialize(entry)
+
+@view_config(route_name='diary_entry', renderer='json', request_method='DELETE')
+def delete_entry(request):
+	entry = DBSession.query(m.Entry).filter(m.Entry.entry_id == request.matchdict['id']).first()
+	DBSession.delete(entry)	
+	return {}
