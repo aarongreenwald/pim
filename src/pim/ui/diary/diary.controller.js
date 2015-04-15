@@ -20,6 +20,12 @@ pim.diary.controller('DiaryCtrl', ['$scope', '$http', '$state',
 				},
 				openEntry: function(diaryEntryId){
 					$state.go('diaryEntry', {diaryEntryId: diaryEntryId})
+				},
+				search: function(){
+					$http({method: 'GET', url: 'api/diary/entries', params : {search: api.searchText}})
+						.success(function(data){
+							api.entries = data
+						})
 				}
 			}
 			

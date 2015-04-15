@@ -15,8 +15,12 @@ import transaction
 #		self.request = request
 
 @view_config(route_name='diary_entries', renderer='json', request_method='GET')
-def get_entries(request):
-	data = DBSession.query(m.Entry).order_by(m.Entry.start_datetime.desc()).slice(0, 10).all()
+def get_entries(request):		
+	#todo this searching is terrible but it's a POC
+	if not any(param == 'search' for param in request.params) or request.GET['search'] == '':
+		data = DBSession.query(m.Entry).order_by(m.Entry.start_datetime.desc()).slice(0, 10).all()
+	else:		
+		data = DBSession.query(m.Entry).filter(m.Entry.content.contains(request.GET['search'])).all()
 	return utilities.serialize(data)
 
 @view_config(route_name='diary_entries',  renderer='json', request_method='POST')
