@@ -1,7 +1,7 @@
 <div ng-controller="DiaryCtrl">
-	<div>
-		<input type="search" placeholder="Search..." ng-model="diary.searchText" ng-change="diary.search()" ng-model-options="{debounce: 300}"/>
-		<button ng-click="diary.newDiaryEntry()" class="btn btn-success">New</button>
+	<div class="pim-diary-menu">
+		<button ng-click="diary.newDiaryEntry()">New</button>
+		<input class="pim-diary-search" type="search" placeholder="Search..." ng-model="diary.searchText" ng-change="diary.search()" ng-model-options="{debounce: 300}"/>		
 	</div>
 	<div ng-repeat="entry in diary.entries" ng-click="diary.openEntry(entry.entry_id)" class="pim-diary-list-item">
 		<div class="date">{{entry.start_datetime | pmFormatDate }}</div>
@@ -12,19 +12,29 @@
 	</div>
 </div>
 <style>
+	.pim-diary-menu {
+		margin-bottom: 10px;
+	}
+	.pim-diary-search {
+		float:right;
+	}
 	.pim-diary-list-item {
 		border: 1px solid #ddd;
 		border-radius: 3px;
-		margin: 4px;
+		margin-bottom: 4px;
 		cursor: pointer;
 		padding: 3px;
-		width: 400px;
+		max-width: 400px;
+		min-height: 20px;
 	}	
 	.pim-diary-list-item:hover{
 		background-color: #BABAE0;
 	}
 	.pim-diary-list-item .date{
 		text-align: right;
+		float: right;
+		font-size: 14px;
+		color: #666;
 	}
 	.pim-diary-list-item .title{
 		font-size: large;

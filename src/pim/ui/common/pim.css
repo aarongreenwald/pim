@@ -1,0 +1,35 @@
+button, a.button {
+	cursor: pointer;
+	border-radius: 3px;
+	padding: 4px 15px;
+	background-color: #eee;
+	border-style: none;
+	border: 1px solid #ccc;
+	text-decoration: none;
+	color: black;
+}
+
+button:hover{
+	background-color: #ccc;
+	border-color: #bbb;
+}
+
+body {
+	font-family: Helvetica;
+}
+
+#header{
+	height: 40px;	
+	padding: 10px 8px 0px 8px;
+	background-color: #79AFE4;
+	margin: -8px -8px 10px;
+}
+#header #logo{
+	float:left;
+	font-size: 20px;
+	text-transform: lowercase;	
+}
+
+#header #logout {
+	float:right;	
+}

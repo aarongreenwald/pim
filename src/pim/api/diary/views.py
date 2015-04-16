@@ -20,7 +20,10 @@ def get_entries(request):
 	if not any(param == 'search' for param in request.params) or request.GET['search'] == '':
 		data = DBSession.query(m.Entry).order_by(m.Entry.start_datetime.desc()).slice(0, 10).all()
 	else:		
-		data = DBSession.query(m.Entry).filter(m.Entry.content.contains(request.GET['search'])).all()
+		searchExpression = '%' + request.GET['search'] + '%'
+		data = DBSession.query(m.Entry) \
+			.filter((m.Entry.content.ilike(searchExpression) | m.Entry.title.ilike(searchExpression))) \
+			.all()
 	return utilities.serialize(data)
 
 @view_config(route_name='diary_entries',  renderer='json', request_method='POST')
