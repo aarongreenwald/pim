@@ -1,4 +1,4 @@
-
+﻿
 
 CREATE TABLE fin_register(register_id serial primary key not null
 						,name varchar(50) NOT NULL UNIQUE);
@@ -57,7 +57,7 @@ CREATE TABLE dry_entry(entry_id serial primary key not null
 			,content text NULL
 );
 
-CREATE TABLE dry_entry_tags(entry_id int not null foreign key references dry_entry(entry_id)
+CREATE TABLE dry_entry_tags(entry_id int not null references dry_entry(entry_id)
 			,name varchar(20) NOT NULL
 			,primary key (entry_id, name)			
 );
