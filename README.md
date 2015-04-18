@@ -11,3 +11,7 @@ From the current location:
 * cd src
 * ../env/bin/python setup.py develop
 * ../env/bin/pserve development.ini --reload
+
+If you don't have postgresql set up yet:
+* sudo apt-get install postgresql libpq-dev python-dev
+* Create a user and a pim database
