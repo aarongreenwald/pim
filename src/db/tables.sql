@@ -1,4 +1,4 @@
-
+﻿
 
 CREATE TABLE fin_register(register_id serial primary key not null
 						,name varchar(50) NOT NULL UNIQUE);
