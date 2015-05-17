@@ -47,9 +47,9 @@ def main(global_config, **settings):
     config.add_route('login', '/login')
     config.add_route('logout', '/logout')    
     
-    config.add_route('cash_accounts', 'api/financials/cash-accounts')
-    config.add_route('spending_item', 'api/financials/spending-item/{id}')
-    config.add_route('spending_items', 'api/financials/spending-items')
+    config.add_route('cash_accounts', 'api/financials/cash-accounts')    
+    config.add_route('spending_items', 'api/financials/spending')
+    config.add_route('spending_item', 'api/financials/spending/{id}')
     
     config.add_route('diary_entries', 'api/diary/entries')
     config.add_route('diary_entry', 'api/diary/entries/{id}')             

@@ -8,8 +8,6 @@ CREATE TABLE fin_category(category_id  serial primary key not null
 	,name varchar(50) NOT NULL UNIQUE
 	,register_id int NOT NULL REFERENCES fin_register);
 
-
-
 --choice of table name is because it most closely represents the concept differentiating spending from income tables.
 --payment/earning, debit/credit, do not capture the difference when it comes to returns and negative spending/income. 
 --The pluralization is clumsy but not terrible. spending_item? blech.
@@ -43,6 +41,7 @@ CREATE TABLE fin_cash_assets_record(cash_assets_record_id serial primary key not
 			);
 
 CREATE TABLE fin_stock_transaction (stock_transaction_id serial primary key not null
+			,transaction_date date NOT NULL
 			,ticker_symbol varchar(20) NOT NULL
 			,unit_price decimal(19,4) NOT NULL
 			,quantity decimal(12,4) NOT NULL
@@ -57,7 +56,7 @@ CREATE TABLE dry_entry(entry_id serial primary key not null
 			,content text NULL
 );
 
-CREATE TABLE dry_entry_tags(entry_id int not null foreign key references dry_entry(entry_id)
+CREATE TABLE dry_entry_tag(entry_id int not null references dry_entry(entry_id)
 			,name varchar(20) NOT NULL
 			,primary key (entry_id, name)			
 );

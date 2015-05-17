@@ -1,5 +1,6 @@
 import datetime
 import numbers
+from pyramid import request
 
 def format(obj):	
 	if isinstance(obj, datetime.date):
@@ -18,3 +19,10 @@ def serialize(result_set):
 			serialized = {c.name: format(getattr(row, c.name)) for c in row.__table__.columns}
 			result.append(serialized)
 	return result
+
+def get_json(self, prop):
+	try:
+		return self.json_body[prop]
+	except Exception, e:
+		return None
+request.Request.get_json = get_json	
