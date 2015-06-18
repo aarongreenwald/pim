@@ -21,7 +21,7 @@ pim.config(function($stateProvider, $urlRouterProvider) {
       templateUrl: ''
     })
     .state('financials.spendingItem', {
-      url: '/spending/{spendingItemId}',
+      url: '/spending/{spendingId}',
       templateUrl: 'financials/spending_item.html'
     })    
    .state('diary', {

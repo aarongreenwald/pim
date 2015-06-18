@@ -6,6 +6,10 @@ var pim = angular.module('pim', [
 
 pim.diary = angular.module('pim.diary', [])
 pim.financials = angular.module('pim.financials', [])
+
+pim.run(['$rootScope', function($rootScope){
+  $rootScope.data = {}
+}])
 	 
 pim.filter('pmFormatDate', function(){
   return function(date){

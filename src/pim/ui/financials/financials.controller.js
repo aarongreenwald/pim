@@ -12,10 +12,10 @@ pim.financials.controller('FinancialsCtrl', ['$scope', '$http', '$state',
 				
 			var api = {
 				newSpending: function(){
-					$state.go('financials.spendingItem', { spendingItemId: 0 })
+					$state.go('financials.spendingItem', { spendingId: 0 })
 				},
-				openSpending: function(spendingItemId){
-					$state.go('financials.spendingItem', { spendingItemId: spendingItemId})
+				openSpending: function(spendingId){
+					$state.go('financials.spendingItem', { spendingId: spendingId})
 				}				
 			}
 			

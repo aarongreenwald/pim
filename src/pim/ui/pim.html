@@ -8,7 +8,7 @@
 </head>
 <body>
   <div id="header">
-    <a id="logo" href="/#/">PIM</daiv>
+    <a id="logo" href="/#/">PIM</a>
     <a id="logout" class="button" href="logout">Logout</a> 
   </div>
   <ui-view/>
@@ -17,6 +17,11 @@
   <script src="/bower_components/angular/angular.min.js"></script>
   <script src="/bower_components/angular-ui-router/release/angular-ui-router.min.js"></script>
   <script src="/bower_components/moment/min/moment.min.js"></script>
+  <!--for acas.data.model-->
+  <script src="//cdnjs.cloudflare.com/ajax/libs/q.js/1.4.1/q.min.js"></script>
+  <!--TODO - get rid of jquery. it's there because acas libraries temporarily requires it -->
+  <script src="//code.jquery.com/jquery-2.1.4.min.js"></script>
+  <script src="//cdn.americancapital.com/acas-libraries/15.10.0/acas-libraries.js"></script>
   
   <script src="/dist/pim.js"></script>  
   

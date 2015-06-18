@@ -19,6 +19,7 @@ module.exports = function(grunt) {
               '**/*.service.js', 
               '**/*.directive.js', 
               '**/*.controller.js',
+              '**/*.model.js',
               '[!bower_components|dist]**/*.js'],
         dest: 'dist/pim.js'
       },      

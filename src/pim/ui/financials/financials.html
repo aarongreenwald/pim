@@ -1,6 +1,6 @@
 <div ng-controller="FinancialsCtrl">
 	<button ng-click="financials.newSpending()">Add New</button>
 	<div ng-repeat="item in financials.spending" 
-		 ng-click="financials.openSpending(item.spending_id)">{{item.recipient}}</div>
+		 ng-click="financials.openSpending(item.spendingId)">({{item.spendingId}}) --> {{item.recipient}} - {{item.amount}}</div>
 	    
 </div>

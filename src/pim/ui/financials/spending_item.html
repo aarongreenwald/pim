@@ -1,9 +1,25 @@
-<div ng-controller="SpendingItemCtrl as spendingItem">	
-	<input type="date" ng-model="spendingItem.data.paidDate" />
-	<label><input type="checkbox" ng-model="spendingItem.incurredOnPaidDate"/> Incurred when paid</label>
-    <input type="date" ng-hide="spendingItem.incurredOnPaidDate" ng-model="spendingItem.data.incurredBeginDate"/>
-    <input type="date" ng-hide="spendingItem.incurredOnPaidDate" ng-model="spendingItem.data.incurredEndDate"/>
-	<input type="number" placeholder="Amount" ng-model="spendingItem.data.amount">
+<div ng-controller="SpendingItemCtrl">	
+	<div class="row">
+		<input type="date" ng-model="spendingItem.data.paidDate" />
+		<label><input type="checkbox" ng-model="spendingItem.incurredOnPaidDate"/> Incurred when paid</label>	
+	</div>
+	
+	<div class="row">
+    	<input type="date" ng-hide="spendingItem.incurredOnPaidDate" ng-model="spendingItem.data.incurredBeginDate"/>
+    	<input type="date" ng-hide="spendingItem.incurredOnPaidDate" ng-model="spendingItem.data.incurredEndDate"/>
+	</div>
+	<div class="row">
+		<input type="number" placeholder="Amount" ng-model="spendingItem.data.amount">
+		<select style="width:50px;" ng-model="spendingItem.data.currencyCode">
+			<option ng-repeat="currency in data.currencies">{{currency.currencyCode}}</option>			
+		</select>				
+	</div>
+	<div ng-hide="spendingItem.data.currencyCode.toUpperCase() === spendingItem.data.defaultCurrencyCode" class="row">
+		
+		<input type="number" placeholder="{{spendingItem.data.currencyCode}}/USD" ng-model="spendingItem.data.fxRate">
+		<span>or</span> 
+		<input type="number" placeholder="USD Amount" ng-model="spendingItem.data.defaultCurrencyAmount">
+	</div>
 	<input type="text" placeholder="Recipient" ng-model="spendingItem.data.recipient"/>
 	<textarea placeholder="Notes" ng-model="spendingItem.data.notes"></textarea>
 	<div>
@@ -15,7 +31,17 @@
 	input:not([type=checkbox]) {
 		display:block;		
 	}	
+	input[type=number]{
+		width:70px;
+	}
 	input, label {
-		margin:5px 0;
+		margin:5px;
+	}
+	.row {
+		display: table;
+	}
+	.row input, 
+	.row span {
+		float:left;
 	}
 </style>

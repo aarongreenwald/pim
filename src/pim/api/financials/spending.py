@@ -32,7 +32,7 @@ def get_spending_item(request):
 	data = DBSession.query(m.Spending).filter(m.Spending.spending_id == id).first()
 	if data is None:
 		raise 'Not implemented - need a 404 here'
-	else:
+	else:		
 		return utilities.serialize(data)	
 
 @view_config(route_name='spending_item', renderer='json', request_method='PUT')

@@ -1,12 +1,13 @@
 from pyramid.config import Configurator
 from pyramid.authentication import AuthTktAuthenticationPolicy
 from pyramid.authorization import ACLAuthorizationPolicy
+from pyramid.renderers import JSON
 from sqlalchemy import engine_from_config
 
 import api.financials.models
 import api.diary.models
 import security.auth
-
+import api.json_adapters
 
 def main(global_config, **settings):
     
@@ -28,6 +29,8 @@ def main(global_config, **settings):
     config = Configurator(settings=settings, root_factory='pim.security.root_factory.RootFactory')
     
     config.include('pyramid_chameleon')
+    ##add renderers from json.py
+    config.add_renderer('json', api.json_adapters.json_renderer)
     
     config.set_authentication_policy(authn_policy)
     config.set_authorization_policy(authz_policy)

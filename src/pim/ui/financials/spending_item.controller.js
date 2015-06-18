@@ -1,12 +1,19 @@
 pim.financials.controller('SpendingItemCtrl', ['$scope', '$http', '$state', '$stateParams',
 	function ($scope, $http, $state, $stateParams) {
-		_.extend(this, new function() {					
+		$scope.spendingItem = new function() {					
 			var internal = {
 				init: function () {
-					if ($stateParams.spendingItemId) {
-						$http({ method: 'GET', url: 'api/financials/spending/' + $stateParams.spendingItemId })
+					acas.data.model.require('currencies', $scope.data).then(function(){
+						$scope.$apply(function(){
+							var defaultCurrency = _.find($scope.data.currencies, {defaultCurrency: true})
+							api.data.defaultCurrencyCode = defaultCurrency.currencyCode
+							api.data.currencyCode = defaultCurrency.currencyCode 
+						})
+					})
+					if (parseInt($stateParams.spendingId)) {
+						$http({ method: 'GET', url: 'api/financials/spending/' + $stateParams.spendingId })
 							.success(function (data) {
-								api.data = data
+								_.extend(api.data, data)							
 						})
 					}
 
@@ -19,7 +26,7 @@ pim.financials.controller('SpendingItemCtrl', ['$scope', '$http', '$state', '$st
 						api.data.incurredBeginDate = api.data.paidDate
 						api.data.incurredEndDate = api.data.paidDate
 					}
-					var method = $stateParams.spendingItemId ? 'PUT' : 'POST'
+					var method = (parseInt($stateParams.spendingId)) ? 'PUT' : 'POST'
 					$http({ method: method, url: 'api/financials/spending', data: api.data })
 						.success(function(){
 							$state.go('financials.home')		
@@ -28,17 +35,17 @@ pim.financials.controller('SpendingItemCtrl', ['$scope', '$http', '$state', '$st
 				cancel: function(){
 					$state.go('financials.home')
 				},
+				incurredOnPaidDate: true,
 				data: {
 					paidDate: new Date(),
 					categoryId: 1,
 					incurredBeginDate: new Date(),
-					incurredEndDate: new Date()
-				},
-				incurredOnPaidDate: true
+					incurredEndDate: new Date(),															
+				}
 			}
 
 			internal.init()
 			return api
-		})
+		}
 	}
 ])
