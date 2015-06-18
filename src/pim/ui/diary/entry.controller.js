@@ -12,13 +12,12 @@ pim.diary.controller('DiaryEntryCtrl', ['$scope', '$http', '$stateParams', '$sta
 			
 			var api = {
 				save: function(){
-					$http({method: 'PUT', url: 'api/diary/entries/' + $stateParams.diaryEntryId
-						, data: api.entry
-					}).success(function(data){
-						api.entry = data
-					})
-				},
-
+					$http({method: 'PUT', url: 'api/diary/entries/' + $stateParams.diaryEntryId,						
+						data: api.entry											
+					}).success(function(data){						
+						api.entry = data											
+					})																			
+				},								
 				delete: function(){
 					$http({method: 'DELETE', url: 'api/diary/entries/' + $stateParams.diaryEntryId})				
 						.success(function(data){

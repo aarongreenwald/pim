@@ -1,0 +1,21 @@
+<div ng-controller="SpendingItemCtrl as spendingItem">	
+	<input type="date" ng-model="spendingItem.data.paidDate" />
+	<label><input type="checkbox" ng-model="spendingItem.incurredOnPaidDate"/> Incurred when paid</label>
+    <input type="date" ng-hide="spendingItem.incurredOnPaidDate" ng-model="spendingItem.data.incurredBeginDate"/>
+    <input type="date" ng-hide="spendingItem.incurredOnPaidDate" ng-model="spendingItem.data.incurredEndDate"/>
+	<input type="number" placeholder="Amount" ng-model="spendingItem.data.amount">
+	<input type="text" placeholder="Recipient" ng-model="spendingItem.data.recipient"/>
+	<textarea placeholder="Notes" ng-model="spendingItem.data.notes"></textarea>
+	<div>
+		<button ng-click="spendingItem.cancel()">Cancel</button>		
+		<button ng-click="spendingItem.save()">Save</button>
+	</div>
+</div>
+<style>
+	input:not([type=checkbox]) {
+		display:block;		
+	}	
+	input, label {
+		margin:5px 0;
+	}
+</style>

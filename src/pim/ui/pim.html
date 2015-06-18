@@ -2,12 +2,13 @@
 <html lang="en" ng-app="pim">
 <head>  
   <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>PIM</title>
   <link rel="stylesheet" href="common/pim.css"/>  
 </head>
 <body>
   <div id="header">
-    <div id="logo">PIM</div>
+    <a id="logo" href="/#/">PIM</daiv>
     <a id="logout" class="button" href="logout">Logout</a> 
   </div>
   <ui-view/>
@@ -17,9 +18,7 @@
   <script src="/bower_components/angular-ui-router/release/angular-ui-router.min.js"></script>
   <script src="/bower_components/moment/min/moment.min.js"></script>
   
-  <script src="/common/pim.module.js"></script>  
-  <script src="/diary/diary.controller.js"></script>  
-  <script src="/diary/entry.controller.js"></script>  
+  <script src="/dist/pim.js"></script>  
   
 </body>
 </html>
