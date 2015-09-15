@@ -2,12 +2,13 @@
 <html lang="en" ng-app="pim">
 <head>  
   <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>PIM</title>
   <link rel="stylesheet" href="common/pim.css"/>  
 </head>
 <body>
   <div id="header">
-    <div id="logo">PIM</div>
+    <a id="logo" href="/#/">PIM</a>
     <a id="logout" class="button" href="logout">Logout</a> 
   </div>
   <ui-view/>
@@ -16,10 +17,13 @@
   <script src="/bower_components/angular/angular.min.js"></script>
   <script src="/bower_components/angular-ui-router/release/angular-ui-router.min.js"></script>
   <script src="/bower_components/moment/min/moment.min.js"></script>
+  <!--for acas.data.model-->
+  <script src="//cdnjs.cloudflare.com/ajax/libs/q.js/1.4.1/q.min.js"></script>
+  <!--TODO - get rid of jquery. it's there because acas libraries temporarily requires it -->
+  <script src="//code.jquery.com/jquery-2.1.4.min.js"></script>
+  <script src="//cdn.americancapital.com/acas-libraries/15.10.0/acas-libraries.js"></script>
   
-  <script src="/common/pim.module.js"></script>  
-  <script src="/diary/diary.controller.js"></script>  
-  <script src="/diary/entry.controller.js"></script>  
+  <script src="/dist/pim.js"></script>  
   
 </body>
 </html>

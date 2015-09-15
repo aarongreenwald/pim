@@ -1,12 +1,13 @@
 from pyramid.config import Configurator
 from pyramid.authentication import AuthTktAuthenticationPolicy
 from pyramid.authorization import ACLAuthorizationPolicy
+from pyramid.renderers import JSON
 from sqlalchemy import engine_from_config
 
 import api.financials.models
 import api.diary.models
 import security.auth
-
+import api.json_adapters
 
 def main(global_config, **settings):
     
@@ -28,6 +29,8 @@ def main(global_config, **settings):
     config = Configurator(settings=settings, root_factory='pim.security.root_factory.RootFactory')
     
     config.include('pyramid_chameleon')
+    ##add renderers from json.py
+    config.add_renderer('json', api.json_adapters.json_renderer)
     
     config.set_authentication_policy(authn_policy)
     config.set_authorization_policy(authz_policy)
@@ -47,9 +50,9 @@ def main(global_config, **settings):
     config.add_route('login', '/login')
     config.add_route('logout', '/logout')    
     
-    config.add_route('cash_accounts', 'api/financials/cash-accounts')
-    config.add_route('spending_item', 'api/financials/spending-item/{id}')
-    config.add_route('spending_items', 'api/financials/spending-items')
+    config.add_route('cash_accounts', 'api/financials/cash-accounts')    
+    config.add_route('spending_items', 'api/financials/spending')
+    config.add_route('spending_item', 'api/financials/spending/{id}')
     
     config.add_route('diary_entries', 'api/diary/entries')
     config.add_route('diary_entry', 'api/diary/entries/{id}')             

@@ -1,2 +1,6 @@
-<button>Add New</button>
-Add a dashboard of summaries with ways to dig deeper. We'll probably need a navigation panel
+<div ng-controller="FinancialsCtrl">
+	<button ng-click="financials.newSpending()">Add New</button>
+	<div ng-repeat="item in financials.spending" 
+		 ng-click="financials.openSpending(item.spendingId)">({{item.spendingId}}) --> {{item.recipient}} - {{item.amount}}</div>
+	    
+</div>
