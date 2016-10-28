@@ -1,0 +1,27 @@
+{
+  "name": "pim-server",
+  "version": "1.0.0",
+  "description": "pim ===",
+  "main": "index.js",
+  "dependencies": {
+    "express": "^4.14.0",
+    "node": "^0.0.0",
+    "npm": "^3.10.9"
+  },
+  "devDependencies": {
+    "chance": "^1.0.4"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aarongreenwald/pim.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/aarongreenwald/pim/issues"
+  },
+  "homepage": "https://github.com/aarongreenwald/pim#readme"
+}
