@@ -3,17 +3,19 @@
   "version": "1.0.0",
   "description": "pim ===",
   "main": "index.js",
+  "scripts": {
+    "watch": "watch 'kill -9 $( lsof -i:3000 -t ); node index.js' ./"
+  },
   "dependencies": {
     "express": "^4.14.0",
     "node": "^0.0.0",
     "npm": "^3.10.9"
   },
   "devDependencies": {
-    "chance": "^1.0.4"
+    "chance": "^1.0.4",
+    "watch": "^1.0.1"
   },
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
+
   "repository": {
     "type": "git",
     "url": "git+https://github.com/aarongreenwald/pim.git"
