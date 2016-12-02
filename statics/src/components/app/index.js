@@ -1,21 +1,24 @@
 
 import React, { Component } from 'react'
-import { Link } from 'react-router'
 import style from './style.css'
 import moment from 'moment'
 
 
-const Entry = ({startTimestamp, content, closeEntry}) => 
+const Entry = ({startTimestamp, content, closeEntry, updateEntry}) => 
   <div> 
     <span className="timestamp">{moment(startTimestamp).format('ll')}</span>
-    <span style={styles.buttons} onClick={closeEntry}>Close</span>
-    <div style={styles.content} contentEditable="true" dangerouslySetInnerHTML={{__html: content.replace(/\n/g, '<br />')}}></div>    
+    <span style={{...styles.buttons, float: 'right'}}  onClick={closeEntry}>Close</span>
+    <div style={styles.content} 
+      contentEditable="true" 
+      dangerouslySetInnerHTML={{__html: content.replace(/\n/g, '<br />')}} 
+      onInput={event => updateEntry(event.target.innerText)}
+      />    
   </div>
 
-const Entries = ({entries, openEntry}) => 
+const Entries = ({entries, openEntry, newEntry}) => 
   <div>
     <h1>Diary</h1>
-    <Link to="/">New</Link>
+    <span style={styles.buttons} onClick={newEntry}>New</span>
   {
     entries.map((e, i) => 
       <EntriesItem key={i} {...e}
@@ -28,7 +31,7 @@ const Entries = ({entries, openEntry}) =>
 const EntriesItem = ({startTimestamp, content, openEntry}) => 
   <div style={styles.entriesItem}> 
     <span className="timestamp">{moment(startTimestamp).format('ll')}</span>
-    <span style={styles.buttons} onClick={openEntry}>View</span>
+    <span style={{...styles.buttons, float: 'right'}} onClick={openEntry}>View</span>
     <div style={styles.content} dangerouslySetInnerHTML={{__html: content.replace(/\n/g, '<br />')}}></div>    
   </div>
 
@@ -58,6 +61,27 @@ export default class App extends Component {
     this.setState({
       currentEntry: e
     })
+    return e
+  }
+
+ _updateEntry(entry, newContent) {
+   const newEntry = {...entry, content: newContent}
+   this.setState({
+     entries: this.state.entries.map(e => e !== entry ? e : newEntry),
+     currentEntry: newEntry
+   })   
+ }
+
+ 
+
+  _newEntry() {
+    fetch('http://localhost:3000/entries', {method: 'POST'})
+      .then(res => res.json())
+      .then(newEntry => this._openEntry(newEntry))
+      .then(newEntry => this.setState({
+        entries: [newEntry, ...this.state.entries]
+      }))
+      .catch(console.error)
   }
 
   render() {
@@ -66,8 +90,8 @@ export default class App extends Component {
             
             { this.state.currentEntry ?
 
-                <Entry {...this.state.currentEntry} closeEntry={this._closeEntry.bind(this)}/>
-              : <Entries entries={this.state.entries} openEntry={this._openEntry.bind(this)}/>
+                <Entry {...this.state.currentEntry} closeEntry={this._closeEntry.bind(this)} updateEntry={newContent => this._updateEntry(this.state.currentEntry, newContent)}/>
+              : <Entries entries={this.state.entries} openEntry={this._openEntry.bind(this)} newEntry={this._newEntry.bind(this)}/>
             }        
             
                       
@@ -85,8 +109,7 @@ const styles = {
   content: {
     marginTop: 10
   },
-  buttons: {
-    float: 'right',
+  buttons: {  
     color: 'blue',
     cursor: 'pointer'
     
