@@ -1,39 +1,8 @@
 
 import React, { Component } from 'react'
 import style from './style.css'
-import moment from 'moment'
-
-
-const Entry = ({startTimestamp, content, closeEntry, updateEntry}) => 
-  <div> 
-    <span className="timestamp">{moment(startTimestamp).format('ll')}</span>
-    <span style={{...styles.buttons, float: 'right'}}  onClick={closeEntry}>Close</span>
-    <div style={styles.content} 
-      contentEditable="true" 
-      dangerouslySetInnerHTML={{__html: content.replace(/\n/g, '<br />')}} 
-      onInput={event => updateEntry(event.target.innerText)}
-      />    
-  </div>
-
-const Entries = ({entries, openEntry, newEntry}) => 
-  <div>
-    <h1>Diary</h1>
-    <span style={styles.buttons} onClick={newEntry}>New</span>
-  {
-    entries.map((e, i) => 
-      <EntriesItem key={i} {...e}
-        openEntry={() => openEntry(e)}
-      />
-    )
-  }
-  </div>
-
-const EntriesItem = ({startTimestamp, content, openEntry}) => 
-  <div style={styles.entriesItem}> 
-    <span className="timestamp">{moment(startTimestamp).format('ll')}</span>
-    <span style={{...styles.buttons, float: 'right'}} onClick={openEntry}>View</span>
-    <div style={styles.content} dangerouslySetInnerHTML={{__html: content.replace(/\n/g, '<br />')}}></div>    
-  </div>
+import Entries from '../entries'
+import Entry from '../entry'
 
 export default class App extends Component {
 
