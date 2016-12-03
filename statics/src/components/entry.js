@@ -1,7 +1,6 @@
 
-import React, { Component } from 'react'
+import React from 'react'
 import moment from 'moment'
-import Entries from '../entries'
 
 const Entry = ({startTimestamp, content, closeEntry, updateEntry}) => 
   <div> 
@@ -25,8 +24,7 @@ const styles = {
   },
   buttons: {  
     color: 'blue',
-    cursor: 'pointer'
-    
+    cursor: 'pointer'  
   }
 }
 

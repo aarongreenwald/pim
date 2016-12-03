@@ -3,6 +3,7 @@ import React, { Component } from 'react'
 import style from './style.css'
 import Entries from '../entries'
 import Entry from '../entry'
+import ServerApi from '../../services/server-api'
 
 export default class App extends Component {
 
@@ -14,8 +15,7 @@ export default class App extends Component {
   }
   
   componentWillMount() {    
-    fetch('http://localhost:3000/entries')
-      .then(res => res.json())
+    ServerApi.getEntries()
       .then(entries => this.setState({entries}))
       .catch(console.error)
   }
@@ -44,8 +44,7 @@ export default class App extends Component {
  
 
   _newEntry() {
-    fetch('http://localhost:3000/entries', {method: 'POST'})
-      .then(res => res.json())
+    ServerApi.newEntry()
       .then(newEntry => this._openEntry(newEntry))
       .then(newEntry => this.setState({
         entries: [newEntry, ...this.state.entries]
@@ -55,32 +54,12 @@ export default class App extends Component {
 
   render() {
     return (
-        <div className={style.root}>
-            
+        <div className={style.root}>            
             { this.state.currentEntry ?
-
                 <Entry {...this.state.currentEntry} closeEntry={this._closeEntry.bind(this)} updateEntry={newContent => this._updateEntry(this.state.currentEntry, newContent)}/>
               : <Entries entries={this.state.entries} openEntry={this._openEntry.bind(this)} newEntry={this._newEntry.bind(this)}/>
-            }        
-            
-                      
+            }                                          
         </div>
     )
-  }
-}
-
-const styles = {
-  entriesItem: {
-    border: '1px solid black',
-    margin: 5,
-    padding: 5
-  },
-  content: {
-    marginTop: 10
-  },
-  buttons: {  
-    color: 'blue',
-    cursor: 'pointer'
-    
   }
 }
