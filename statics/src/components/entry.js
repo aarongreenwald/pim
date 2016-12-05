@@ -20,7 +20,8 @@ const styles = {
     padding: 5
   },
   content: {
-    marginTop: 10
+    marginTop: 10, 
+    height: 200
   },
   buttons: {  
     color: 'blue',

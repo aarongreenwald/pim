@@ -9,13 +9,13 @@
   "dependencies": {
     "express": "^4.14.0",
     "node": "^0.0.0",
-    "npm": "^3.10.9"
+    "npm": "^3.10.9",
+    "uuid": "^3.0.1"
   },
   "devDependencies": {
     "chance": "^1.0.4",
     "watch": "^1.0.1"
   },
-
   "repository": {
     "type": "git",
     "url": "git+https://github.com/aarongreenwald/pim.git"

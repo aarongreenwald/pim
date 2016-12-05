@@ -15,7 +15,9 @@ app.route('/entries')
         res.send(data.getEntries())
     })    
     .post((req, res) => {
-        res.send({startTimestamp: new Date(), content: ''})
+        const entry = data.newEntry()
+        console.log(entry)
+        res.send(entry)    
     })
 
 app.route('/entries/:id')
@@ -23,6 +25,9 @@ app.route('/entries/:id')
         res.send(data.getEntry(req.params.id))
     })
     .put((req, res) => {
+        const {id} = req.params
+        const {content} = req.body
+        data.saveEntry({id, content})
         res.send(200)
     })
 
