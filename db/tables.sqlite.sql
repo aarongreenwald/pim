@@ -32,6 +32,8 @@ CREATE TABLE income(income_id integer primary key not null
 
 CREATE TABLE cash_account(cash_account_id integer primary key not null
     ,name varchar( 50 )NOT NULL unique
+    ,currency char(3) NOT NULL default 'USD'
+    ,active boolean NOT NULL default true --when false, hidden from the input form in the UI, but everything else works as normal
 );
 
 CREATE TABLE cash_assets_record(cash_assets_record_id integer primary key not null
