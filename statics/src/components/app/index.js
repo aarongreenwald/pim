@@ -43,6 +43,7 @@ export default class App extends Component {
 
 
   _newEntry() {
+    ServerApi.getSpending().then(console.log);
     ServerApi.newEntry()
       .then(newEntry => this._openEntry(newEntry))
       .then(newEntry => this.setState({

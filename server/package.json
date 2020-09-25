@@ -4,13 +4,14 @@
   "description": "pim ===",
   "main": "index.js",
   "scripts": {
-    "watch": "PORT=6540; watch 'kill -9 $( lsof -i:6540 -t ); node index.js' ./"
+    "watch": "PORT=6540 PIM_DATABASE_PATH=~/pim-data/pim-test.db watch 'kill -9 $( lsof -i:6540 -t ); node index.js' ./"
   },
   "private": true,
   "dependencies": {
     "express": "^4.14.0",
     "node": "^0.0.0",
-    "npm": "^3.10.9",
+    "npm": "^6.14.8",
+    "sqlite3": "^5.0.0",
     "uuid": "^3.0.1"
   },
   "devDependencies": {

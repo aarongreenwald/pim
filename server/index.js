@@ -1,8 +1,7 @@
-const PORT = process.env.PORT || 6540;
-const DATABASE_PATH = process.env.PIM_DATABASE_PATH || '~/data/pim.db';
-
+const {getAllSpending} = require('./db');
 const data = require('./data')
 const app = require('express')()
+const PORT = process.env.PORT;
 
 app.use((req, res, next) => {
   res.header("Access-Control-Allow-Origin", "*")
@@ -14,7 +13,7 @@ app.use((req, res, next) => {
 
 app.route('/spending')
     .get((req, res) => {
-        res.send('TODO ')
+        getAllSpending().then(data => res.send(JSON.stringify(data)))
     })
 
 app.route('/entries')
