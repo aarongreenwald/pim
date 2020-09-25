@@ -13,10 +13,11 @@ CREATE TABLE category(category_id  integer primary key not null
 
 CREATE TABLE spending(spending_id  integer primary key not null
     ,paid_date date not null
-    ,incurred_begin_date date not null
-    ,incurred_end_date date not null
+    ,incurred_begin_date date null --if empty assume the paid_date
+    ,incurred_end_date date null --if empty assume the incurred_begin_date
     ,recipient varchar(50) not null
     ,amount decimal(19,4) not null
+    ,currency char(3) not null default 'ILS'
     ,category_id int not null references category
     ,note text null
 );
