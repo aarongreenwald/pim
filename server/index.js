@@ -1,3 +1,5 @@
+const PORT = process.env.PORT || 6540;
+const DATABASE_PATH = process.env.PIM_DATABASE_PATH || '~/data/pim.db';
 
 const data = require('./data')
 const app = require('express')()
@@ -9,6 +11,11 @@ app.use((req, res, next) => {
   console.log(new Date(), req.method, req.url)
   next()
 })
+
+app.route('/spending')
+    .get((req, res) => {
+        res.send('TODO ')
+    })
 
 app.route('/entries')
     .get((req, res) => {
@@ -31,4 +38,4 @@ app.route('/entries/:id')
         res.send(200)
     })
 
-app.listen(3000, () => console.log('Example app listening on port 3000!'))
+app.listen(PORT, () => console.log(`App listening on port: ${PORT}`));

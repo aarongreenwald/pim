@@ -1,0 +1,1 @@
+Add PIM_DATABASE_PATH environment variable to path. 

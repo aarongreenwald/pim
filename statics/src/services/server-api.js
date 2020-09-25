@@ -1,6 +1,7 @@
+import config from '../config/config';
 export default {
-    newEntry: () =>fetch('http://localhost:3000/entries', {method: 'POST'})
+    newEntry: () =>fetch(`${config.apiServiceUrl}/entries`, {method: 'POST'})
         .then(res => res.json()) ,
-    getEntries: () => fetch('http://localhost:3000/entries')
+    getEntries: () => fetch(`${config.apiServiceUrl}/entries`)
         .then(res => res.json())    
 }
