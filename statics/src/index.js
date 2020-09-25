@@ -1,13 +1,15 @@
 import React from 'react'
 import { render } from 'react-dom'
 import { Router, Route, browserHistory } from 'react-router'
-import App from './components/app/index'
+import Diary from './diary/app'
+import Spending from './financials/spending';
 
 render((
-    <Router history={browserHistory}>
-        <Route component={App} path="/" />
-        <Route component={App} path="/entries" />
-    </Router>
+  <Router history={browserHistory}>
+    <Route component={Spending} path="/" />
+    <Route component={Diary} path="/diary" />
+    <Route component={Diary} path="/diary/entries" />
+  </Router>
 ), document.getElementById('app'))
 
 
