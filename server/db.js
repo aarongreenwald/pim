@@ -7,33 +7,74 @@ if (!DATABASE_PATH) {
 
 sqlite.verbose();
 
-const getDb = (readonly = true) =>
-  new Promise((resolve, reject) => {
-    const db = new sqlite.Database(DATABASE_PATH, readonly ? sqlite.OPEN_READONLY : sqlite.OPEN_READWRITE)
-    if (!readonly) {
-      db.run('PRAGMA foreign_keys = ON;', err => {
+/**
+ * Helper function to promisify Database.all()
+ * @param db
+ * @param sql
+ * @returns {Promise<unknown[]>}
+ */
+function all(db, sql, params = []) {
+  return new Promise(((resolve, reject) =>
+      db.all(sql, params, (err, rows) => {
         if (err) reject(err)
-        else resolve(db)
+        else resolve(rows)
       })
-    }
-    resolve(db)
-  })
-
-const getAllSpending = () => new Promise(async (resolve, reject) =>
-  (await getDb()).all('select * from v_spending', (err, rows) => {
-    if (err) reject(err)
-    else resolve(rows)
-  })
-)
-
-const getAllCategories = () => new Promise(async (resolve, reject) => {
-    (await getDb()).all('select * from category', (err, rows) => {
-      if (err) reject(err)
-      else resolve(rows)
-    })
+  ))
 }
 
-)
+/**
+ * Helper function to promisify Database.run()
+ * @param db
+ * @param sql
+ * @returns {Promise<{lastId, changes}>}
+ */
+function run(db, sql, params = []) {
+  return new Promise((resolve, reject) => {
+    db.run(sql, params, function(err) {
+      if (err) reject(err)
+      resolve({lastId: this.lastID, changes: this.changes})
+    })
+  })
+}
+
+/**
+ * Helper function to promisify Database.get()
+ * @param db
+ * @param sql
+ * @returns {Promise<unknown>}
+ */
+function get(db, sql, params = []) {
+  return new Promise((resolve, reject) => {
+    db.get(sql, params, function(err, data) {
+      if (err) reject(err)
+      resolve(data)
+    })
+  })
+}
+
+/**
+ * Setups a db connection
+ * @param readonly = true
+ * @returns {Promise<sqlite.Database>}
+ */
+const getDb = async (readonly = true) => {
+  const db = new sqlite.Database(DATABASE_PATH, readonly ? sqlite.OPEN_READONLY : sqlite.OPEN_READWRITE)
+  if (!readonly) {
+    await run(db, 'PRAGMA foreign_keys = ON;')
+  }
+  return db;
+}
+
+
+const getAllSpending = async () => {
+  const db = await getDb();
+  return all(db, 'select * from v_spending')
+}
+
+const getAllCategories = async () => {
+  const db = await getDb();
+  return all(db, 'select * from category')
+}
 
 const insertSpending = (spending) => new Promise(async (resolve, reject) => {
   const sql = `
@@ -54,20 +95,10 @@ const insertSpending = (spending) => new Promise(async (resolve, reject) => {
   ]
   const db = await getDb(false);
 
-  db.run(sql, params, function (err) {
-    if (err) reject(err)
-    else {
-      console.log(this.lastID)
-      db.get(`select * from v_spending where spending_id = ?`, this.lastID, (err, data) => {
-        if (err) reject(err) //this is problematic, server will return 500 and client will be tempted to retry, but the post was successful
-        else {
-          console.log(data)
-          resolve(data)
-        }
-
-      })
-    }
-  })
+  const {lastId} = await run(db, sql, params)
+  //if the get() rejects but the run() resolved, the server will return 500 which is not good
+  //client will be tempted to retry, but the post was successful
+  return get(db, `select * from v_spending where spending_id = ?`, lastId)
 })
 
 module.exports = {

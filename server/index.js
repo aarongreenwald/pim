@@ -20,8 +20,8 @@ app.route('/spending')
     db.insertSpending(req.body)
       .then(data => res.send(JSON.stringify(data)))
       .catch(ex => {
-        console.log(ex)
-        res.sendStatus(500)
+        console.error(ex)
+        res.sendStatus(ex)
       })
   })
 
