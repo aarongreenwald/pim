@@ -5,6 +5,7 @@ if (!DATABASE_PATH) {
   throw 'Environment variable PIM_DATABASE_PATH is not set!'
 }
 
+
 sqlite.verbose();
 
 /**
@@ -76,12 +77,12 @@ const getAllCategories = async () => {
   return all(db, 'select * from category')
 }
 
-const insertSpending = (spending) => new Promise(async (resolve, reject) => {
+const insertSpending = async (spending) => {
   const sql = `
     insert into spending
         (paid_date, recipient, amount, category_id, note)
     values (?,?,?,?,?)
- `
+  `
   //TODO: validations - the fallback to null done here forces the db to reject
   //bad data but there should probably be a validation and sanitization step prior to getting here
   //empty string isn't a valid counterparty, 0 isn't a valid amount. 0 could theoretically be a note but
@@ -99,7 +100,7 @@ const insertSpending = (spending) => new Promise(async (resolve, reject) => {
   //if the get() rejects but the run() resolved, the server will return 500 which is not good
   //client will be tempted to retry, but the post was successful
   return get(db, `select * from v_spending where spending_id = ?`, lastId)
-})
+}
 
 module.exports = {
   getAllSpending,

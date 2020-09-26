@@ -21,7 +21,7 @@ app.route('/spending')
       .then(data => res.send(JSON.stringify(data)))
       .catch(ex => {
         console.error(ex)
-        res.sendStatus(ex)
+        res.status(500).send(ex)
       })
   })
 

@@ -4,7 +4,7 @@
   "description": "pim ===",
   "main": "index.js",
   "scripts": {
-    "watch": "PORT=6540 PIM_DATABASE_PATH=~/pim-data/pim-test.db watch 'kill -9 $( lsof -i:6540 -t ); node index.js' ./"
+    "watch": "PORT=6540 PIM_DATABASE_PATH=~/pim-data/pim-test.db watch 'fuser -k 6540/tcp; node index.js' ./"
   },
   "private": true,
   "dependencies": {
