@@ -1,8 +1,9 @@
-import React, {useCallback, useState} from 'react';
+import {useCallback, useState} from 'react';
+import * as React from 'react';
 
 export default function Spending() {
   const [item, setItem] = useState({
-    paidDate: new Date()
+    paidDate: new Date().getTime()
   })
   const updateItem = useCallback(({target}) => {
     setItem({
