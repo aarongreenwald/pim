@@ -16,13 +16,18 @@ export const getAllCategories = (): Promise<Category[]> =>
     .then(res => res.json())
     .then(data => data.map(convertCategoryDto))
 
-export const savePayment = (payment: Payment) => fetch(`${config.apiServiceUrl}/spending`, {
-    method: 'POST',
-    headers: {
-        'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(payment)
-})
+export const savePayment = (payment: Payment): Promise<any> =>
+    fetch(`${config.apiServiceUrl}/spending`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payment)
+    }).then(res => {
+      if (!res.ok) {
+          throw 'Request failed'
+      }
+    })
 
 function convertCategoryDto(category: any): Category {
     return {
