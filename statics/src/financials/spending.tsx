@@ -1,7 +1,7 @@
 import {useCallback, useState} from 'react';
 import * as React from 'react';
 
-export default function Spending() {
+export const Spending: React.FC = () => {
   const [item, setItem] = useState({
     paidDate: new Date().getTime()
   })
