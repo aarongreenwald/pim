@@ -1,7 +1,7 @@
 import {useCallback, useEffect, useState} from 'react';
 import * as React from 'react';
 import styled from '@emotion/styled';
-import {Category, Payment} from './models';
+import {Category, Payment} from '@pim/common';
 import {Button} from '@material-ui/core';
 import {format} from 'date-fns';
 import {getAllCategories, savePayment} from '../services/server-api';

@@ -3,3 +3,4 @@ node_modules
 *.db
 statics/**/config.js
 statics/build
+server/build

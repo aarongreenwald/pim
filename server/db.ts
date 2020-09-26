@@ -1,4 +1,5 @@
 const sqlite = require('sqlite3')
+import {Payment} from '@pim/common';
 
 const DATABASE_PATH = process.env.PIM_DATABASE_PATH;
 if (!DATABASE_PATH) {
@@ -29,10 +30,11 @@ function all(db, sql, params = []) {
  * @param sql
  * @returns {Promise<{lastId, changes}>}
  */
-function run(db, sql, params = []) {
+function run(db, sql, params: any[] = []): Promise<{lastId: any; changes: any}> {
   return new Promise((resolve, reject) => {
-    db.run(sql, params, function(err) {
+    db.run(sql, params, function (err) {
       if (err) reject(err)
+      // @ts-ignore
       resolve({lastId: this.lastID, changes: this.changes})
     })
   })
@@ -67,17 +69,17 @@ const getDb = async (readonly = true) => {
 }
 
 
-const getAllSpending = async () => {
+export const getAllSpending = async () => {
   const db = await getDb();
   return all(db, 'select * from v_spending')
 }
 
-const getAllCategories = async () => {
+export const getAllCategories = async () => {
   const db = await getDb();
   return all(db, 'select * from category')
 }
 
-const insertSpending = async (spending) => {
+export const insertSpending = async (spending: Payment) => {
   const sql = `
     insert into spending
         (paid_date, recipient, amount, category_id, note)
@@ -100,10 +102,4 @@ const insertSpending = async (spending) => {
   //if the get() rejects but the run() resolved, the server will return 500 which is not good
   //client will be tempted to retry, but the post was successful
   return get(db, `select * from v_spending where spending_id = ?`, lastId)
-}
-
-module.exports = {
-  getAllSpending,
-  getAllCategories,
-  insertSpending
 }

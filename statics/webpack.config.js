@@ -22,7 +22,7 @@ module.exports = {
             loader: require.resolve('eslint-loader'),
           },
         ],
-        exclude: /node_modules/,
+        exclude: /node_modules|..\/common/ //exclude common for now because eslint blows up on it. TODO fix
       },
       {
         test: /\.tsx?$/,
@@ -32,6 +32,9 @@ module.exports = {
     ],
   },
   resolve: {
+    alias: {
+      '@pim/common': path.join(__dirname, '../common')
+    },
     extensions: [ '.tsx', '.ts', '.js' ],
   },
   output: {
@@ -52,47 +55,4 @@ module.exports = {
       }
     })
   ].filter(Boolean)
-  // module: {
-    // rules: [
-    //   {
-    //     test: /\.tsx?$/,
-    //     use: 'ts-loader',
-    //     exclude: /node_modules/,
-    //   },
-    // ]
-    // preLoaders: [
-    //   {
-    //     test: /\.js$/,
-    //     exclude: /node_modules/,
-    //     loader: 'eslint'
-    //   }
-    // ],
-    // loaders: [
-    //   {
-    //     test: /\.js$/,
-    //     exclude: /node_modules/,
-    //     loader: 'babel'
-    //   },
-    //   {
-    //     test: /\.css$/,
-    //     exclude: /node_modules/,
-    //     loaders: ['style', 'css?modules&sourceMap&importLoaders=1&localIdentName=[name]__[local]___[hash:base64:5]', 'postcss']
-    //   },
-    //   {
-    //     test: /\.css$/,
-    //     exclude: /src/,
-    //     loaders: ['style', 'css']
-    //   },
-    //   {
-    //     test: /\.(jpg|png|ttf|eot|woff|woff2|svg)$/,
-    //     exclude: /node_modules/,
-    //     loader: 'url?limit=100000'
-    //   }
-    // ]
-  // },
-  // plugins: [
-  //   new webpack.OldWatchingPlugin(),
-  //   new WebpackNotifierPlugin()
-  // ]
-
 };

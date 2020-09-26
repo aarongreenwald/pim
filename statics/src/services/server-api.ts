@@ -1,5 +1,6 @@
 import config from '../config/config';
-import {Category, Payment} from '../financials/models';
+import {Category, Payment} from '@pim/common';
+
 /* eslint-disable */
 export default {
     newEntry: () => fetch(`${config.apiServiceUrl}/entries`, {method: 'POST'})

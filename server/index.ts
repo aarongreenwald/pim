@@ -1,9 +1,11 @@
-const db = require('./db');
-const data = require('./data')
-const app = require('express')()
-const bodyParser = require('body-parser')
+import * as db from './db'
+import bodyParser from 'body-parser';
+import express from 'express';
+import {doSomethingReal} from "@pim/common";
+const app = express()
 const PORT = process.env.PORT;
 const jsonParser = bodyParser.json();
+console.log(doSomethingReal)
 
 app.use((req, res, next) => {
   res.header("Access-Control-Allow-Origin", "*")
@@ -13,7 +15,7 @@ app.use((req, res, next) => {
 })
 
 app.route('/spending')
-    .get((req, res) => {
+  .get((req, res) => {
         db.getAllSpending().then(data => res.send(JSON.stringify(data)))
     })
   .post(jsonParser, (req, res) => {
@@ -29,26 +31,5 @@ app.route('/categories')
   .get((req, res) => {
     db.getAllCategories().then(data => res.send(JSON.stringify(data)))
   })
-
-app.route('/entries')
-    .get((req, res) => {
-        res.send(data.getEntries())
-    })    
-    .post((req, res) => {
-        const entry = data.newEntry()
-        console.log(entry)
-        res.send(entry)    
-    })
-
-app.route('/entries/:id')
-    .get((req, res) => {
-        res.send(data.getEntry(req.params.id))
-    })
-    .put((req, res) => {
-        const {id} = req.params
-        const {content} = req.body
-        data.saveEntry({id, content})
-        res.send(200)
-    })
 
 app.listen(PORT, () => console.log(`App listening on port: ${PORT}`));
