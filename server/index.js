@@ -1,20 +1,34 @@
-const {getAllSpending} = require('./db');
+const db = require('./db');
 const data = require('./data')
 const app = require('express')()
+const bodyParser = require('body-parser')
 const PORT = process.env.PORT;
+const jsonParser = bodyParser.json();
 
 app.use((req, res, next) => {
   res.header("Access-Control-Allow-Origin", "*")
   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept")
-
   console.log(new Date(), req.method, req.url)
   next()
 })
 
 app.route('/spending')
     .get((req, res) => {
-        getAllSpending().then(data => res.send(JSON.stringify(data)))
+        db.getAllSpending().then(data => res.send(JSON.stringify(data)))
     })
+  .post(jsonParser, (req, res) => {
+    db.insertSpending(req.body)
+      .then(data => res.send(JSON.stringify(data)))
+      .catch(ex => {
+        console.log(ex)
+        res.sendStatus(500)
+      })
+  })
+
+app.route('/categories')
+  .get((req, res) => {
+    db.getAllCategories().then(data => res.send(JSON.stringify(data)))
+  })
 
 app.route('/entries')
     .get((req, res) => {
