@@ -7,36 +7,52 @@ if (!DATABASE_PATH) {
 
 sqlite.verbose();
 
-const getDb = () => new sqlite.Database(DATABASE_PATH, sqlite.OPEN_READWRITE)
+const getDb = (readonly = true) =>
+  new Promise((resolve, reject) => {
+    const db = new sqlite.Database(DATABASE_PATH, readonly ? sqlite.OPEN_READONLY : sqlite.OPEN_READWRITE)
+    if (!readonly) {
+      db.run('PRAGMA foreign_keys = ON;', err => {
+        if (err) reject(err)
+        else resolve(db)
+      })
+    }
+    resolve(db)
+  })
 
-const getAllSpending = () => new Promise((resolve, reject) =>
-  getDb().all('select * from v_spending', (err, rows) => {
+const getAllSpending = () => new Promise(async (resolve, reject) =>
+  (await getDb()).all('select * from v_spending', (err, rows) => {
     if (err) reject(err)
     else resolve(rows)
   })
 )
 
-const getAllCategories = () => new Promise((resolve, reject) =>
-  getDb().all('select * from category', (err, rows) => {
-    if (err) reject(err)
-    else resolve(rows)
-  })
+const getAllCategories = () => new Promise(async (resolve, reject) => {
+    (await getDb()).all('select * from category', (err, rows) => {
+      if (err) reject(err)
+      else resolve(rows)
+    })
+}
+
 )
 
-const insertSpending = (spending) => new Promise((resolve, reject) => {
+const insertSpending = (spending) => new Promise(async (resolve, reject) => {
   const sql = `
     insert into spending
         (paid_date, recipient, amount, category_id, note)
     values (?,?,?,?,?)
  `
+  //TODO: validations - the fallback to null done here forces the db to reject
+  //bad data but there should probably be a validation and sanitization step prior to getting here
+  //empty string isn't a valid counterparty, 0 isn't a valid amount. 0 could theoretically be a note but
+  //unlikely. make sure to enable FK support in sqlite or categoryId won't be checked
   const params = [
     new Date(spending.paidDate),
-    spending.counterParty || null, //empty string isn't valid, and '0' is highly unlikely - let the db reject it
-    spending.amount || null, //0 isn't valid, instead put null and let the db reject it. really the db should have a constraint here
-    spending.categoryId, //is the db enforcing FK constraints?
-    spending.note || null //here maybe 0 should be allowed
+    spending.counterParty || null,
+    spending.amount || null,
+    spending.categoryId,
+    spending.note || null
   ]
-  const db = getDb();
+  const db = await getDb(false);
 
   db.run(sql, params, function (err) {
     if (err) reject(err)
