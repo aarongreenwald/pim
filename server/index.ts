@@ -2,6 +2,7 @@ import * as db from './db'
 import bodyParser from 'body-parser';
 import express from 'express';
 import {doSomethingReal} from "@pim/common";
+import {setupAuth} from "./auth";
 const app = express()
 const PORT = process.env.PORT;
 const jsonParser = bodyParser.json();
@@ -13,6 +14,8 @@ app.use((req, res, next) => {
   console.log(new Date(), req.method, req.url)
   next()
 })
+
+setupAuth(app);
 
 app.route('/spending')
   .get((req, res) => {
@@ -31,5 +34,7 @@ app.route('/categories')
   .get((req, res) => {
     db.getAllCategories().then(data => res.send(JSON.stringify(data)))
   })
+
+app.use(express.static('../statics/build'))
 
 app.listen(PORT, () => console.log(`App listening on port: ${PORT}`));
