@@ -1,12 +1,40 @@
-import helmet from "helmet";
-import session from "express-session";
-import pbkdf2_password from "pbkdf2-password";
-import bodyParser from "body-parser";
+import helmet from 'helmet';
+import session from 'express-session';
+import pbkdf2_password from 'pbkdf2-password';
+import bodyParser from 'body-parser';
+import {Express, RequestHandler} from 'express';
 const jsonParser = bodyParser.json();
 
 const tlsUnavailable = process.env.NO_TLS; //dev environment
 const hash = pbkdf2_password()
-export const setupAuth = (app) => {
+
+const verifyAuthentication: RequestHandler = (req, res, next) => {
+    if (req.session!.authenticated) {
+        next();
+    } else {
+        console.error(`Unauthenticated attempt to access: ${req.method} ${req.url}`)
+        res.sendStatus(401);
+    }
+};
+
+const authenticateUser: (password: string) => Promise<boolean> = password => {
+    console.log('Authenticating user');
+
+    return new Promise((resolve, reject) => {
+        hash({ password, salt: credentials.salt }, (err, pass, salt, hash) => {
+            if (err) {
+                reject(err)
+            } else if (hash === credentials.hash) {
+                resolve(true)
+            } else {
+                resolve(false)
+            }
+        });
+    })
+
+};
+
+export const setupAuth = (app: Express) => {
 
     app.use(helmet());
 
@@ -23,69 +51,43 @@ export const setupAuth = (app) => {
 
     }));
 
-    // // Session-persisted message middleware
-    // app.use(function(req, res, next){
-    //   var err = req.session.error;
-    //   var msg = req.session.success;
-    //   delete req.session.error;
-    //   delete req.session.success;
-    //   res.locals.message = '';
-    //   if (err) res.locals.message = '<p class="msg error">' + err + '</p>';
-    //   if (msg) res.locals.message = '<p class="msg success">' + msg + '</p>';
-    //   next();
-    // });
-
-    app.post('/login', jsonParser, function(req, res){
-        authenticate(req.body.password, function(err, result){
-            console.log('auth', result)
+    app.post('/login', jsonParser, async (req, res) => {
+        try {
+            const result = await authenticateUser(req.body.password);
             if (result) {
-                // Regenerate session when signing in
-                // to prevent fixation
-                // req.session.regenerate(function(){
+                // Regenerate session when signing in. Is this necessary?
+                req.session!.regenerate(() => {
+                    // @ts-ignore
                     req.session.authenticated = true;
-                    res.sendStatus('200');
-                    console.log('authenticated', req.session)
-                // });
+                    res.sendStatus(200);
+                    console.log('Auth succeeded')
+                });
 
             } else {
-                req.session.error = 'Authentication failed, please check your password.'
-                res.sendStatus('401');
+                throw 'Authentication failure'
             }
-        });
+        } catch (ex) {
+            console.error(ex)
+            console.error('Login failed')
+            res.sendStatus(401);
+        }
+
+
     });
 
-    app.get('/logout', function(req, res){
+    app.get('/logout', (req, res) => {
         // destroy the user's session to log them out
         // will be re-created next request
-        req.session.destroy(function() {
+        req.session!.destroy(() => {
             res.sendStatus(200)
         });
     });
 
-    app.use(restrict);
+    app.use(verifyAuthentication);
 }
 
 
 const credentials = {
     salt: process.env.SALT,
     hash: process.env.HASH
-}
-
-function restrict(req, res, next) {
-    if (req.session.authenticated) {
-        next();
-    } else {
-        req.session.error = 'Access denied!';
-        res.sendStatus('401');
-    }
-}
-
-function authenticate(password: string, callback) {
-    console.log('authenticating %s:%s', password);
-
-    hash({ password: password, salt: credentials.salt }, function (err, pass, salt, hash) {
-        if (err) return callback(err);
-        if (hash === credentials.hash) return callback(null, true)
-        callback(new Error('invalid password'), false);
-    });
 }

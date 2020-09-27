@@ -1,12 +1,10 @@
 import * as db from './db'
 import bodyParser from 'body-parser';
 import express from 'express';
-import {doSomethingReal} from "@pim/common";
-import {setupAuth} from "./auth";
+import {setupAuth} from './auth';
 const app = express()
 const PORT = process.env.PORT;
 const jsonParser = bodyParser.json();
-console.log(doSomethingReal)
 
 app.use((req, res, next) => {
   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept")
@@ -33,8 +31,6 @@ app.route('/categories')
   .get((req, res) => {
     db.getAllCategories().then(data => res.send(JSON.stringify(data)))
   })
-
-app.use(express.static('../statics/build'))
 
 express()
     .use('/api', app)
