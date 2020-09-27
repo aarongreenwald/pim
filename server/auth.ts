@@ -4,19 +4,21 @@ import pbkdf2_password from "pbkdf2-password";
 import bodyParser from "body-parser";
 const jsonParser = bodyParser.json();
 
+const tlsUnavailable = process.env.NO_TLS; //dev environment
 const hash = pbkdf2_password()
 export const setupAuth = (app) => {
 
     app.use(helmet());
 
     app.set('trust proxy', 1) // in order to use cookie.secure: true with a proxy
+
     app.use(session({
         resave: false, // don't save session if unmodified
         saveUninitialized: false, // don't create session until something stored
         secret: 'secret', //TODO,
         cookie: {
             maxAge: 60000,
-            //secure: false //TODO true after TLS
+            secure: !tlsUnavailable
         }
 
     }));
