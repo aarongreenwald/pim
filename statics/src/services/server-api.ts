@@ -20,26 +20,23 @@ export const login = (password: string) : Promise<boolean> => {
     return fetch(`${config.apiServiceUrl}/login`, {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
         },
+        credentials: 'include',
         body: JSON.stringify({password})
     })
         .then(handleResponse)
         .then(() => true)
 }
 
-/* eslint-disable */
-export default {
-    newEntry: () => fetch(`${config.apiServiceUrl}/entries`, {
-        method: 'POST'
-    })
-        .then(res => res.json()) ,
-    getEntries: () => fetch(`${config.apiServiceUrl}/entries`)
-        .then(res => res.json()),
-    getSpending: () => fetch(`${config.apiServiceUrl}/spending`)
-        .then(res => res.json())
-}
-/* eslint-enable */
+
+export const getSpending: () => Promise<any> = () =>
+    fetch(`${config.apiServiceUrl}/spending`, {
+            credentials: 'include',
+        })
+        .then(handleResponse)
+        .then(res => res.json());
+
 
 export const getAllCategories = (): Promise<Category[]> =>
   fetch(`${config.apiServiceUrl}/categories`, {
@@ -55,12 +52,9 @@ export const savePayment = (payment: Payment): Promise<any> =>
         headers: {
             'Content-Type': 'application/json'
         },
+        credentials: 'include',
         body: JSON.stringify(payment)
-    }).then(res => {
-      if (!res.ok) {
-          throw 'Request failed'
-      }
-    })
+    }).then(handleResponse)
 
 function convertCategoryDto(category: any): Category {
     return {

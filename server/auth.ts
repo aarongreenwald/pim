@@ -9,18 +9,16 @@ export const setupAuth = (app) => {
 
     app.use(helmet());
 
-
     app.use(session({
         resave: false, // don't save session if unmodified
         saveUninitialized: false, // don't create session until something stored
         secret: 'secret', //TODO,
         cookie: {
             maxAge: 60000,
-            secure: false //TODO true after TLS
+            //secure: false //TODO true after TLS
         }
 
     }));
-
 
     // // Session-persisted message middleware
     // app.use(function(req, res, next){
@@ -40,11 +38,11 @@ export const setupAuth = (app) => {
             if (result) {
                 // Regenerate session when signing in
                 // to prevent fixation
-                req.session.regenerate(function(){
+                // req.session.regenerate(function(){
                     req.session.authenticated = true;
                     res.sendStatus('200');
                     console.log('authenticated', req.session)
-                });
+                // });
 
             } else {
                 req.session.error = 'Authentication failed, please check your password.'
@@ -53,12 +51,11 @@ export const setupAuth = (app) => {
         });
     });
 
-
     app.get('/logout', function(req, res){
         // destroy the user's session to log them out
         // will be re-created next request
-        req.session.destroy(function(){
-            res.status(401).send('Logged out successfully');
+        req.session.destroy(function() {
+            res.sendStatus(200)
         });
     });
 
@@ -72,8 +69,9 @@ const credentials = {
 }
 
 function restrict(req, res, next) {
-    console.log('In restrict method', req.session)
-    if (req.session.authenticated || req.url === '/login') { //because of the way the post is sent
+    if (req.method === 'OPTIONS') {
+        next()
+    } else if (req.session.authenticated) {
         next();
     } else {
         req.session.error = 'Access denied!';
