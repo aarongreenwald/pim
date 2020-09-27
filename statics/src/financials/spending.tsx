@@ -94,7 +94,8 @@ function initializePayment(): Payment {
     categoryId: -1,
     amount: 0,
     counterParty: '',
-    currency: 'ILS'
+    currency: 'ILS',
+    note: ''
   };
 }
 
