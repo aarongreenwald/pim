@@ -9,6 +9,7 @@ export const setupAuth = (app) => {
 
     app.use(helmet());
 
+    app.set('trust proxy', 1) // in order to use cookie.secure: true with a proxy
     app.use(session({
         resave: false, // don't save session if unmodified
         saveUninitialized: false, // don't create session until something stored
@@ -69,9 +70,7 @@ const credentials = {
 }
 
 function restrict(req, res, next) {
-    if (req.method === 'OPTIONS') {
-        next()
-    } else if (req.session.authenticated) {
+    if (req.session.authenticated) {
         next();
     } else {
         req.session.error = 'Access denied!';

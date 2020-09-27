@@ -44,7 +44,10 @@ module.exports = {
   devtool: dev ? 'eval-source-map' : 'source-map',
   devServer: dev ? {
     contentBase: 'public',
-    historyApiFallback: true
+    historyApiFallback: true,
+    proxy: {
+      '/api': 'http://localhost:6540'
+    }
   } : undefined,
   plugins: [
     // new webpack.OldWatchingPlugin(),

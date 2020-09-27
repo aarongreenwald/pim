@@ -29,7 +29,6 @@
     "webpack-notifier": "^1.8.0"
   },
   "scripts": {
-    "prestart": "NODE_ENV=development ./scripts/config.sh",
     "lint": "eslint . --fix",
     "start": "webpack-dev-server --history-api-fallback --host 0.0.0.0 --port 3000 --hot --inline --progress",
     "prebuild": "NODE_ENV=production ./scripts/prebuild.sh",

@@ -9,8 +9,6 @@ const jsonParser = bodyParser.json();
 console.log(doSomethingReal)
 
 app.use((req, res, next) => {
-  res.header("Access-Control-Allow-Origin", "http://localhost:3000")
-  res.header("Access-Control-Allow-Credentials", 'true')
   res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept")
   console.log(new Date(), req.method, req.url)
   next()
@@ -38,4 +36,6 @@ app.route('/categories')
 
 app.use(express.static('../statics/build'))
 
-app.listen(PORT, () => console.log(`App listening on port: ${PORT}`));
+express()
+    .use('/api', app)
+    .listen(PORT, () => console.log(`App listening on port: ${PORT}`));
