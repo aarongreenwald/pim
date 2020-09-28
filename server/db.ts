@@ -72,9 +72,9 @@ const getDb = async (readonly = true) => {
 }
 
 
-export const getAllSpending = async () => {
+export const getAllPayments = async () => {
   const db = await getDb();
-  return all(db, 'select * from v_spending')
+  return all(db, 'select * from v_payment')
 }
 
 export const getAllCategories = async () => {
@@ -83,10 +83,10 @@ export const getAllCategories = async () => {
   return all<Category>(db, sql)
 }
 
-export const insertSpending = async (spending: Payment) => {
+export const insertPayment = async (payment: Payment) => {
   const sql = `
-    insert into spending
-        (paid_date, recipient, amount, category_id, note)
+    insert into payment
+        (paid_date, counterparty, amount, category_id, note)
     values (?,?,?,?,?)
   `
   //TODO: validations - the fallback to null done here forces the db to reject
@@ -94,16 +94,16 @@ export const insertSpending = async (spending: Payment) => {
   //empty string isn't a valid counterparty, 0 isn't a valid amount. 0 could theoretically be a note but
   //unlikely. make sure to enable FK support in sqlite or categoryId won't be checked
   const params = [
-    new Date(spending.paidDate),
-    spending.counterParty || null,
-    spending.amount || null,
-    spending.categoryId,
-    spending.note || null
+    new Date(payment.paidDate),
+    payment.counterparty || null,
+    payment.amount || null,
+    payment.categoryId,
+    payment.note || null
   ]
   const db = await getDb(false);
 
   const {lastId} = await run(db, sql, params)
   //if the get() rejects but the run() resolved, the server will return 500 which is not good
   //client will be tempted to retry, but the post was successful
-  return get<Payment>(db, `select * from spending where spending_id = ?`, lastId)
+  return get<Payment>(db, `select * from payment where payment_id = ?`, lastId)
 }

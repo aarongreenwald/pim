@@ -30,8 +30,8 @@ export const login = (password: string) : Promise<boolean> => {
 }
 
 
-export const getSpending: () => Promise<any> = () =>
-    fetch(`${config.apiServiceUrl}/spending`, {
+export const getPayments: () => Promise<any> = () =>
+    fetch(`${config.apiServiceUrl}/payments`, {
             credentials: 'include',
         })
         .then(handleResponse)
@@ -46,7 +46,7 @@ export const getAllCategories = (): Promise<Category[]> =>
     .then(res => res.json())
 
 export const savePayment = (payment: Payment): Promise<any> =>
-    fetch(`${config.apiServiceUrl}/spending`, {
+    fetch(`${config.apiServiceUrl}/payments`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'

@@ -14,12 +14,12 @@ app.use((req, res, next) => {
 
 setupAuth(app);
 
-app.route('/spending')
+app.route('/payments')
   .get((req, res) => {
-        db.getAllSpending().then(data => res.send(JSON.stringify(data)))
+        db.getAllPayments().then(data => res.send(JSON.stringify(data)))
     })
   .post(jsonParser, (req, res) => {
-    db.insertSpending(req.body)
+    db.insertPayment(req.body)
       .then(data => res.send(JSON.stringify(data)))
       .catch(ex => {
         console.error(ex)

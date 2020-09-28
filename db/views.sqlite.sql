@@ -1,8 +1,9 @@
-drop view if exists v_spending;
+drop view if exists v_payment;
 
-create view v_spending as
-select spending.spending_id,
+create view v_payment as
+select payment.payment_id,
        paid_date,
+       counterparty,
        coalesce(incurred_begin_date, paid_date) incurred_begin_date,
        coalesce(incurred_end_date, incurred_begin_date, paid_date) incurred_end_date,
        amount,
@@ -12,6 +13,6 @@ select spending.spending_id,
        note,
        c.category_id,
        c.register_id
-from spending
-         inner join category c on c.category_id = spending.category_id
+from payment
+         inner join category c on c.category_id = payment.category_id
          inner join register r on r.register_id = c.register_id;

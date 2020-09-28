@@ -9,7 +9,7 @@ export interface Payment {
   incurredEndDate?: string;
   amount: Money;
   currency: 'ILS' | 'USD';
-  counterParty: string;
+  counterparty: string;
   note?: string;
   categoryId: CategoryId
 }

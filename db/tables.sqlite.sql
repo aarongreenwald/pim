@@ -11,7 +11,7 @@ CREATE TABLE category(category_id  integer primary key not null
     ,name varchar(50) not null unique
     ,register_id int not null references register);
 
-CREATE TABLE spending(spending_id  integer primary key not null
+CREATE TABLE payment(payment_id  integer primary key not null
     ,paid_date date not null
     ,incurred_begin_date date null --if empty assume the paid_date
     ,incurred_end_date date null --if empty assume the incurred_begin_date

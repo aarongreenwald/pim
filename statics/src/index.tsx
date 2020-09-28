@@ -1,7 +1,7 @@
 import * as React from 'react'
 import {render} from 'react-dom'
 import {browserHistory, Route, Router} from 'react-router'
-import {Spending} from './financials/spending';
+import {AddPayment} from './financials/add-payment';
 
 import {useCallback, useState} from 'react';
 import {login, logout} from './services/server-api';
@@ -37,7 +37,7 @@ function withLogin (WrappedComponent) {
 }
 const App = () => (
     <Router history={browserHistory}>
-        <Route component={Spending} path="/" />
+        <Route component={AddPayment} path="/" />
     </Router>
 )
 const AppWithLogin = withLogin(App);

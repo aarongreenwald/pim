@@ -6,7 +6,7 @@ import {Button} from '@material-ui/core';
 import {format} from 'date-fns';
 import {getAllCategories, savePayment} from '../services/server-api';
 
-export const Spending: React.FC = () => {
+export const AddPayment: React.FC = () => {
   const categories = useCategories();
 
   const [item, setItem] = useState<Payment>(initializePayment())
@@ -40,9 +40,9 @@ export const Spending: React.FC = () => {
       {/*</StyledInput>*/}
       <StyledInput>
         <input type="text"
-               name="counterParty"
+               name="counterparty"
                placeholder="Counterparty"
-               value={item.counterParty}
+               value={item.counterparty}
                onChange={updateItem}/>
       </StyledInput>
       <StyledInput>
@@ -93,7 +93,7 @@ function initializePayment(): Payment {
     paidDate: format(new Date(), 'yyyy-MM-dd'),
     categoryId: -1,
     amount: 0,
-    counterParty: '',
+    counterparty: '',
     currency: 'ILS',
     note: ''
   };
