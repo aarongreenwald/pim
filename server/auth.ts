@@ -4,6 +4,7 @@ import pbkdf2_password from 'pbkdf2-password';
 import bodyParser from 'body-parser';
 import {Express, RequestHandler} from 'express';
 const jsonParser = bodyParser.json();
+import crypto from 'crypto';
 
 const tlsUnavailable = process.env.NO_TLS; //dev environment
 const hash = pbkdf2_password()
@@ -40,10 +41,15 @@ export const setupAuth = (app: Express) => {
 
     app.set('trust proxy', 1) // in order to use cookie.secure: true with a proxy
 
+    //TODO this should be an ENV variable so that restarts don't invalidate
+    //the existing sessions. Anyway I'm using an in memory store so it doesn't
+    //matter until I use a persistent store.
+    const secret = crypto.randomBytes(32).toString('hex');
+
     app.use(session({
         resave: false, // don't save session if unmodified
         saveUninitialized: false, // don't create session until something stored
-        secret: 'secret', //TODO,
+        secret,
         cookie: {
             maxAge: 60000,
             secure: !tlsUnavailable
@@ -56,6 +62,7 @@ export const setupAuth = (app: Express) => {
             const result = await authenticateUser(req.body.password);
             if (result) {
                 // Regenerate session when signing in. Is this necessary?
+                //TODO perhaps the goal is rolling sessions, but there's a config for that
                 req.session!.regenerate(() => {
                     // @ts-ignore
                     req.session.authenticated = true;
