@@ -6,7 +6,6 @@ import {Express, RequestHandler} from 'express';
 const jsonParser = bodyParser.json();
 import crypto from 'crypto';
 
-const tlsUnavailable = process.env.NO_TLS; //dev environment
 const hash = pbkdf2_password()
 
 const verifyAuthentication: RequestHandler = (req, res, next) => {
@@ -52,7 +51,7 @@ export const setupAuth = (app: Express) => {
         secret,
         cookie: {
             maxAge: 60000,
-            secure: !tlsUnavailable
+            secure: 'auto'
         }
 
     }));

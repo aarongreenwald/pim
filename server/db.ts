@@ -1,5 +1,5 @@
-const sqlite = require('sqlite3')
-import {Payment} from '@pim/common';
+import {Category, Payment} from '@pim/common';
+import sqlite from 'sqlite3';
 
 const DATABASE_PATH = process.env.PIM_DATABASE_PATH;
 if (!DATABASE_PATH) {
@@ -13,13 +13,14 @@ sqlite.verbose();
  * Helper function to promisify Database.all()
  * @param db
  * @param sql
+ * @param params
  * @returns {Promise<unknown[]>}
  */
-function all(db, sql, params = []) {
+function all<T>(db: sqlite.Database, sql: string, params = []): Promise<T[]> {
   return new Promise(((resolve, reject) =>
       db.all(sql, params, (err, rows) => {
         if (err) reject(err)
-        else resolve(rows)
+        else resolve(rows as unknown as T[])
       })
   ))
 }
@@ -28,9 +29,10 @@ function all(db, sql, params = []) {
  * Helper function to promisify Database.run()
  * @param db
  * @param sql
+ * @param params
  * @returns {Promise<{lastId, changes}>}
  */
-function run(db, sql, params: any[] = []): Promise<{lastId: any; changes: any}> {
+function run(db: sqlite.Database, sql: string, params: any[] = []): Promise<{lastId: any; changes: any}> {
   return new Promise((resolve, reject) => {
     db.run(sql, params, function (err) {
       if (err) reject(err)
@@ -44,9 +46,10 @@ function run(db, sql, params: any[] = []): Promise<{lastId: any; changes: any}> 
  * Helper function to promisify Database.get()
  * @param db
  * @param sql
+ * @param params
  * @returns {Promise<unknown>}
  */
-function get(db, sql, params = []) {
+function get<T>(db: sqlite.Database, sql: string, params = []): Promise<T> {
   return new Promise((resolve, reject) => {
     db.get(sql, params, function(err, data) {
       if (err) reject(err)
@@ -76,7 +79,8 @@ export const getAllSpending = async () => {
 
 export const getAllCategories = async () => {
   const db = await getDb();
-  return all(db, 'select * from category')
+  const sql = 'select category_id as id, name from category';
+  return all<Category>(db, sql)
 }
 
 export const insertSpending = async (spending: Payment) => {
@@ -101,5 +105,5 @@ export const insertSpending = async (spending: Payment) => {
   const {lastId} = await run(db, sql, params)
   //if the get() rejects but the run() resolved, the server will return 500 which is not good
   //client will be tempted to retry, but the post was successful
-  return get(db, `select * from v_spending where spending_id = ?`, lastId)
+  return get<Payment>(db, `select * from spending where spending_id = ?`, lastId)
 }

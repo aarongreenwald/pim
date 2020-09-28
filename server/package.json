@@ -4,7 +4,7 @@
   "description": "pim api service",
   "main": "index.js",
   "scripts": {
-    "start": "PORT=6540 PIM_DATABASE_PATH=~/pim-data/pim-test.db NO_TLS=true nodemon -r tsconfig-paths/register index.ts ./",
+    "start": "PORT=6540 PIM_DATABASE_PATH=~/pim-data/pim-test.db nodemon -r tsconfig-paths/register index.ts ./",
     "build": "tsc && cp ./tsconfig.json ./build/server/tsconfig.json",
     "prod": "cd build/server && node -r tsconfig-paths/register index.js"
   },
@@ -24,6 +24,7 @@
     "@types/express": "^4.17.8",
     "@types/express-session": "^1.17.0",
     "@types/node": "^14.11.2",
+    "@types/sqlite3": "^3.1.6",
     "chance": "^1.0.4",
     "nodemon": "^2.0.4",
     "ts-node": "^9.0.0",

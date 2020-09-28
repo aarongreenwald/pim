@@ -44,7 +44,6 @@ export const getAllCategories = (): Promise<Category[]> =>
   })
     .then(handleResponse)
     .then(res => res.json())
-    .then(data => data.map(convertCategoryDto))
 
 export const savePayment = (payment: Payment): Promise<any> =>
     fetch(`${config.apiServiceUrl}/spending`, {
@@ -56,9 +55,3 @@ export const savePayment = (payment: Payment): Promise<any> =>
         body: JSON.stringify(payment)
     }).then(handleResponse)
 
-function convertCategoryDto(category: any): Category {
-    return {
-        ...category,
-        id: category.category_id
-    }
-}
