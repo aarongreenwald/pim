@@ -3,13 +3,10 @@
  I don't recall the logic. Regardless this db is probably overkill for now but it won't hurt,
  it can be refactored or changed later with some data migrations.
  */
-CREATE TABLE register(register_id integer primary key not null
-    ,name varchar(50) not null unique);
-
 
 CREATE TABLE category(category_id  integer primary key not null
     ,name varchar(50) not null unique
-    ,register_id int not null references register);
+    ,parent_category_id null references category);
 
 CREATE TABLE payment(payment_id  integer primary key not null
     ,paid_date date not null
@@ -26,7 +23,7 @@ CREATE TABLE income(income_id integer primary key not null
     , source varchar(50) NOT NULL
     , paid_date date NOT NULL
     , amount decimal(19,4) NOT NULL
-    , register_id int NOT NULL REFERENCES register
+    , currency char(3) not null default 'ILS'
     , note text NULL
 );
 

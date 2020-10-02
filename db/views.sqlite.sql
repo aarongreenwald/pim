@@ -9,10 +9,20 @@ select payment.payment_id,
        amount,
        currency,
        c.name category_name,
-       r.name register_name,
        note,
-       c.category_id,
-       c.register_id
+       c.category_id
 from payment
-         inner join category c on c.category_id = payment.category_id
-         inner join register r on r.register_id = c.register_id;
+         inner join category c on c.category_id = payment.category_id;
+
+drop view if exists v_car;
+create view v_car as
+with by_currency as (
+    select record_date,
+           case currency when 'ILS' then amount else null end ils,
+           case currency when 'USD' then amount else null end usd
+    from cash_assets_record
+             left join cash_account ca on cash_assets_record.cash_account_id = ca.cash_account_id)
+select record_date, sum(ils) ils, sum(usd) usd
+from by_currency
+group by record_date;
+
