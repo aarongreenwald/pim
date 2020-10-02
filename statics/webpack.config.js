@@ -50,7 +50,6 @@ module.exports = {
     }
   } : undefined,
   plugins: [
-    // new webpack.OldWatchingPlugin(),
     new WebpackNotifierPlugin(),
     prod && new webpack.DefinePlugin({
       'process.env': {
