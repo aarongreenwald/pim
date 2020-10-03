@@ -15,7 +15,6 @@ jobs:
         with:
           node-version: 12
           registry-url: https://npm.pkg.github.com/
-          scope: @aarongreenwald
       - run: |
           npm ci
           npm run build
