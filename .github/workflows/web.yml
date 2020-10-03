@@ -15,6 +15,7 @@ jobs:
           node-version: 12.18.4
           registry-url: https://npm.pkg.github.com/
       - name: bump version
+        working-directory: statics
         uses: opspresso/action-version@v0.2.5
       - name: build & publish
         run: |
