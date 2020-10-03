@@ -20,8 +20,8 @@ jobs:
       - name: build & publish
         run: |
           npm ci
-          npm version patch
           npm run build
+          npm version patch
           npm publish
         working-directory: statics
         env:
