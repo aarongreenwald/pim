@@ -4,10 +4,6 @@
   "description": "",
   "author": "github.com/aarongreenwald",
   "license": "MIT",
-  "private": false,
-  "publishConfig": {
-    "registry": "https://npm.pkg.github.com/"
-  },
   "repository" : {
     "type" : "git",
     "url": "ssh://git@github.com/aarongreenwald/pim.git",
