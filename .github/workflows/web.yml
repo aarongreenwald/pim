@@ -14,13 +14,10 @@ jobs:
         with:
           node-version: 12.18.4
           registry-url: https://npm.pkg.github.com/
-      - name: bump version
-        uses: michmich112/version-bumper@v1.0.2
-        with:
-          version-file: statics/package.json
       - name: build & publish
         run: |
           npm ci
+          npm version patch
           npm run build
           npm publish
         working-directory: statics
