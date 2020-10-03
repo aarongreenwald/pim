@@ -9,4 +9,4 @@ rm -rf ./build
 #I should use jq but I ran into issues installing it, so for now this hacky sed
 #if the spacing changes it'll break, as well as if I bump the minor or major
 version=$(npm view @aarongreenwald/pim-web version)
-cat package.json | sed "s/\"version\": \"1.0.0\"/\"version\": \"$version\"/"
+sed -i "s/\"version\": \"1.0.0\"/\"version\": \"$version\"/" package.json
