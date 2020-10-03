@@ -1,10 +1,14 @@
 {
-  "name": "pim-statics",
+  "name": "@aarongreenwald/pim-web",
   "version": "1.0.0",
   "description": "",
   "author": "github.com/aarongreenwald",
   "license": "MIT",
-  "private": true,
+  "repository" : {
+    "type" : "git",
+    "url": "ssh://git@github.com/aarongreenwald/pim.git",
+    "directory": "statics"
+  },
   "dependencies": {
     "@emotion/core": "^10.0.35",
     "@emotion/styled": "^10.0.27",
@@ -31,7 +35,7 @@
   "scripts": {
     "lint": "eslint . --fix",
     "start": "webpack-dev-server --history-api-fallback --host 0.0.0.0 --port 3000 --hot --inline --progress",
-    "prebuild": "NODE_ENV=production ./scripts/prebuild.sh",
+    "prebuild": "./scripts/prebuild.sh",
     "build": "NODE_ENV=production webpack",
     "postbuild": "npm run copy",
     "copy": "cp -r public/* build"
