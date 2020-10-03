@@ -1,9 +1,12 @@
-name: web
+name: pim-web
 
 on:
   push:
     branches:
-    - test-actions
+    - master
+    paths:
+      - 'statics/**'
+      - 'common/**'
 
 jobs:
   build:
