@@ -15,13 +15,14 @@ jobs:
           node-version: 12.18.4
           registry-url: https://npm.pkg.github.com/
       - name: bump version
-        uses: opspresso/action-version@v0.2.5
-        working-directory: statics
+        uses: michmich112/version-bumper@v1.0.2
+        with:
+          version-file: statics/package.json
       - name: build & publish
         run: |
           npm ci
           npm run build
-          npm publish --access public
+          npm publish
         working-directory: statics
         env:
           NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
