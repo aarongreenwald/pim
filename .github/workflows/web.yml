@@ -11,7 +11,6 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v1
-        name: build & publish
         with:
           node-version: 12
           registry-url: https://npm.pkg.github.com/
@@ -20,5 +19,6 @@ jobs:
           npm run build
           npm publish --access public
         working-directory: statics
+        name: build & publish
         env:
           NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
