@@ -4,8 +4,8 @@
   "description": "web frontend for pim",
   "author": "github.com/aarongreenwald",
   "license": "MIT",
-  "repository" : {
-    "type" : "git",
+  "repository": {
+    "type": "git",
     "url": "ssh://git@github.com/aarongreenwald/pim.git",
     "directory": "statics"
   },
