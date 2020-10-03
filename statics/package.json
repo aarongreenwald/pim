@@ -5,7 +5,14 @@
   "author": "github.com/aarongreenwald",
   "license": "MIT",
   "private": false,
-  "publishConfig": { "registry": "https://npm.pkg.github.com/" },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com/"
+  },
+  "repository" : {
+    "type" : "git",
+    "url": "ssh://git@github.com/aarongreenwald/pim.git",
+    "directory": "statics"
+  },
   "dependencies": {
     "@emotion/core": "^10.0.35",
     "@emotion/styled": "^10.0.27",
