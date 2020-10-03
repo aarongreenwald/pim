@@ -1,7 +1,7 @@
 {
   "name": "@aarongreenwald/pim-web",
   "version": "1.0.0",
-  "description": "",
+  "description": "web frontend for pim",
   "author": "github.com/aarongreenwald",
   "license": "MIT",
   "repository" : {
