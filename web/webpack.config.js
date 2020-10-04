@@ -46,7 +46,7 @@ module.exports = {
     contentBase: 'public',
     historyApiFallback: true,
     proxy: {
-      '/api': 'http://localhost:6540'
+      '/api': 'http://localhost:4321'
     }
   } : undefined,
   plugins: [
