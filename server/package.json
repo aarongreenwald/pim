@@ -4,13 +4,14 @@
   "description": "pim api service",
   "main": "index.js",
   "scripts": {
-    "start": "PORT=6540 PIM_DATABASE_PATH=~/pim-data/pim-test.db nodemon -r tsconfig-paths/register index.ts ./",
+    "start": "DOTENV=./.env.dev nodemon -r tsconfig-paths/register index.ts ./",
     "build": "tsc && cp ./tsconfig.json ./build/server/tsconfig.json",
     "prod": "cd build/server && node -r tsconfig-paths/register index.js"
   },
   "private": true,
   "dependencies": {
     "body-parser": "^1.19.0",
+    "dotenv": "^8.2.0",
     "ejs": "^3.1.5",
     "express": "^4.14.0",
     "express-session": "^1.17.1",

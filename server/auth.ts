@@ -6,6 +6,11 @@ import {Express, RequestHandler} from 'express';
 const jsonParser = bodyParser.json();
 import crypto from 'crypto';
 
+const credentials = {
+    salt: process.env.SALT,
+    hash: process.env.HASH
+}
+
 const hash = pbkdf2_password()
 
 const verifyAuthentication: RequestHandler = (req, res, next) => {
@@ -35,6 +40,9 @@ const authenticateUser: (password: string) => Promise<boolean> = password => {
 };
 
 export const setupAuth = (app: Express) => {
+    if (!credentials.salt || !credentials.hash) {
+        console.error('SALT and HASH are not available. Auth will fail.')
+    }
 
     app.use(helmet());
 
@@ -90,10 +98,4 @@ export const setupAuth = (app: Express) => {
     });
 
     app.use(verifyAuthentication);
-}
-
-
-const credentials = {
-    salt: process.env.SALT,
-    hash: process.env.HASH
 }

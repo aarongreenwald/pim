@@ -1,3 +1,6 @@
+if (process.env.DOTENV) {
+    require('dotenv').config({path: process.env.DOTENV})
+}
 import * as db from './db'
 import bodyParser from 'body-parser';
 import express from 'express';

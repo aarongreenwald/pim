@@ -1,9 +1,9 @@
 import {Category, Payment} from '@pim/common';
 import sqlite from 'sqlite3';
 
-const DATABASE_PATH = process.env.PIM_DATABASE_PATH;
+const DATABASE_PATH = process.env.DATABASE_PATH;
 if (!DATABASE_PATH) {
-  throw 'Environment variable PIM_DATABASE_PATH is not set!'
+  throw 'Environment variable DATABASE_PATH is not set!'
 }
 
 
