@@ -29,6 +29,12 @@ export const login = (password: string) : Promise<boolean> => {
         .then(() => true)
 }
 
+export const getLoggedIn = (): Promise<boolean> => {
+    return fetch(`${config.apiServiceUrl}/login`)
+        .then(handleResponse)
+        .then(res => res.json())
+        .catch(() => false)
+}
 
 export const getPayments: () => Promise<any> = () =>
     fetch(`${config.apiServiceUrl}/payments`, {

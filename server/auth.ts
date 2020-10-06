@@ -64,6 +64,11 @@ export const setupAuth = (app: Express) => {
 
     }));
 
+    app.get('/login', (req, res) => {
+        const loggedIn = !!req.session!.authenticated;
+        res.send(loggedIn);
+    });
+
     app.post('/login', jsonParser, async (req, res) => {
         try {
             const result = await authenticateUser(req.body.password);
