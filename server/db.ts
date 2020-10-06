@@ -64,7 +64,15 @@ function get<T>(db: sqlite.Database, sql: string, params = []): Promise<T> {
  * @returns {Promise<sqlite.Database>}
  */
 const getDb = async (readonly = true) => {
-  const db = new sqlite.Database(DATABASE_PATH, readonly ? sqlite.OPEN_READONLY : sqlite.OPEN_READWRITE)
+  const db = await new Promise<sqlite.Database>((resolve, reject) => {
+    //sqlite3 creates a DB immediately but could throw in error if it fails
+    //to find the file, or permission is denied, etc. So best to promisify
+    //the whole thing
+    const _db: sqlite.Database = new sqlite.Database(resolvePath(DATABASE_PATH),
+        readonly ? sqlite.OPEN_READONLY : sqlite.OPEN_READWRITE,
+        err => err ? reject(err): resolve(_db) //resolve the object already created 🤔
+    );
+  })
   if (!readonly) {
     await run(db, 'PRAGMA foreign_keys = ON;')
   }
@@ -107,3 +115,9 @@ export const insertPayment = async (payment: Payment) => {
   //client will be tempted to retry, but the post was successful
   return get<Payment>(db, `select * from payment where payment_id = ?`, lastId)
 }
+
+/*
+  Simple utility to expand ~ in paths to the user's home dir. Only handles tilde as
+  first character.
+ */
+const resolvePath = path => path.startsWith('~') ? path.replace('~', require('os').homedir()) : path;
