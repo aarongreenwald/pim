@@ -1,6 +1,7 @@
 const path = require('path');
 const webpack = require('webpack')
 const WebpackNotifierPlugin = require('webpack-notifier')
+const {BundleAnalyzerPlugin} = require('webpack-bundle-analyzer');
 
 const prod = process.env.NODE_ENV === 'production'
 const dev = !prod
@@ -50,7 +51,7 @@ module.exports = {
     }
   } : undefined,
   plugins: [
-    // new webpack.OldWatchingPlugin(),
+    new BundleAnalyzerPlugin(),
     new WebpackNotifierPlugin(),
     prod && new webpack.DefinePlugin({
       'process.env': {

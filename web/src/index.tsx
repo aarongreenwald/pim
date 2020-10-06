@@ -6,7 +6,11 @@ import {login, logout, getLoggedIn} from './services/server-api';
 import styled from '@emotion/styled';
 import {FinancialsHome} from './financials/finacials.home';
 import {AppBar, IconButton, Toolbar} from '@material-ui/core';
-import {ExitToApp} from '@material-ui/icons';
+import {Icon} from '@fluentui/react/lib/Icon'
+import { initializeIcons } from '@uifabric/icons';
+// import ExitToApp from '@material-ui/icons/ExitToApp';
+// import {ExitToApp} from '@material-ui/icons';
+initializeIcons();
 
 function LoginForm({onLoggedIn}: {onLoggedIn: (success: boolean) => void}) {
     const [password, setPassword] = useState('')
@@ -44,7 +48,8 @@ function withLogin (WrappedComponent) {
                 <AppBar position={'relative'}>
                     <Toolbar>
                         <IconButton onClick={onLogout} color={'inherit'}>
-                            <ExitToApp />
+                            {/*<ExitToApp />*/}
+                            <Icon iconName={'SignOut'}/>
                         </IconButton>
                     </Toolbar>
                 </AppBar>

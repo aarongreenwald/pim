@@ -36,7 +36,7 @@ export const getLoggedIn = (): Promise<boolean> => {
         .catch(() => false)
 }
 
-export const getPayments: () => Promise<any> = () =>
+export const getPayments: () => Promise<Payment[]> = () =>
     fetch(`${config.apiServiceUrl}/payments`, {
             credentials: 'include',
         })
@@ -51,7 +51,7 @@ export const getAllCategories = (): Promise<Category[]> =>
     .then(handleResponse)
     .then(res => res.json())
 
-export const savePayment = (payment: Payment): Promise<any> =>
+export const savePayment = (payment: Payment): Promise<Payment[]> =>
     fetch(`${config.apiServiceUrl}/payments`, {
         method: 'POST',
         headers: {

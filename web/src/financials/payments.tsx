@@ -25,13 +25,17 @@ export const Payments: React.FC = () => {
     }, [payments])
 
     return (
-        payments ? <List data={payments} sortData={sortPayments} /> : null
+        payments ? <List data={payments}
+                         sortData={sortPayments}
+                         idField={'payment_id'} /> : null
     )
 }
 
-interface TableProps {
-    data: any[];
+// eslint-disable-next-line @typescript-eslint/ban-types
+interface TableProps<T extends object = {}> {
+    data: T[];
     sortData?: (sort: Sort) => void;
+    idField: string;
 }
 
 export const HtmlTable: React.FC<TableProps> = ({data}) => {
@@ -74,9 +78,9 @@ interface Sort {
     direction: number; //TODO name these
 }
 
-const defaultSortDirection = (fieldName: string): number => 0
+const defaultSortDirection = (fieldName: string): number => fieldName.includes('date') ? 0 : 1
 
-export const List: React.FC<TableProps> = ({data, sortData}) => {
+export const List: React.FC<TableProps> = ({data, sortData, idField}) => {
     const [sort, setSort] = useState<Sort>(null)
     const columns = useMemo(() => {
         const keys = Object.keys(data[0]);
@@ -98,9 +102,9 @@ export const List: React.FC<TableProps> = ({data, sortData}) => {
                 sortData(newSort);
             }
         }))
-    }, [data, sort])
+    }, [data, sort, sortData])
 
-    const items = useMemo(() => data.map(item => ({...item, id: item.payment_id})), [data])
+    const items = useMemo(() => data.map(item => ({...item, id: item[idField]})), [data, idField])
 
     const getKey = useCallback((item) => item.id, []);
 
@@ -112,19 +116,19 @@ export const List: React.FC<TableProps> = ({data, sortData}) => {
                columns={columns}/>
 }
 
-export const Grid: React.FC<TableProps> = ({data}) => {
+export const Grid: React.FC<TableProps> = ({data, idField}) => {
     const columns = useMemo(() => {
         const keys = Object.keys(data[0]);
         return keys.map(key => ({
             field: key,
-            type: key.indexOf('date') ? 'date' : 'string',
+            type: key.includes('date') ? 'date' : 'string',
             headerName: key
         }))
     }, [data])
 
-    const foo = useMemo(() => data.map(item => ({...item, id: item.payment_id})), [data])
+    const rows = useMemo(() => data.map(item => ({...item, id: item[idField]})), [data, idField])
 
     return (
-        <DataGrid rows={foo} columns={columns} />
+        <DataGrid rows={rows} columns={columns} />
     )
 }

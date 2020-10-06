@@ -2,10 +2,9 @@ import {useCallback, useEffect, useState} from 'react';
 import * as React from 'react';
 import styled from '@emotion/styled';
 import {Category, Payment} from '@pim/common';
-import {AppBar, Button, IconButton, Toolbar, Typography} from '@material-ui/core';
-import {Close} from '@material-ui/icons'
 import {format} from 'date-fns';
 import {getAllCategories, savePayment} from '../services/server-api';
+import Button from '@material-ui/core/Button';
 
 interface AddPaymentProps {
     onClose: () => void;
