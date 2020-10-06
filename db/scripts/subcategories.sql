@@ -40,6 +40,16 @@ WITH RECURSIVE rollup_category(category_id, group_category_id, level) AS (
 select rc.*, c.name, gc.name
 from rollup_category rc inner join category c on rc.category_id = c.category_id
 inner join category gc on rc.group_category_id = gc.category_id
-order by rc.category_id
+order by rc.category_id;
 
-
+/*
+ A view for a seeing categories inside their parents, for a UI
+ */
+WITH RECURSIVE all_categories(category_id, name, level, parent) AS (
+    select category_id, name, 0 as level, parent_category_id from category where parent_category_id is null
+    UNION ALL
+    SELECT category.category_id,  replace(hex(zeroblob(level + 1)), '00', '--') || category.name, level + 1, parent_category_id
+    FROM category inner join all_categories on parent_category_id = all_categories.category_id
+    order by category_id, parent_category_id, level, name
+    )
+select * from all_categories

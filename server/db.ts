@@ -79,7 +79,7 @@ export const getAllPayments = async () => {
 
 export const getAllCategories = async () => {
   const db = await getDb();
-  const sql = 'select category_id as id, name from category';
+  const sql = 'select category_id as id, name from v_category';
   return all<Category>(db, sql)
 }
 
