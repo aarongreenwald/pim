@@ -6,6 +6,7 @@ import {AddPayment} from './financials/add-payment';
 import {useCallback, useEffect, useState} from 'react';
 import {login, logout, getLoggedIn} from './services/server-api';
 import styled from '@emotion/styled';
+import {FinancialsHome} from './financials/finacials.home';
 
 function LoginForm({onLoggedIn}: {onLoggedIn: (success: boolean) => void}) {
     const [password, setPassword] = useState('')
@@ -48,7 +49,7 @@ function withLogin (WrappedComponent) {
 }
 const App = () => (
     <Router history={browserHistory}>
-        <Route component={AddPayment} path="/" />
+        <Route component={FinancialsHome} path="/" />
     </Router>
 )
 const AppWithLogin = withLogin(App);

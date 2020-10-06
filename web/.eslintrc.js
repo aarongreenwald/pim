@@ -11,6 +11,7 @@ module.exports = {
     'plugin:@typescript-eslint/recommended',
   ],
   rules: {
-    quotes: [2, 'single']
+    quotes: [2, 'single'],
+    "react/prop-types": 0
   }
 }
