@@ -51,8 +51,8 @@ module.exports = {
     }
   } : undefined,
   plugins: [
-    new BundleAnalyzerPlugin(),
-    new WebpackNotifierPlugin(),
+    dev && new BundleAnalyzerPlugin(),
+    dev && new WebpackNotifierPlugin(),
     prod && new webpack.DefinePlugin({
       'process.env': {
         'NODE_ENV': JSON.stringify('production')
