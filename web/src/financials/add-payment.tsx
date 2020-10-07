@@ -9,68 +9,67 @@ import {PrimaryButton, DefaultButton, Stack, TextField, ChoiceGroup} from '@flue
 interface AddPaymentProps {
     onClose: () => void;
 }
+
 export const AddPayment: React.FC<AddPaymentProps> = ({onClose}) => {
   const categories = useCategories();
-
-  const [item, setItem] = useState<Payment>(initializePayment())
-  const updateItem = useCallback(({target}) => {
-    setItem({
-      ...item,
-      [target.name]: target.value
-    })
-  }, [item])
-  const submitForm = useCallback(async () => {
-    await savePayment(item)
-    setItem(initializePayment())
-  }, [item])
+    const {payment, updatePayment, submitForm} = usePaymentForm();
 
     return (
       <form>
         <Stack tokens={stackTokens}>
             <TextField
-                    label={'Date'}
-                    type="date"
-                   onChange={updateItem}
-                   value={item.paidDate}
-                   name="paidDate"/>
+               label={'Date'}
+               type="date"
+               onChange={updatePayment}
+               value={payment.paidDate}
+               name="paidDate"/>
 
             {/* todo begin/end incurred dates */}
             <TextField
                 label="Counterparty"
                 name="counterparty"
-                value={item.counterparty}
-                onChange={updateItem}
+                value={payment.counterparty}
+                onChange={updatePayment}
             />
 
             <TextField
                 label="Amount"
-                value={item.amount ? item.amount.toString() : ''}
+                value={payment.amount ? payment.amount.toString() : ''}
                 type="number"
                 name="amount"
-                onChange={updateItem}
+                onChange={updatePayment}
             />
 
-            <StyledChoiceGroup selectedKey={item.currency}
-                               label="Currency"
-                         styles={horizontalChoiceGroup}
-                         onChange={updateItem}
-                         options={currencyOptions}/>
+            <StyledChoiceGroup
+                selectedKey={payment.currency}
+                label="Currency"
+                styles={horizontalChoiceGroup}
+                onChange={updatePayment}
+                options={currencyOptions}/>
 
             <StyledInput>
-                <select name="categoryId" value={item.categoryId} onChange={updateItem}>
+                <select
+                    name="categoryId"
+                    value={payment.categoryId}
+                    onChange={updatePayment}>
                   <option disabled value={-1}> Select category </option>
                   {
-                    categories && categories.map(category => <option key={category.id}
-                                                                     value={category.id}>{category.name}</option>)
+                    categories && categories.map(category =>
+                        <option
+                            key={category.id}
+                            value={category.id}>
+                            {category.name}
+                        </option>)
                   }
                 </select>
             </StyledInput>
 
-            <TextField label="Notes"
-                       multiline
-                       name="note"
-                       value={item.note}
-                       onChange={updateItem}/>
+            <TextField
+                label="Notes"
+                name="note"
+                value={payment.note}
+                multiline
+                onChange={updatePayment}/>
 
             <Stack horizontal tokens={stackTokens}>
                 <PrimaryButton onClick={submitForm}>Save</PrimaryButton>
@@ -90,6 +89,20 @@ function useCategories() {
   return categories;
 }
 
+function usePaymentForm() {
+    const [payment, setPayment] = useState<Payment>(initializePayment())
+    const updatePayment = useCallback(({target}) => {
+        setPayment({
+            ...payment,
+            [target.name]: target.value
+        })
+    }, [payment])
+    const submitForm = useCallback(async () => {
+        await savePayment(payment)
+        setPayment(initializePayment())
+    }, [payment])
+    return {payment, updatePayment, submitForm};
+}
 
 function initializePayment(): Payment {
   return {
