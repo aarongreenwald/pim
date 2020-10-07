@@ -82,7 +82,7 @@ const getDb = async (readonly = true) => {
 
 export const getAllPayments = async () => {
   const db = await getDb();
-  return all(db, 'select * from v_payment')
+  return all(db, 'select * from v_payment order by paid_date desc')
 }
 
 export const getAllCategories = async () => {

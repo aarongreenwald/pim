@@ -15,7 +15,7 @@ export const Payments: React.FC = () => {
     const sortPayments = useCallback((sort: Sort) => {
         const newPayments = [...payments];
         const sortFn =
-            sort.direction ?
+            sort.direction === SortDirection.asc ?
                 (a, b) => a[sort.fieldName] > b[sort.fieldName] ? 1 : -1 :
                 (a, b) => a[sort.fieldName] < b[sort.fieldName] ? 1 : -1
 
@@ -75,10 +75,15 @@ export const HtmlTable: React.FC<TableProps> = ({data}) => {
 
 interface Sort {
     fieldName: string;
-    direction: number; //TODO name these
+    direction: SortDirection;
 }
 
-const defaultSortDirection = (fieldName: string): number => fieldName.includes('date') ? 0 : 1
+enum SortDirection {
+    asc,
+    desc
+}
+
+const defaultSortDirection = (fieldName: string): number => fieldName.includes('date') ? SortDirection.desc : SortDirection.asc
 
 export const List: React.FC<TableProps> = ({data, sortData, idField}) => {
     const [sort, setSort] = useState<Sort>(null)
@@ -91,12 +96,14 @@ export const List: React.FC<TableProps> = ({data, sortData, idField}) => {
             name: key,
             isResizable: true,
             isSorted: sort?.fieldName === key,
-            isSortedDescending: sort?.direction === 0,
+            isSortedDescending: sort?.direction === SortDirection.desc,
             // isCollapsible: true, //what does this do?
             onColumnClick: () => {
                 const newSort = {
                     fieldName: key,
-                    direction: sort?.fieldName === key ? ~sort?.direction : defaultSortDirection(key)
+                    direction: sort?.fieldName === key ?
+                        Number(!sort?.direction) :
+                        defaultSortDirection(key)
                 };
                 setSort(newSort)
                 sortData(newSort);
