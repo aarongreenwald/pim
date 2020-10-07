@@ -5,8 +5,8 @@ import {Payments} from './payments';
 import {Panel} from '@fluentui/react';
 // import useTheme from '@material-ui/core/styles/useTheme';
 // import useMediaQuery from '@material-ui/core/useMediaQuery';
-import Button from '@material-ui/core/Button';
-
+// import Button from '@material-ui/core/Button';
+// import {Fab} from '@material-ui/core';
 
 export const FinancialsHome: React.FC = () => {
     const [showAddPayment, setShowAddPayment] = useState(false)
@@ -17,13 +17,12 @@ export const FinancialsHome: React.FC = () => {
 
     return (
         <>
-            <Payments />
-            <Button
-                variant={'contained'}
-                color={'primary'}
-                onClick={onAddPayment}>
-                Add Payment
-            </Button>
+            {/*<Fab*/}
+            {/*    color={'primary'}*/}
+            {/*    onClick={onAddPayment}>*/}
+            {/*    Add Payment*/}
+            {/*</Fab>*/}
+            <Payments onAddPayment={onAddPayment} />
             {/*<Drawer anchor={'right'} open={showAddPayment} onClose={closePanel}>*/}
             {/*    <AddPayment onClose={closePanel}/>*/}
             {/*</Drawer>*/}
@@ -40,6 +39,7 @@ export const FinancialsHome: React.FC = () => {
             {/*</Dialog>*/}
             <Panel
                 isOpen={showAddPayment}
+                headerText="Add Payment"
                 onDismiss={closePanel}>
                 <AddPayment onClose={closePanel}/>
             </Panel>

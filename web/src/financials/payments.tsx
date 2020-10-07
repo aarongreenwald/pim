@@ -3,9 +3,13 @@ import {useCallback, useEffect, useMemo, useState} from 'react';
 import {Payment} from '@pim/common';
 import {getPayments} from '../services/server-api';
 import {DataGrid} from '@material-ui/data-grid';
-import {DetailsList, DetailsListLayoutMode, SelectionMode} from '@fluentui/react';
+import {CommandBar, DetailsList, DetailsListLayoutMode, SelectionMode} from '@fluentui/react';
 
-export const Payments: React.FC = () => {
+interface PaymentsProps {
+    onAddPayment: () => void;
+}
+
+export const Payments: React.FC<PaymentsProps> = ({onAddPayment}) => {
 
     const [payments, setPayments] = useState<Payment[]>()
     useEffect(() => {
@@ -24,10 +28,39 @@ export const Payments: React.FC = () => {
         setPayments(newPayments)
     }, [payments])
 
+    const reloadData = useCallback(() => {
+        getPayments().then(setPayments)
+    }, [])
+
+    //maybe use CommandBarButton directly, or a CommandButton
+    const commands = useMemo(() => (
+        [
+            {
+                key: 'new',
+                text: 'New Payment',
+                iconProps: { iconName: 'Add' },
+                onClick: onAddPayment,
+            },
+            {
+                key: 'refresh',
+                text: 'Refresh',
+                iconProps: { iconName: 'Refresh' },
+                onClick: reloadData
+            }
+        ]), [reloadData, onAddPayment])
+
     return (
-        payments ? <List data={payments}
-                         sortData={sortPayments}
-                         idField={'payment_id'} /> : null
+        <>
+            <CommandBar items={commands} />
+            {
+
+                payments &&
+                    <List data={payments}
+                        sortData={sortPayments}
+                        idField={'payment_id'} />
+            }
+        </>
+
     )
 }
 
