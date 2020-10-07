@@ -1,11 +1,12 @@
 import * as React from 'react';
-import {useCallback, useMemo, useState} from 'react';
+import {useCallback, useMemo} from 'react';
 import {DetailsList, DetailsListLayoutMode, SelectionMode} from '@fluentui/react';
-import {DataGrid} from '@material-ui/data-grid';
+// import {DataGrid} from '@material-ui/data-grid';
 
 // eslint-disable-next-line @typescript-eslint/ban-types
 interface TableProps<T extends object = {}> {
     data: T[];
+    sortConfig?: SortConfig;
     sortData?: (sort: SortConfig) => void;
     idField: string;
 }
@@ -51,8 +52,7 @@ export const HtmlTable: React.FC<TableProps> = ({data}) => {
 /*
 Table based on fluent DetailsList
  */
-export const List: React.FC<TableProps> = ({data, sortData, idField}) => {
-    const [sortConfig, setSortConfig] = useState<SortConfig>(null)
+export const List: React.FC<TableProps> = ({data, sortConfig, sortData, idField}) => {
 
     const columns = useMemo(() => {
         const keys = Object.keys(data[0]);
@@ -73,7 +73,6 @@ export const List: React.FC<TableProps> = ({data, sortData, idField}) => {
                         Number(!sortConfig?.direction) :
                         defaultSortDirection(key)
                 };
-                setSortConfig(newSort)
                 sortData(newSort);
             }
         }))
@@ -97,22 +96,22 @@ export const List: React.FC<TableProps> = ({data, sortData, idField}) => {
 /*
 Table based on MUI DataGrid
  */
-export const Grid: React.FC<TableProps> = ({data, idField}) => {
-    const columns = useMemo(() => {
-        const keys = Object.keys(data[0]);
-        return keys.map(key => ({
-            field: key,
-            type: key.includes('date') ? 'date' : 'string',
-            headerName: key
-        }))
-    }, [data])
-
-    const rows = useMemo(() => data.map(item => ({...item, id: item[idField]})), [data, idField])
-
-    return (
-        <DataGrid rows={rows} columns={columns} />
-    )
-}
+// export const Grid: React.FC<TableProps> = ({data, idField}) => {
+//     const columns = useMemo(() => {
+//         const keys = Object.keys(data[0]);
+//         return keys.map(key => ({
+//             field: key,
+//             type: key.includes('date') ? 'date' : 'string',
+//             headerName: key
+//         }))
+//     }, [data])
+//
+//     const rows = useMemo(() => data.map(item => ({...item, id: item[idField]})), [data, idField])
+//
+//     return (
+//         <DataGrid rows={rows} columns={columns} />
+//     )
+// }
 
 const defaultSortDirection = (fieldName: string): number => fieldName.includes('date') ? SortDirection.desc : SortDirection.asc
 
