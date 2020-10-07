@@ -122,10 +122,11 @@ export const List: React.FC<TableProps> = ({data, sortData, idField}) => {
     const [sort, setSort] = useState<Sort>(null)
     const columns = useMemo(() => {
         const keys = Object.keys(data[0]);
-        return keys.map(key => ({
+        return keys.filter(key => key === 'id' || !key.endsWith('_id')).map(key => ({
             key,
             minWidth: 100,
             fieldName: key,
+            onRender: (value) => key.includes('date') ? new Date(value[key]).toDateString() : value[key],
             name: key,
             isResizable: true,
             isSorted: sort?.fieldName === key,
