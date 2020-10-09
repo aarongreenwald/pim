@@ -43,7 +43,7 @@ export function withLogin (WrappedComponent) {
         return loggedIn ?
             <>
                 <StyledAppHeader>
-                    <ActionButton iconProps={{iconName: 'SignOut'}} text={'Logout'} />
+                    <ActionButton iconProps={{iconName: 'SignOut'}} text={'Logout'} onClick={onLogout} />
                 </StyledAppHeader>
 
                 <WrappedComponent/>
