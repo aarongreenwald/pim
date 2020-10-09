@@ -12,7 +12,7 @@ interface AddPaymentProps {
 
 export const AddPayment: React.FC<AddPaymentProps> = ({onClose}) => {
   const categories = useCategories();
-    const {payment, updatePayment, submitForm} = usePaymentForm();
+    const {payment, updatePayment, updateCurrency, submitForm} = usePaymentForm();
 
     return (
       <form>
@@ -44,7 +44,7 @@ export const AddPayment: React.FC<AddPaymentProps> = ({onClose}) => {
                 selectedKey={payment.currency}
                 label="Currency"
                 styles={horizontalChoiceGroup}
-                onChange={updatePayment}
+                onChange={updateCurrency}
                 options={currencyOptions}/>
 
             <StyledInput>
@@ -91,6 +91,12 @@ function useCategories() {
 
 function usePaymentForm() {
     const [payment, setPayment] = useState<Payment>(initializePayment())
+    const updateCurrency = useCallback((_, {key}) => {
+        setPayment({
+            ...payment,
+            currency: key
+        })
+    }, [payment])
     const updatePayment = useCallback(({target}) => {
         setPayment({
             ...payment,
@@ -101,7 +107,7 @@ function usePaymentForm() {
         await savePayment(payment)
         setPayment(initializePayment())
     }, [payment])
-    return {payment, updatePayment, submitForm};
+    return {payment, updatePayment, updateCurrency, submitForm};
 }
 
 function initializePayment(): Payment {
