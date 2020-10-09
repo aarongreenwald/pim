@@ -85,6 +85,16 @@ export const getAllPayments = async () => {
   return all(db, 'select * from v_payment order by paid_date desc')
 }
 
+export const getAllIncome = async () => {
+  const db = await getDb();
+  return all(db, 'select * from income order by paid_date desc')
+}
+
+export const getCarSummary = async () => {
+  const db = await getDb();
+  return all(db, 'select * from v_car order by record_date desc')
+}
+
 export const getAllCategories = async () => {
   const db = await getDb();
   const sql = 'select category_id as id, name from v_category';

@@ -35,6 +35,16 @@ app.route('/categories')
     db.getAllCategories().then(data => res.send(JSON.stringify(data)))
   })
 
+app.route('/car/summary')
+    .get((req, res) =>
+        db.getCarSummary().then(data => res.send(JSON.stringify(data)))
+    )
+
+app.route('/income')
+    .get((req, res) =>
+        db.getAllIncome().then(data => res.send(JSON.stringify(data)))
+    )
+
 express()
     .use('/api', app)
     .listen(PORT, () => console.log(`App listening on port: ${PORT}`));

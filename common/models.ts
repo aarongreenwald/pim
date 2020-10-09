@@ -1,6 +1,7 @@
 export type Money = number;
 export type CategoryId = number;
 export type PaymentId = number;
+export type Currency = 'ILS' | 'USD';
 
 export interface Payment {
   id: PaymentId;
@@ -8,7 +9,7 @@ export interface Payment {
   incurredBeginDate?: string;
   incurredEndDate?: string;
   amount: Money;
-  currency: 'ILS' | 'USD';
+  currency: Currency;
   counterparty: string;
   note?: string;
   categoryId: CategoryId
@@ -17,4 +18,17 @@ export interface Payment {
 export interface Category {
   id: CategoryId;
   name: string;
+}
+
+export interface CarSummary {
+  recordDate: string;
+  ils: Money;
+  usd: Money;
+}
+
+export interface Income {
+  paidDate: string;
+  source: string;
+  amount: Money;
+  currency: Currency;
 }

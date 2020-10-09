@@ -5,12 +5,16 @@ import {Panel} from '@fluentui/react';
 import {useBoolean} from '@uifabric/react-hooks';
 import {AddCashRecord} from './add-cash-record';
 import {AddIncome} from './add-income';
+import {useEffect} from 'react';
+import {getCarSummary, getIncome} from '../services/server-api';
 
 export const FinancialsHome: React.FC = () => {
     const [addIncome, {setTrue: showAddIncome, setFalse: hideAddIncome}] = useBoolean(false)
     const [addCar, {setTrue: showAddCar, setFalse: hideAddCar}] = useBoolean(false)
     const [addPayment, {setTrue: showAddPayment, setFalse: hideAddPayment}] = useBoolean(false)
 
+    useEffect(() => {getCarSummary().then(console.log)}, [])
+    useEffect(() => {getIncome().then(console.log)}, [])
     return (
         <>
             <Payments
