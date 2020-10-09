@@ -5,12 +5,9 @@ import {Category, Payment} from '@pim/common';
 import {format} from 'date-fns';
 import {getAllCategories, savePayment} from '../services/server-api';
 import {PrimaryButton, DefaultButton, Stack, TextField, ChoiceGroup} from '@fluentui/react'
+import {PanelProps} from '../common/panel.types';
 
-interface AddPaymentProps {
-    onClose: () => void;
-}
-
-export const AddPayment: React.FC<AddPaymentProps> = ({onClose}) => {
+export const AddPayment: React.FC<PanelProps> = ({onClose}) => {
   const categories = useCategories();
     const {payment, updatePayment, updateCurrency, submitForm} = usePaymentForm();
 

@@ -2,21 +2,23 @@ import * as React from 'react';
 import {useCallback, useEffect, useMemo, useState} from 'react';
 import {Payment} from '@pim/common';
 import {getPayments} from '../services/server-api';
-import {CommandBar} from '@fluentui/react';
+import {CommandBar, ICommandBarItemProps} from '@fluentui/react';
 import {List, SortConfig, SortDirection} from './table';
 
 interface PaymentsProps {
     onAddPayment: () => void;
+    onAddIncome: () => void;
+    onAddCar: () => void;
 }
 
-export const Payments: React.FC<PaymentsProps> = ({onAddPayment}) => {
+export const Payments: React.FC<PaymentsProps> = ({onAddPayment, onAddCar, onAddIncome}) => {
     const {
         payments,
         sortConfig,
         onSortPayments,
         reloadData
     } = useSortablePayments();
-    const commands = useCommandBarCommands(onAddPayment, reloadData);
+    const commands = useCommandBarCommands(onAddPayment, onAddIncome, onAddCar, reloadData);
 
     return (
         <>
@@ -84,14 +86,34 @@ const sortPayments = (payments: Payment[], sortConfig: SortConfig) => {
     return newPayments;
 }
 
-function useCommandBarCommands(onAddPayment: () => void, reloadData: () => void) {
+function useCommandBarCommands(onAddPayment: () => void,
+                               onAddIncome: () => void,
+                               onAddCar: () => void,
+                               reloadData: () => void): ICommandBarItemProps[] {
     const commands = useMemo(() => (
         [
             {
-                key: 'new',
-                text: 'New Payment',
+                split: true,
+                key: 'newPayment',
+                text: 'Payment',
                 iconProps: {iconName: 'Add'},
                 onClick: onAddPayment,
+                subMenuProps: {
+                    items: [
+                        {
+                            key: 'newIncome',
+                            text: 'Income',
+                            onClick: onAddIncome,
+                            iconProps: { iconName: 'Money' },
+                        },
+                        {
+                            key: 'newCashAssets',
+                            text: 'Cash balances',
+                            onClick: onAddCar,
+                            iconProps: { iconName: 'AddToShoppingList' },
+                        },
+                    ]
+                },
             },
             {
                 key: 'refresh',
@@ -99,7 +121,7 @@ function useCommandBarCommands(onAddPayment: () => void, reloadData: () => void)
                 iconProps: {iconName: 'Refresh'},
                 onClick: reloadData
             }
-        ]), [reloadData, onAddPayment])
+        ]), [reloadData, onAddPayment, onAddIncome, onAddCar])
     return commands;
 }
 
