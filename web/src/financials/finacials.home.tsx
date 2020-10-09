@@ -1,7 +1,7 @@
 import {AddPayment} from './add-payment';
 import * as React from 'react';
 import {Payments} from './payments';
-import {Panel} from '@fluentui/react';
+import { Label, Panel, Pivot, PivotItem} from '@fluentui/react';
 import {useBoolean} from '@uifabric/react-hooks';
 import {AddCashRecord} from './add-cash-record';
 import {AddIncome} from './add-income';
@@ -17,10 +17,21 @@ export const FinancialsHome: React.FC = () => {
     useEffect(() => {getIncome().then(console.log)}, [])
     return (
         <>
-            <Payments
-                onAddPayment={showAddPayment}
-                onAddIncome={showAddIncome}
-                onAddCar={showAddCar}/>
+            <Pivot>
+                <PivotItem headerText="Spending">
+                    <Payments
+                        onAddPayment={showAddPayment}
+                        onAddIncome={showAddIncome}
+                        onAddCar={showAddCar}/>
+                </PivotItem>
+                <PivotItem headerText="Income">
+                    <Label>Income: TODO</Label>
+                </PivotItem>
+                <PivotItem headerText="Cash Record History">
+                    <Label>CAR: TODO</Label>
+                </PivotItem>
+            </Pivot>
+
             <Panel
                 isOpen={addPayment}
                 headerText="Add Payment"
