@@ -30,7 +30,9 @@ export const login = (password: string) : Promise<boolean> => {
 }
 
 export const getLoggedIn = (): Promise<boolean> => {
-    return fetch(`${config.apiServiceUrl}/login`)
+    return fetch(`${config.apiServiceUrl}/login`, {
+            credentials: 'include',
+        })
         .then(handleResponse)
         .then(res => res.json())
         .catch(() => false)

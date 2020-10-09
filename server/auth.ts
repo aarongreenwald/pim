@@ -61,6 +61,7 @@ export const setupAuth = (app: Express) => {
         resave: false, // don't save session if unmodified
         saveUninitialized: false, // don't create session until something stored
         secret,
+        rolling: true,
         cookie: {
             maxAge: 60000 * 60 * 24,
             secure: 'auto'
@@ -78,7 +79,6 @@ export const setupAuth = (app: Express) => {
             const result = await authenticateUser(req.body.password);
             if (result) {
                 // Regenerate session when signing in. Is this necessary?
-                //TODO perhaps the goal is rolling sessions, but there's a config for that
                 req.session!.regenerate(() => {
                     // @ts-ignore
                     req.session.authenticated = true;
