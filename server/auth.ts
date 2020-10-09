@@ -62,7 +62,7 @@ export const setupAuth = (app: Express) => {
         saveUninitialized: false, // don't create session until something stored
         secret,
         cookie: {
-            maxAge: 60000,
+            maxAge: 60000 * 60 * 24,
             secure: 'auto'
         }
 
