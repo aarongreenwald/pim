@@ -98,22 +98,22 @@ function useCommandBarCommands(onAddPayment: () => void,
                 text: 'Payment',
                 iconProps: {iconName: 'Add'},
                 onClick: onAddPayment,
-                subMenuProps: {
-                    items: [
-                        {
-                            key: 'newIncome',
-                            text: 'Income',
-                            onClick: onAddIncome,
-                            iconProps: { iconName: 'Money' },
-                        },
-                        {
-                            key: 'newCashAssets',
-                            text: 'Cash balances',
-                            onClick: onAddCar,
-                            iconProps: { iconName: 'AddToShoppingList' },
-                        },
-                    ]
-                },
+                // subMenuProps: {
+                //     items: [
+                //         {
+                //             key: 'newIncome',
+                //             text: 'Income',
+                //             onClick: onAddIncome,
+                //             iconProps: { iconName: 'Money' },
+                //         },
+                //         {
+                //             key: 'newCashAssets',
+                //             text: 'Cash balances',
+                //             onClick: onAddCar,
+                //             iconProps: { iconName: 'AddToShoppingList' },
+                //         },
+                //     ]
+                // },
             },
             {
                 key: 'refresh',
