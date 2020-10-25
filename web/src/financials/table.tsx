@@ -50,6 +50,12 @@ export const HtmlTable: React.FC<TableProps> = ({data}) => {
     )
 }
 
+const idFields = ['id', 'categoryId'];
+const fieldIsNotId = fieldName => !idFields.includes(fieldName)
+const formatFieldName = fieldName => {
+    const split = fieldName.replace(/([a-z])([A-Z])/g, '$1 $2');
+    return split.charAt(0).toUpperCase() + split.slice(1);
+}
 /*
 Table based on fluent DetailsList
  */
@@ -63,12 +69,12 @@ export const List: React.FC<TableProps> = ({
 
     const columns = useMemo(() => {
         const keys = Object.keys(data[0]);
-        return keys.filter(key => key === 'id' || !key.endsWith('_id')).map(key => ({
+        return keys.filter(fieldIsNotId).map(key => ({
             key,
             minWidth: 100,
             fieldName: key,
             onRender: (value) => key.toLowerCase().includes('date') ? new Date(value[key]).toDateString() : value[key],
-            name: key,
+            name: formatFieldName(key),
             isResizable: true,
             isSorted: sortConfig?.fieldName === key,
             isSortedDescending: sortConfig?.direction === SortDirection.desc,

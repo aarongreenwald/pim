@@ -140,4 +140,4 @@ function useCommandBarCommands(onAddPayment: () => void,
 
 const commandBarStyles = {root: {padding: 0}};
 
-const defaultPaymentsSortConfig = {fieldName: 'paid_date', direction: SortDirection.desc};
+const defaultPaymentsSortConfig = {fieldName: 'paidDate', direction: SortDirection.desc};
