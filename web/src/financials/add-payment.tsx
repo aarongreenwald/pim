@@ -7,10 +7,9 @@ import {getAllCategories, savePayment} from '../services/server-api';
 import {PrimaryButton, DefaultButton, Stack, TextField, ChoiceGroup} from '@fluentui/react'
 import {PanelProps} from '../common/panel.types';
 
-export const AddPayment: React.FC<PanelProps> = ({onClose}) => {
+export const AddPayment: React.FC<PanelProps & {data?: Payment}> = ({onClose, data}) => {
   const categories = useCategories();
-    const {payment, updatePayment, updateCurrency, submitForm} = usePaymentForm();
-
+    const {payment, updatePayment, updateCurrency, submitForm} = usePaymentForm(onClose, data);
     return (
       <form>
         <Stack tokens={stackTokens}>
@@ -18,7 +17,7 @@ export const AddPayment: React.FC<PanelProps> = ({onClose}) => {
                label={'Date'}
                type="date"
                onChange={updatePayment}
-               value={payment.paidDate}
+               value={format(new Date(payment.paidDate), 'yyyy-MM-dd')}
                name="paidDate"/>
 
             {/* todo begin/end incurred dates */}
@@ -86,8 +85,8 @@ function useCategories() {
   return categories;
 }
 
-function usePaymentForm() {
-    const [payment, setPayment] = useState<Payment>(initializePayment())
+function usePaymentForm(onClose: () => void, data?: Payment, ) {
+    const [payment, setPayment] = useState<Payment>(data || initializePayment())
     const updateCurrency = useCallback((_, {key}) => {
         setPayment({
             ...payment,
@@ -102,7 +101,11 @@ function usePaymentForm() {
     }, [payment])
     const submitForm = useCallback(async () => {
         await savePayment(payment)
-        setPayment(initializePayment())
+        if (payment.id === -1) {
+            setPayment(initializePayment())
+        } else {
+            onClose();
+        }
     }, [payment])
     return {payment, updatePayment, updateCurrency, submitForm};
 }

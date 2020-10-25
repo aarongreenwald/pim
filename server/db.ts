@@ -82,7 +82,19 @@ const getDb = async (readonly = true) => {
 
 export const getAllPayments = async () => {
   const db = await getDb();
-  return all(db, 'select * from v_payment order by paid_date desc')
+  return all(db, `
+    select
+           payment_id id,
+           paid_date paidDate,
+           counterparty, 
+           incurred_begin_date incurredBeginDate, 
+           incurred_end_date incurredEndDate, 
+           amount, 
+           currency, 
+           category_name categoryName, 
+           note, 
+           category_id categoryId
+    from v_payment order by paid_date desc`)
 }
 
 export const getAllIncome = async () => {
@@ -112,7 +124,7 @@ export const insertPayment = async (payment: Payment) => {
   //empty string isn't a valid counterparty, 0 isn't a valid amount. 0 could theoretically be a note but
   //unlikely. make sure to enable FK support in sqlite or categoryId won't be checked
   const params = [
-    new Date(payment.paidDate),
+    new Date(payment.paidDate), //TODO maybe save the data in yyyy-mm-dd so it's easier to use?
     payment.counterparty || null,
     payment.amount || null,
     payment.currency || null,
@@ -127,6 +139,34 @@ export const insertPayment = async (payment: Payment) => {
   return get<Payment>(db, `select * from payment where payment_id = ?`, lastId)
 }
 
+export const updatePayment = async (payment: Payment) => {
+    const sql = `
+        update payment
+        set paid_date = ?,
+            counterparty = ?,
+            amount = ?,
+            currency = ?,
+            category_id = ?,
+            note = ?
+        where payment_id = ?        
+  `
+    //TODO: validations - the fallback to null done here forces the db to reject
+    //bad data but there should probably be a validation and sanitization step prior to getting here
+    //empty string isn't a valid counterparty, 0 isn't a valid amount. 0 could theoretically be a note but
+    //unlikely. make sure to enable FK support in sqlite or categoryId won't be checked
+    const params = [
+        new Date(payment.paidDate), //TODO maybe save the data in yyyy-mm-dd so it's easier to use?
+        payment.counterparty || null,
+        payment.amount || null,
+        payment.currency || null,
+        payment.categoryId,
+        payment.note || null,
+        payment.id
+    ]
+    const db = await getDb(false);
+
+    await run(db, sql, params)
+}
 /*
   Simple utility to expand ~ in paths to the user's home dir. Only handles tilde as
   first character.

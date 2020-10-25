@@ -70,7 +70,7 @@ export const getAllCategories = (): Promise<Category[]> =>
 
 export const savePayment = (payment: Payment): Promise<Payment[]> =>
     fetch(`${config.apiServiceUrl}/payments`, {
-        method: 'POST',
+        method: payment.id === -1 ? 'POST' : 'PUT',
         headers: {
             'Content-Type': 'application/json'
         },

@@ -9,6 +9,7 @@ interface TableProps<T extends object = {}> {
     sortConfig?: SortConfig;
     sortData?: (sort: SortConfig) => void;
     idField: string;
+    onClick?: (row: T) => void;
 }
 
 /*
@@ -52,7 +53,13 @@ export const HtmlTable: React.FC<TableProps> = ({data}) => {
 /*
 Table based on fluent DetailsList
  */
-export const List: React.FC<TableProps> = ({data, sortConfig, sortData, idField}) => {
+export const List: React.FC<TableProps> = ({
+                                               data,
+                                               sortConfig,
+                                               sortData,
+                                               idField,
+                                               onClick
+                                           }) => {
 
     const columns = useMemo(() => {
         const keys = Object.keys(data[0]);
@@ -60,7 +67,7 @@ export const List: React.FC<TableProps> = ({data, sortConfig, sortData, idField}
             key,
             minWidth: 100,
             fieldName: key,
-            onRender: (value) => key.includes('date') ? new Date(value[key]).toDateString() : value[key],
+            onRender: (value) => key.toLowerCase().includes('date') ? new Date(value[key]).toDateString() : value[key],
             name: key,
             isResizable: true,
             isSorted: sortConfig?.fieldName === key,
@@ -88,8 +95,9 @@ export const List: React.FC<TableProps> = ({data, sortConfig, sortData, idField}
             columns={columns}
             getKey={getKey}
             compact
+            onActiveItemChanged={onClick}
             layoutMode={DetailsListLayoutMode.fixedColumns}
-            selectionMode={SelectionMode.none}/>
+            selectionMode={onClick ? SelectionMode.single : SelectionMode.none}/>
     )
 }
 

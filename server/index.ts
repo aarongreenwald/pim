@@ -29,6 +29,14 @@ app.route('/payments')
         res.status(500).send(ex)
       })
   })
+  .put(jsonParser, (req, res) => {
+    db.updatePayment(req.body)
+      .then(() => res.status(200).send())
+      .catch(ex => {
+        console.error(ex)
+        res.status(500).send(ex)
+      })
+  })
 
 app.route('/categories')
   .get((req, res) => {

@@ -2,8 +2,9 @@ import * as React from 'react';
 import {useCallback, useEffect, useMemo, useState} from 'react';
 import {Payment} from '@pim/common';
 import {getPayments} from '../services/server-api';
-import {CommandBar, ICommandBarItemProps} from '@fluentui/react';
+import {CommandBar, ICommandBarItemProps, Panel} from '@fluentui/react';
 import {List, SortConfig, SortDirection} from './table';
+import {AddPayment} from './add-payment';
 
 interface PaymentsProps {
     onAddPayment: () => void;
@@ -20,6 +21,9 @@ export const Payments: React.FC<PaymentsProps> = ({onAddPayment, onAddCar, onAdd
     } = useSortablePayments();
     const commands = useCommandBarCommands(onAddPayment, onAddIncome, onAddCar, reloadData);
 
+    const [selectedItem, setSelectedItem] = useState<Payment>(null)
+    const hideEditPayment = () => setSelectedItem(null);
+
     return (
         <>
             <CommandBar items={commands} styles={commandBarStyles}/>
@@ -28,9 +32,18 @@ export const Payments: React.FC<PaymentsProps> = ({onAddPayment, onAddCar, onAdd
                 payments &&
                     <List
                         data={payments}
+                        onClick={setSelectedItem}
                         sortConfig={sortConfig}
                         sortData={onSortPayments}
-                        idField={'payment_id'} />
+                        idField={'id'} />
+            }
+            {
+                <Panel
+                    isOpen={!!selectedItem}
+                    headerText="Edit Payment"
+                    onDismiss={hideEditPayment}>
+                    <AddPayment onClose={hideEditPayment} data={selectedItem}/>
+                </Panel>
             }
         </>
 
