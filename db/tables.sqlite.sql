@@ -1,9 +1,3 @@
-/*
- Using the same schema as in pgsql, but why did I separate spending and income into two tables?
- I don't recall the logic. Regardless this db is probably overkill for now but it won't hurt,
- it can be refactored or changed later with some data migrations.
- */
-
 CREATE TABLE category(category_id  integer primary key not null
     ,name varchar(50) not null unique
     ,parent_category_id null references category);
@@ -46,3 +40,18 @@ CREATE TABLE stock_transaction (stock_transaction_id integer primary key not nul
     ,quantity decimal(12,4) NOT NULL
     ,is_purchase boolean NOT NULL
 );
+
+create table cash_assets_allocation(cash_assets_allocation_id integer primary key not null
+    ,record_date date NOT NULL
+    ,allocation_code varchar(6) NOT NULL
+    ,currency char(3) NOT NULL
+    ,amount decimal(19,4) NOT NULL
+    ,note text NULL
+
+);
+
+create table financial_constants(
+    code varchar(10) not null primary key,
+    amount decimal(19,4) not null
+
+)
