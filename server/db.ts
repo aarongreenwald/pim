@@ -1,4 +1,4 @@
-import {Category, Payment} from '@pim/common';
+import {Category, Payment, PaymentId, vPayment} from '@pim/common';
 import sqlite from 'sqlite3';
 
 const DATABASE_PATH = process.env.DATABASE_PATH;
@@ -49,7 +49,7 @@ function run(db: sqlite.Database, sql: string, params: any[] = []): Promise<{las
  * @param params
  * @returns {Promise<unknown>}
  */
-function get<T>(db: sqlite.Database, sql: string, params = []): Promise<T> {
+function get<T>(db: sqlite.Database, sql: string, params = [] as any): Promise<T> {
   return new Promise((resolve, reject) => {
     db.get(sql, params, function(err, data) {
       if (err) reject(err)
@@ -80,7 +80,7 @@ const getDb = async (readonly = true) => {
 }
 
 
-export const getAllPayments = async () => {
+export const getAllPayments: () => Promise<vPayment[]> = async () => {
   const db = await getDb();
   return all(db, `
     select
@@ -89,13 +89,33 @@ export const getAllPayments = async () => {
            counterparty, 
            incurred_begin_date incurredBeginDate, 
            incurred_end_date incurredEndDate, 
-           amount, 
-           currency, 
+           ils, 
+           usd, 
            category_name categoryName, 
            note, 
            category_id categoryId
     from v_payment order by paid_date desc`)
 }
+
+export const getPayment: (id: PaymentId) => Promise<Payment> = async id => {
+    const db = await getDb();
+    return get<Payment>(db,
+        `
+            select
+               payment_id id, 
+               paid_date paidDate, 
+               incurred_begin_date incurredBeginDate, 
+               incurred_end_date incurredEndDate, 
+               counterparty, 
+               amount, 
+               category_id categoryId, 
+               note, 
+               currency
+            from payment where payment_id = ?`,
+        id)
+}
+
+
 
 export const getAllIncome = async () => {
   const db = await getDb();

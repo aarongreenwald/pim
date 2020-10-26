@@ -38,6 +38,10 @@ app.route('/payments')
       })
   })
 
+app.get('/payments/:id', (req, res) => {
+    db.getPayment((req.params as any).id).then(data => res.send(JSON.stringify(data)));
+})
+
 app.route('/categories')
   .get((req, res) => {
     db.getAllCategories().then(data => res.send(JSON.stringify(data)))

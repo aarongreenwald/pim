@@ -1,15 +1,18 @@
 import {useCallback, useEffect, useState} from 'react';
 import * as React from 'react';
 import styled from '@emotion/styled';
-import {Category, Payment} from '@pim/common';
+import {Category, Payment, PaymentId} from '@pim/common';
 import {format} from 'date-fns';
-import {getAllCategories, savePayment} from '../services/server-api';
+import {getAllCategories, getPayment, savePayment} from '../services/server-api';
 import {PrimaryButton, DefaultButton, Stack, TextField, ChoiceGroup} from '@fluentui/react'
 import {PanelProps} from '../common/panel.types';
 
-export const PaymentForm: React.FC<PanelProps & {data?: Payment}> = ({onClose, data}) => {
+export const PaymentForm: React.FC<PanelProps & {paymentId?: PaymentId}> = ({onClose, paymentId}) => {
   const categories = useCategories();
-    const {payment, updatePayment, updateCurrency, submitForm} = usePaymentForm(onClose, data);
+    const {payment, updatePayment, updateCurrency, submitForm} = usePaymentForm(onClose, paymentId);
+
+    if (!payment) return null; //TODO show a spinner
+
     return (
       <form>
         <Stack tokens={stackTokens}>
@@ -85,8 +88,15 @@ function useCategories() {
   return categories;
 }
 
-function usePaymentForm(onClose: () => void, data?: Payment, ) {
-    const [payment, setPayment] = useState<Payment>(data || initializePayment())
+function usePaymentForm(onClose: () => void, paymentId?: PaymentId, ) {
+    const [payment, setPayment] = useState<Payment>(paymentId ? null : initializePayment())
+
+    useEffect(() => {
+        if (paymentId) {
+            getPayment(paymentId).then(setPayment)
+        }
+    }, [paymentId])
+
     const updateCurrency = useCallback((_, {key}) => {
         setPayment({
             ...payment,

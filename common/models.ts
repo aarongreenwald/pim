@@ -15,6 +15,19 @@ export interface Payment {
   categoryId: CategoryId
 }
 
+export interface vPayment {
+  id: PaymentId;
+  paidDate: string;
+  incurredBeginDate?: string;
+  incurredEndDate?: string;
+  ils: Money;
+  usd: Money;
+  counterparty: string;
+  note?: string;
+  categoryId: CategoryId;
+  categoryName: string;
+}
+
 export interface Category {
   id: CategoryId;
   name: string;

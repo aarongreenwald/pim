@@ -1,5 +1,5 @@
 import config from '../config/config';
-import {CarSummary, Category, Income, Payment} from '@pim/common';
+import {CarSummary, Category, Income, Payment, PaymentId, vPayment} from '@pim/common';
 
 const handleResponse = (res) => {
     if (res.status === 401) {
@@ -38,7 +38,14 @@ export const getLoggedIn = (): Promise<boolean> => {
         .catch(() => false)
 }
 
-export const getPayments: () => Promise<Payment[]> = () =>
+export const getPayment: (paymentId: PaymentId) => Promise<Payment> = (paymentId) =>
+    fetch(`${config.apiServiceUrl}/payments/${paymentId}`, {
+        credentials: 'include',
+    })
+        .then(handleResponse)
+        .then(res => res.json());
+
+export const getPayments: () => Promise<vPayment[]> = () =>
     fetch(`${config.apiServiceUrl}/payments`, {
             credentials: 'include',
         })

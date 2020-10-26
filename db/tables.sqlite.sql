@@ -1,3 +1,7 @@
+/*
+ In order for the rollup logic to work right, there must be exactly one category ("uncategorized" or "root")
+ with a null parent_category_id
+ */
 CREATE TABLE category(category_id  integer primary key not null
     ,name varchar(50) not null unique
     ,parent_category_id null references category);

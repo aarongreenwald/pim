@@ -5,7 +5,7 @@
 /*
  Get all subcategories of a category. optionally limit to a level.
  Not very useful for payment queries unless I want a scalar sum or completely ungrouped,
- because if I choose <= 1, for example, I won't include lower level payments, and
+ because if I filter to level<= 1, for example, I won't include lower level payments, and
  if I don't limit the level, the grouping will not really be right.
  */
 WITH RECURSIVE all_subcategories(category_id, name, level, parent) AS (
@@ -37,19 +37,8 @@ WITH RECURSIVE rollup_category(category_id, group_category_id, level) AS (
     from category
              inner join rollup_category on parent_category_id = rollup_category.category_id
 )
-select rc.*, c.name, gc.name
+select rc.category_id, rc.group_category_id, c.name name, gc.name group_category_name, level
 from rollup_category rc inner join category c on rc.category_id = c.category_id
 inner join category gc on rc.group_category_id = gc.category_id
 order by rc.category_id;
 
-/*
- A view for a seeing categories inside their parents, for a UI
- */
-WITH RECURSIVE all_categories(category_id, name, level, parent) AS (
-    select category_id, name, 0 as level, parent_category_id from category where parent_category_id is null
-    UNION ALL
-    SELECT category.category_id,  replace(hex(zeroblob(level + 1)), '00', '--') || category.name, level + 1, parent_category_id
-    FROM category inner join all_categories on parent_category_id = all_categories.category_id
-    order by category_id, parent_category_id, level, name
-    )
-select * from all_categories

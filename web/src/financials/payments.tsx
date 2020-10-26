@@ -1,6 +1,6 @@
 import * as React from 'react';
 import {useCallback, useEffect, useMemo, useState} from 'react';
-import {Payment} from '@pim/common';
+import {Payment, PaymentId, vPayment} from '@pim/common';
 import {getPayments} from '../services/server-api';
 import {CommandBar, ICommandBarItemProps, Panel} from '@fluentui/react';
 import {List, SortConfig, SortDirection} from './table';
@@ -21,7 +21,7 @@ export const Payments: React.FC<PaymentsProps> = ({onAddPayment, onAddCar, onAdd
     } = useSortablePayments();
     const commands = useCommandBarCommands(onAddPayment, onAddIncome, onAddCar, reloadData);
 
-    const [selectedItem, setSelectedItem] = useState<Payment>(null)
+    const [selectedItem, setSelectedItem] = useState<PaymentId>(null)
     const hideEditPayment = () => setSelectedItem(null);
 
     return (
@@ -32,7 +32,7 @@ export const Payments: React.FC<PaymentsProps> = ({onAddPayment, onAddCar, onAdd
                 payments &&
                     <List
                         data={payments}
-                        onClick={setSelectedItem}
+                        onClick={(item: vPayment) => setSelectedItem(item.id)}
                         sortConfig={sortConfig}
                         sortData={onSortPayments}
                         idField={'id'} />
@@ -42,7 +42,7 @@ export const Payments: React.FC<PaymentsProps> = ({onAddPayment, onAddCar, onAdd
                     isOpen={!!selectedItem}
                     headerText="Edit Payment"
                     onDismiss={hideEditPayment}>
-                    <PaymentForm onClose={hideEditPayment} data={selectedItem}/>
+                    <PaymentForm onClose={hideEditPayment} paymentId={selectedItem}/>
                 </Panel>
             }
         </>
@@ -56,7 +56,7 @@ export const Payments: React.FC<PaymentsProps> = ({onAddPayment, onAddCar, onAdd
     is only necessary because I don't have a store
  */
 function useSortablePayments() {
-    const [payments, setPayments] = useState<Payment[]>()
+    const [payments, setPayments] = useState<vPayment[]>()
     const [sortConfig, setSortConfig] = useState<SortConfig>(defaultPaymentsSortConfig)
 
     const onSortPayments = useCallback((config: SortConfig) => {
@@ -87,7 +87,7 @@ function useSortablePayments() {
     return {payments, sortConfig, onSortPayments, reloadData};
 }
 
-const sortPayments = (payments: Payment[], sortConfig: SortConfig) => {
+const sortPayments = (payments: vPayment[], sortConfig: SortConfig) => {
     const newPayments = [...payments];
     const sortFn =
         sortConfig.direction === SortDirection.asc ?

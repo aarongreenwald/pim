@@ -51,8 +51,44 @@ WITH RECURSIVE all_categories(category_id, name, level, parent) AS (
              inner join all_categories on parent_category_id = all_categories.category_id
     order by category_id, parent_category_id, level, name
 )
-select category_id, name
-from all_categories;
+select * from all_categories
+;
+
+/*
+ This view would ideally be a TVF that took a root category as an argument,
+ and return all its descendant categories and how they roll up to one level
+ beneath the root. The idea is that payments can then be grouped by the group_category_id,
+ and what you get is all payments under the root broken out to one level, with another group
+ for the catch-all parent.
+
+ Because sqlite doesn't have TVFs, this view outputs that data for ALL roots (ie all categories).
+ There's no point using this view without immediately adding `where root_category_id = ?`
+ */
+drop view if exists v_rollup_categories;
+create view v_rollup_categories as
+WITH RECURSIVE rollup_category(category_id, group_category_id, root_category_id, level) AS (
+    select category_id, category_id, category_id, 0 as level
+    from category
+         -- where category_id = @root --if this was a TVF
+    UNION ALL
+    SELECT category.category_id,
+           --this rolls everything up to the first level, but not past it. So the root is left as is,
+           --and the first level is left as is, and subsequent levels get rolled up
+           case when level >= 1 then rollup_category.group_category_id else category.category_id end,
+           rollup_category.root_category_id root,
+           level + 1
+    from category
+             inner join rollup_category on parent_category_id = rollup_category.category_id
+)
+select rc.category_id, rc.group_category_id, rc.root_category_id,
+       c.name name, gc.name group_category_name, r.name root_category_name, level
+--the joins are just for readability, so the the category names are return. Consider removing them
+--and doing the join outside the view if necessary
+from rollup_category rc left join category c on rc.category_id = c.category_id
+                        left join category gc on rc.group_category_id = gc.category_id
+                        left join category r on rc.root_category_id = r.category_id
+;
+
 
 /*
  v_unallocated_cash_snapshot represents the current status of unallocated money.
@@ -94,3 +130,4 @@ with caa_summary as (
 select sum(ils) ils, sum(usd) usd
 from all_data
 ;
+
