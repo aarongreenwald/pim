@@ -4,7 +4,7 @@ import {Payment} from '@pim/common';
 import {getPayments} from '../services/server-api';
 import {CommandBar, ICommandBarItemProps, Panel} from '@fluentui/react';
 import {List, SortConfig, SortDirection} from './table';
-import {AddPayment} from './add-payment';
+import {PaymentForm} from './payment-form';
 
 interface PaymentsProps {
     onAddPayment: () => void;
@@ -42,7 +42,7 @@ export const Payments: React.FC<PaymentsProps> = ({onAddPayment, onAddCar, onAdd
                     isOpen={!!selectedItem}
                     headerText="Edit Payment"
                     onDismiss={hideEditPayment}>
-                    <AddPayment onClose={hideEditPayment} data={selectedItem}/>
+                    <PaymentForm onClose={hideEditPayment} data={selectedItem}/>
                 </Panel>
             }
         </>

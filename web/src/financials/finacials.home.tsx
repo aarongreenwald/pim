@@ -1,4 +1,4 @@
-import {AddPayment} from './add-payment';
+import {PaymentForm} from './payment-form';
 import * as React from 'react';
 import {Payments} from './payments';
 import { Label, Panel, Pivot, PivotItem} from '@fluentui/react';
@@ -36,7 +36,7 @@ export const FinancialsHome: React.FC = () => {
                 isOpen={addPayment}
                 headerText="Add Payment"
                 onDismiss={hideAddPayment}>
-                <AddPayment onClose={hideAddPayment}/>
+                <PaymentForm onClose={hideAddPayment}/>
             </Panel>
             <Panel
                 isOpen={addCar}

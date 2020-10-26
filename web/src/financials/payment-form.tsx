@@ -7,7 +7,7 @@ import {getAllCategories, savePayment} from '../services/server-api';
 import {PrimaryButton, DefaultButton, Stack, TextField, ChoiceGroup} from '@fluentui/react'
 import {PanelProps} from '../common/panel.types';
 
-export const AddPayment: React.FC<PanelProps & {data?: Payment}> = ({onClose, data}) => {
+export const PaymentForm: React.FC<PanelProps & {data?: Payment}> = ({onClose, data}) => {
   const categories = useCategories();
     const {payment, updatePayment, updateCurrency, submitForm} = usePaymentForm(onClose, data);
     return (
