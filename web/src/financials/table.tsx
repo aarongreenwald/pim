@@ -1,6 +1,6 @@
 import * as React from 'react';
 import {useCallback, useMemo} from 'react';
-import {DetailsList, DetailsListLayoutMode, SelectionMode} from '@fluentui/react';
+import {CheckboxVisibility, DetailsList, DetailsListLayoutMode, SelectionMode} from '@fluentui/react';
 // import {DataGrid} from '@material-ui/data-grid';
 
 // eslint-disable-next-line @typescript-eslint/ban-types
@@ -50,11 +50,13 @@ export const HtmlTable: React.FC<TableProps> = ({data}) => {
     )
 }
 
-const idFields = ['id', 'categoryId'];
+const idFields = ['id', 'categoryId', 'group_category_id'];
 const fieldIsNotId = fieldName => !idFields.includes(fieldName)
 const formatFieldName = fieldName => {
-    const split = fieldName.replace(/([a-z])([A-Z])/g, '$1 $2');
-    return split.charAt(0).toUpperCase() + split.slice(1);
+    const spaces = fieldName
+        .split('_').join(' ') //underscores to spaces
+        .replace(/([a-z])([A-Z])/g, '$1 $2'); //camel case to spaces
+    return spaces.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
 }
 /*
 Table based on fluent DetailsList
@@ -68,6 +70,8 @@ export const List: React.FC<TableProps> = ({
                                            }) => {
 
     const columns = useMemo(() => {
+        if (!data.length) return [];
+
         const keys = Object.keys(data[0]);
         return keys.filter(fieldIsNotId).map(key => ({
             key,
@@ -95,8 +99,9 @@ export const List: React.FC<TableProps> = ({
 
     const getKey = useCallback((item) => item.id, []);
 
-    return (
+    return data.length ? (
         <DetailsList
+            checkboxVisibility={CheckboxVisibility.hidden}
             items={items}
             columns={columns}
             getKey={getKey}
@@ -104,7 +109,7 @@ export const List: React.FC<TableProps> = ({
             onActiveItemChanged={onClick}
             layoutMode={DetailsListLayoutMode.fixedColumns}
             selectionMode={onClick ? SelectionMode.single : SelectionMode.none}/>
-    )
+    ) : null;
 }
 
 /*

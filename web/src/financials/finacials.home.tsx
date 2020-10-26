@@ -7,6 +7,7 @@ import {AddCashRecord} from './add-cash-record';
 import {AddIncome} from './add-income';
 import {useEffect} from 'react';
 import {getCarSummary, getIncome} from '../services/server-api';
+import {HistoryAnalysis} from './history-analysis';
 
 export const FinancialsHome: React.FC = () => {
     const [addIncome, {setTrue: showAddIncome, setFalse: hideAddIncome}] = useBoolean(false)
@@ -29,6 +30,9 @@ export const FinancialsHome: React.FC = () => {
                 </PivotItem>
                 <PivotItem headerText="Cash Record History">
                     <Label>CAR: TODO</Label>
+                </PivotItem>
+                <PivotItem headerText="Analysis">
+                    <HistoryAnalysis />
                 </PivotItem>
             </Pivot>
 

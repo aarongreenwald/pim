@@ -47,6 +47,10 @@ app.route('/categories')
     db.getAllCategories().then(data => res.send(JSON.stringify(data)))
   })
 
+app.get('/analysis/spending-by-category', (req, res) => {
+    db.getSpendingByCategory((req.query as any).rootCategoryId).then(data => res.send(JSON.stringify(data)))
+})
+
 app.route('/car/summary')
     .get((req, res) =>
         db.getCarSummary().then(data => res.send(JSON.stringify(data)))

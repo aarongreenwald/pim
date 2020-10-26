@@ -1,4 +1,4 @@
-import {Category, Payment, PaymentId, vPayment} from '@pim/common';
+import {Category, CategoryId, Payment, PaymentId, vPayment} from '@pim/common';
 import sqlite from 'sqlite3';
 
 const DATABASE_PATH = process.env.DATABASE_PATH;
@@ -16,7 +16,7 @@ sqlite.verbose();
  * @param params
  * @returns {Promise<unknown[]>}
  */
-function all<T>(db: sqlite.Database, sql: string, params = []): Promise<T[]> {
+function all<T>(db: sqlite.Database, sql: string, params = [] as any[]): Promise<T[]> {
   return new Promise(((resolve, reject) =>
       db.all(sql, params, (err, rows) => {
         if (err) reject(err)
@@ -95,6 +95,18 @@ export const getAllPayments: () => Promise<vPayment[]> = async () => {
            note, 
            category_id categoryId
     from v_payment order by paid_date desc`)
+}
+
+export async function getSpendingByCategory(rootCategoryId: CategoryId) {
+    const db = await getDb();
+    return all(db,
+        `
+            select 
+                rc.group_category_id, rc.group_category_name, sum(ils) ils, sum(usd) usd 
+            from v_payment p inner join v_rollup_categories rc
+                on p.category_id = rc.category_id and rc.root_category_id = ?
+            group by rc.group_category_id, rc.group_category_name
+        `, [rootCategoryId])
 }
 
 export const getPayment: (id: PaymentId) => Promise<Payment> = async id => {

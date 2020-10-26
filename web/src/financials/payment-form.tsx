@@ -1,15 +1,15 @@
 import {useCallback, useEffect, useState} from 'react';
 import * as React from 'react';
 import styled from '@emotion/styled';
-import {Category, Payment, PaymentId} from '@pim/common';
+import {Payment, PaymentId} from '@pim/common';
 import {format} from 'date-fns';
-import {getAllCategories, getPayment, savePayment} from '../services/server-api';
+import {getPayment, savePayment} from '../services/server-api';
 import {PrimaryButton, DefaultButton, Stack, TextField, ChoiceGroup} from '@fluentui/react'
 import {PanelProps} from '../common/panel.types';
+import {CategoryDropdown} from './category-dropdown';
 
 export const PaymentForm: React.FC<PanelProps & {paymentId?: PaymentId}> = ({onClose, paymentId}) => {
-  const categories = useCategories();
-    const {payment, updatePayment, updateCurrency, submitForm} = usePaymentForm(onClose, paymentId);
+    const {payment, updatePayment, updateCurrency, updateCategory, submitForm} = usePaymentForm(onClose, paymentId);
 
     if (!payment) return null; //TODO show a spinner
 
@@ -47,20 +47,11 @@ export const PaymentForm: React.FC<PanelProps & {paymentId?: PaymentId}> = ({onC
                 options={currencyOptions}/>
 
             <StyledInput>
-                <select
+                <CategoryDropdown
                     name="categoryId"
                     value={payment.categoryId}
-                    onChange={updatePayment}>
-                  <option disabled value={-1}> Select category </option>
-                  {
-                    categories && categories.map(category =>
-                        <option
-                            key={category.id}
-                            value={category.id}>
-                            {category.name}
-                        </option>)
-                  }
-                </select>
+                    onChange={updateCategory}>
+                </CategoryDropdown>
             </StyledInput>
 
             <TextField
@@ -80,14 +71,6 @@ export const PaymentForm: React.FC<PanelProps & {paymentId?: PaymentId}> = ({onC
   )
 }
 
-function useCategories() {
-  const [categories, setCategories] = useState<Category[]>()
-  useEffect(() => {
-    getAllCategories().then(setCategories)
-  }, [])
-  return categories;
-}
-
 function usePaymentForm(onClose: () => void, paymentId?: PaymentId, ) {
     const [payment, setPayment] = useState<Payment>(paymentId ? null : initializePayment())
 
@@ -103,6 +86,14 @@ function usePaymentForm(onClose: () => void, paymentId?: PaymentId, ) {
             currency: key
         })
     }, [payment])
+
+    const updateCategory = useCallback((categoryId) => {
+        setPayment({
+            ...payment,
+            categoryId
+        });
+    }, [payment])
+
     const updatePayment = useCallback(({target}) => {
         setPayment({
             ...payment,
@@ -117,7 +108,7 @@ function usePaymentForm(onClose: () => void, paymentId?: PaymentId, ) {
             onClose();
         }
     }, [payment])
-    return {payment, updatePayment, updateCurrency, submitForm};
+    return {payment, updatePayment, updateCategory, updateCurrency, submitForm};
 }
 
 function initializePayment(): Payment {
