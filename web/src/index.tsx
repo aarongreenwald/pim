@@ -53,7 +53,7 @@ render(<AppWithLogin />, document.getElementById('app'))
 
 const navGroups = [
     {
-        name: 'History',
+        // name: 'History',
         links: [
             {
                 key: 'spending',
