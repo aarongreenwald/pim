@@ -3,7 +3,7 @@ import {useCallback, useMemo} from 'react';
 import {CheckboxVisibility, DetailsList, DetailsListLayoutMode, SelectionMode} from '@fluentui/react';
 
 // eslint-disable-next-line @typescript-eslint/ban-types
-interface TableProps<T extends object = {}> {
+interface ListProps<T extends object = {}> {
     data: T[];
     sortConfig?: SortConfig;
     sortData?: (sort: SortConfig) => void;
@@ -13,15 +13,29 @@ interface TableProps<T extends object = {}> {
 
 
 const idFields = ['id', 'categoryId'];
+const currencyFields = ['ils', 'usd'];
+
 const fieldIsNotId = fieldName => !idFields.includes(fieldName)
 const formatFieldName = fieldName => {
+    if (currencyFields.includes(fieldName)) {
+        return fieldName.toUpperCase();
+    }
+
     const spaces = fieldName
         .split('_').join(' ') //underscores to spaces
         .replace(/([a-z])([A-Z])/g, '$1 $2'); //camel case to spaces
     return spaces.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
 }
 
-export const List: React.FC<TableProps> = ({
+function getColumnRenderer(key: string) {
+    return (value) => key.toLowerCase().includes('date') ?
+        new Date(value[key]).toDateString() :
+        currencyFields.includes(key) ?
+            value[key]?.toFixed(2) :
+            value[key];
+}
+
+export const List: React.FC<ListProps> = ({
                                                data,
                                                sortConfig,
                                                sortData,
@@ -37,7 +51,7 @@ export const List: React.FC<TableProps> = ({
             key,
             minWidth: 100,
             fieldName: key,
-            onRender: (value) => key.toLowerCase().includes('date') ? new Date(value[key]).toDateString() : value[key],
+            onRender: getColumnRenderer(key),
             name: formatFieldName(key),
             isResizable: true,
             isSorted: sortConfig?.fieldName === key,
@@ -72,7 +86,10 @@ export const List: React.FC<TableProps> = ({
     ) : null;
 }
 
-const defaultSortDirection = (fieldName: string): number => fieldName.includes('date') ? SortDirection.desc : SortDirection.asc
+const defaultSortDirection = (fieldName: string): number =>
+    fieldName.toLowerCase().includes('date') ?
+        SortDirection.desc :
+        SortDirection.asc
 
 export interface SortConfig {
     fieldName: string;
