@@ -50,7 +50,7 @@ export const HtmlTable: React.FC<TableProps> = ({data}) => {
     )
 }
 
-const idFields = ['id', 'categoryId', 'group_category_id'];
+const idFields = ['id', 'categoryId', 'group_category_id', 'income_id'];
 const fieldIsNotId = fieldName => !idFields.includes(fieldName)
 const formatFieldName = fieldName => {
     const spaces = fieldName

@@ -136,7 +136,7 @@ export const getAllIncome = async () => {
 
 export const getCarSummary = async () => {
   const db = await getDb();
-  return all(db, 'select * from v_car order by record_date desc')
+  return all(db, 'select * from v_car_summary order by record_date desc')
 }
 
 export const getAllCategories = async () => {
