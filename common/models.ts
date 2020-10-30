@@ -40,8 +40,17 @@ export interface CarSummary {
 }
 
 export interface Income {
+  id: number;
   paidDate: string;
   source: string;
   amount: Money;
   currency: Currency;
+  note: string;
+}
+
+export interface SpendingByCategory {
+  id: CategoryId;
+  categoryName: string;
+  ils: Money;
+  usd: Money;
 }
