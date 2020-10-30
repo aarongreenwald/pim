@@ -1,12 +1,10 @@
 import {PaymentForm} from './payment-form';
 import * as React from 'react';
 import {Payments} from './payments';
-import { Label, Panel, Pivot, PivotItem} from '@fluentui/react';
+import { Panel, Pivot, PivotItem} from '@fluentui/react';
 import {useBoolean} from '@uifabric/react-hooks';
 import {AddCashRecord} from './add-cash-record';
 import {AddIncome} from './add-income';
-import {useEffect} from 'react';
-import {getCarSummary, getIncome} from '../services/server-api';
 import {HistoryAnalysis} from './history-analysis';
 import {Income} from './income';
 import {CashRecordHistory} from './cash-record-history';
@@ -16,10 +14,9 @@ export const FinancialsHome: React.FC = () => {
     const [addCar, {setTrue: showAddCar, setFalse: hideAddCar}] = useBoolean(false)
     const [addPayment, {setTrue: showAddPayment, setFalse: hideAddPayment}] = useBoolean(false)
 
-    useEffect(() => {getCarSummary().then(console.log)}, [])
     return (
         <>
-            <Pivot>
+            <Pivot> {/* overflowBehavior="menu" */}
                 <PivotItem headerText="Spending">
                     <Payments
                         onAddPayment={showAddPayment}

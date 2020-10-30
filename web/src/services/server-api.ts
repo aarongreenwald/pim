@@ -85,7 +85,7 @@ export const savePayment = (payment: Payment): Promise<Payment[]> =>
         body: JSON.stringify(payment)
     }).then(handleResponse)
 
-export function getSpendingByCategory(rootCategoryId: CategoryId): Promise<any> {
+export function getSpendingByCategory(rootCategoryId: CategoryId): Promise<unknown> {
     return fetch(`${config.apiServiceUrl}/analysis/spending-by-category?rootCategoryId=${rootCategoryId}`, {
         credentials: 'include'
     }).then(handleResponse)

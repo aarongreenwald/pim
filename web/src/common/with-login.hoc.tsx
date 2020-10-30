@@ -41,22 +41,7 @@ export function withLogin (WrappedComponent) {
     return function Component() {
         const {loggedIn, setLoggedIn, onLogout} = useLoginState();
         return loggedIn ?
-            <>
-                <StyledAppHeader>
-                    <ActionButton iconProps={{iconName: 'SignOut'}} text={'Logout'} onClick={onLogout} />
-                </StyledAppHeader>
-
-                <WrappedComponent/>
-            </> :
+            <WrappedComponent onLogout={onLogout}/> :
             <LoginForm onLoggedIn={setLoggedIn}/>
     }
 }
-
-//TODO style this according to the theme, or use MUI's AppBar or something.
-//or put the header in a left
-const StyledAppHeader = styled.div`
-    display: flex;
-    justify-content: flex-end;
-    // background-color: black;
-    border-bottom: 1px solid gray;     
-`

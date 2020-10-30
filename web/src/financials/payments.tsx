@@ -1,6 +1,6 @@
 import * as React from 'react';
 import {useCallback, useEffect, useMemo, useState} from 'react';
-import {Payment, PaymentId, vPayment} from '@pim/common';
+import {PaymentId, vPayment} from '@pim/common';
 import {getPayments} from '../services/server-api';
 import {CommandBar, ICommandBarItemProps, Panel} from '@fluentui/react';
 import {List, SortConfig, SortDirection} from './table';
