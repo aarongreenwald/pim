@@ -1,5 +1,5 @@
 import config from '../config/config';
-import {CarSummary, Category, CategoryId, Income, Payment, PaymentId, vPayment} from '@pim/common';
+import {CarSummary, Category, CategoryId, Income, Payment, PaymentId, SpendingByCategory, vPayment} from '@pim/common';
 
 const handleResponse = (res) => {
     if (res.status === 401) {
@@ -85,7 +85,7 @@ export const savePayment = (payment: Payment): Promise<Payment[]> =>
         body: JSON.stringify(payment)
     }).then(handleResponse)
 
-export function getSpendingByCategory(rootCategoryId: CategoryId): Promise<unknown> {
+export function getSpendingByCategory(rootCategoryId: CategoryId): Promise<SpendingByCategory[]> {
     return fetch(`${config.apiServiceUrl}/analysis/spending-by-category?rootCategoryId=${rootCategoryId}`, {
         credentials: 'include'
     }).then(handleResponse)

@@ -69,14 +69,13 @@ export const List: React.FC<ListProps> = ({
         }))
     }, [data, sortConfig, sortData])
 
-    const items = useMemo(() => data.map(item => ({...item, id: item[idField]})), [data, idField])
 
-    const getKey = useCallback((item) => item.id, []);
+    const getKey = useCallback((item) => item[idField], []);
 
     return data.length ? (
         <DetailsList
             checkboxVisibility={CheckboxVisibility.hidden}
-            items={items}
+            items={data}
             columns={columns}
             getKey={getKey}
             compact

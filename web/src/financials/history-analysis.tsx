@@ -1,5 +1,5 @@
 import {useEffect, useState} from 'react';
-import {CategoryId} from '@pim/common';
+import {CategoryId, SpendingByCategory} from '@pim/common';
 import {CategoryDropdown} from './category-dropdown';
 import {getSpendingByCategory} from '../services/server-api';
 import {List} from './table';
@@ -7,7 +7,7 @@ import * as React from 'react';
 
 export const HistoryAnalysis: React.FC = () => {
     const [selectedCategory, setSelectedCategory] = useState<CategoryId>(null)
-    const [byCategoryData, setByCategoryData ] = useState(null);
+    const [byCategoryData, setByCategoryData ] = useState<SpendingByCategory[]>(null);
 
     useEffect(() => {
         if (selectedCategory) {
@@ -22,7 +22,7 @@ export const HistoryAnalysis: React.FC = () => {
                 byCategoryData &&
                     <List
                         data={byCategoryData}
-                        idField={'group_category_id'}
+                        idField={'id'}
                     />
             }
         </>
