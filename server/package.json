@@ -4,9 +4,9 @@
   "description": "pim api service",
   "main": "index.js",
   "scripts": {
-    "start": "DOTENV=./.env.dev nodemon -r tsconfig-paths/register index.ts ./",
+    "start": "DOTENV=./.env.dev nodemon -r tsconfig-paths/register src/index.ts ./",
     "build": "tsc && cp ./tsconfig.json ./build/server/tsconfig.json",
-    "prod": "cd build/server && node -r tsconfig-paths/register index.js"
+    "prod": "cd build/server && node -r tsconfig-paths/register src/index.js"
   },
   "private": true,
   "dependencies": {

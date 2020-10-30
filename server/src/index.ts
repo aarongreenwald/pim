@@ -3,7 +3,7 @@ if (process.env.DOTENV) {
 }
 import {setupRoutes} from './routes/routes';
 import express from 'express';
-import {setupAuth} from './auth';
+import {setupAuth} from './auth/auth';
 const app = express()
 const PORT = process.env.PORT;
 
