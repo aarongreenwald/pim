@@ -1,7 +1,6 @@
 import * as React from 'react';
 import {useCallback, useMemo} from 'react';
 import {CheckboxVisibility, DetailsList, DetailsListLayoutMode, SelectionMode} from '@fluentui/react';
-// import {DataGrid} from '@material-ui/data-grid';
 
 // eslint-disable-next-line @typescript-eslint/ban-types
 interface TableProps<T extends object = {}> {
@@ -12,45 +11,8 @@ interface TableProps<T extends object = {}> {
     onClick?: (row: T) => void;
 }
 
-/*
-Naive implementation
- */
-export const HtmlTable: React.FC<TableProps> = ({data}) => {
-    if (!data?.length) {
-        return null;
-    }
-    const keys = Object.keys(data[0])
-    return (
-        <table>
-            <thead>
 
-            {keys.map(key =>
-                <td key={key}>
-                    {key}
-                </td>
-            )}
-
-            </thead>
-            <tbody>
-            {
-                data.map((row, i) => {
-                    return (
-                        <tr key={i}>
-                            {keys.map(key =>
-                                <td key={key}>
-                                    {row[key]}
-                                </td>
-                            )}
-                        </tr>
-                    )
-                })
-            }
-            </tbody>
-        </table>
-    )
-}
-
-const idFields = ['id', 'categoryId', 'group_category_id', 'income_id'];
+const idFields = ['id', 'categoryId'];
 const fieldIsNotId = fieldName => !idFields.includes(fieldName)
 const formatFieldName = fieldName => {
     const spaces = fieldName
@@ -58,9 +20,7 @@ const formatFieldName = fieldName => {
         .replace(/([a-z])([A-Z])/g, '$1 $2'); //camel case to spaces
     return spaces.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
 }
-/*
-Table based on fluent DetailsList
- */
+
 export const List: React.FC<TableProps> = ({
                                                data,
                                                sortConfig,
@@ -111,26 +71,6 @@ export const List: React.FC<TableProps> = ({
             selectionMode={onClick ? SelectionMode.single : SelectionMode.none}/>
     ) : null;
 }
-
-/*
-Table based on MUI DataGrid
- */
-// export const Grid: React.FC<TableProps> = ({data, idField}) => {
-//     const columns = useMemo(() => {
-//         const keys = Object.keys(data[0]);
-//         return keys.map(key => ({
-//             field: key,
-//             type: key.includes('date') ? 'date' : 'string',
-//             headerName: key
-//         }))
-//     }, [data])
-//
-//     const rows = useMemo(() => data.map(item => ({...item, id: item[idField]})), [data, idField])
-//
-//     return (
-//         <DataGrid rows={rows} columns={columns} />
-//     )
-// }
 
 const defaultSortDirection = (fieldName: string): number => fieldName.includes('date') ? SortDirection.desc : SortDirection.asc
 
