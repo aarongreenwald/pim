@@ -1,5 +1,7 @@
 import {
     CarSummary,
+    CashAccount,
+    CashAssetRecord,
     Category,
     CategoryId,
     Income,
@@ -9,7 +11,7 @@ import {
     SpendingByCategory,
     vPayment
 } from '@pim/common';
-import {all, get, getDb, run} from './db.helpers';
+import {all, beginTransaction, commitTransaction, get, getDb, rollbackTransaction, run} from './db.helpers';
 
 export const getAllPayments: () => Promise<vPayment[]> = async () => {
   const db = await getDb();
@@ -197,6 +199,60 @@ export const getAllCarSummaries = async () => {
         order by record_date desc
         `
     )
+}
+
+export const getActiveCashAccounts = async () => {
+    const db = await getDb();
+    //todo return inactive to client as well, and hide/show them depending on whether
+    //values exist
+    return all<CashAccount>(db,
+        `
+            select cash_account_id id,
+                   name,
+                   currency
+            from cash_account
+            where active = 1 
+        `
+    )
+}
+
+export const getCashAssetRecords = async (recordDate: string): Promise<CashAssetRecord[]> => {
+    const db = await getDb();
+    return all<CashAssetRecord>(db,
+        `
+            select cash_account_id accountId, 
+                   amount 
+            from cash_assets_record where record_date = ?`,
+        [recordDate]
+    )
+}
+
+export const updateCashAssetRecords = async (recordDate: string, accountBalances: CashAssetRecord[]) => {
+    const db = await getDb(false);
+    await beginTransaction(db);
+    try {
+        await run(db, 'delete from cash_assets_record where record_date = ?', [new Date(recordDate)])
+        await Promise.all(
+            accountBalances.map(ab =>
+                run(db,
+                    `                
+                insert into cash_assets_record(record_date, cash_account_id, amount)
+                values (?, ?, ?)
+            `, [
+                        new Date(recordDate),
+                        ab.accountId,
+                        ab.amount
+                    ]
+                )
+            )
+        )
+        await commitTransaction(db);
+    } catch (ex) {
+        await rollbackTransaction(db);
+        throw ex
+    }
+
+
 }
 
 export const getAllCategories = async () => {

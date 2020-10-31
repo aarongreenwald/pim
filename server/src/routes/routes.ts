@@ -38,6 +38,21 @@ export const setupRoutes = (app: Express) => {
             db.getAllCarSummaries().then(data => res.send(JSON.stringify(data)))
         )
 
+    app.get('/car/accounts', (req, res) =>
+        db.getActiveCashAccounts().then(data => res.send(JSON.stringify(data)))
+    )
+
+    app.route('/car/records')
+        .get((req, res) => {
+            db.getCashAssetRecords((req.query as any).recordDate)
+                .then(data => res.send(JSON.stringify(data)))
+        })
+        .put(jsonParser, (req, res) => {
+            const {recordDate, accountBalances} = req.body;
+            db.updateCashAssetRecords(recordDate, accountBalances)
+                .then(data => res.send(JSON.stringify(data)))
+        })
+
     app.route('/income')
         .get((req, res) =>
             db.getAllIncome().then(data => res.send(JSON.stringify(data)))

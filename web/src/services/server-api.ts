@@ -1,6 +1,8 @@
 import config from '../config/config';
 import {
     CarSummary,
+    CashAccount,
+    CashAssetRecord,
     Category,
     CategoryId,
     Income,
@@ -68,6 +70,33 @@ export const getCarSummary: () => Promise<CarSummary[]> = () =>
     })
         .then(handleResponse)
         .then(res => res.json());
+
+export const getActiveCashAccounts: () => Promise<CashAccount[]> = () =>
+    fetch(`${config.apiServiceUrl}/car/accounts`, {
+        credentials: 'include',
+    })
+        .then(handleResponse)
+        .then(res => res.json());
+
+export const saveCashRecords = (recordDate: string | number | Date, accountBalances: CashAssetRecord[]) =>
+    fetch(`${config.apiServiceUrl}/car/records`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+            recordDate,
+            accountBalances
+        })
+    }).then(handleResponse)
+
+export const getCashRecords = (recordDate: string | number | Date): Promise<CashAssetRecord[]> =>
+    fetch(`${config.apiServiceUrl}/car/records?recordDate=${recordDate}`, {
+        credentials: 'include',
+    })
+        .then(handleResponse)
+        .then(res => res.json())
 
 
 export const getAllIncome: () => Promise<Income[]> = () =>

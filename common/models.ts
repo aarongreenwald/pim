@@ -40,6 +40,17 @@ export interface CarSummary {
   usd: Money;
 }
 
+export interface CashAccount {
+  id: number;
+  name: string;
+  currency: Currency;
+}
+
+export interface CashAssetRecord {
+  accountId: number;
+  amount: Money;
+}
+
 export interface Income {
   id: IncomeId;
   paidDate: string;

@@ -77,6 +77,16 @@ export const getDb = async (readonly = true) => {
     return db;
 }
 
+export const beginTransaction = (db) =>
+    new Promise(resolve => db.exec('begin transaction', resolve));
+
+export const commitTransaction = (db) =>
+    new Promise(resolve => db.exec('commit transaction', resolve));
+
+export const rollbackTransaction = (db) =>
+    new Promise(resolve => db.exec('rollback transaction', resolve));
+
+
 /*
   Simple utility to expand ~ in paths to the user's home dir. Only handles tilde as
   first character.
