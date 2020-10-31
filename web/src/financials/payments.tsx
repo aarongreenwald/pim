@@ -5,21 +5,19 @@ import {getPayments} from '../services/server-api';
 import {CommandBar, ICommandBarItemProps, Panel} from '@fluentui/react';
 import {List, SortConfig, SortDirection} from './table';
 import {PaymentForm} from './payment-form';
+import {commandBarStyles} from './styles';
+import {useBoolean} from '@uifabric/react-hooks';
 
-interface PaymentsProps {
-    onAddPayment: () => void;
-    onAddIncome: () => void;
-    onAddCar: () => void;
-}
-
-export const Payments: React.FC<PaymentsProps> = ({onAddPayment, onAddCar, onAddIncome}) => {
+export const Payments: React.FC = () => {
     const {
         payments,
         sortConfig,
         onSortPayments,
         reloadData
     } = useSortablePayments();
-    const commands = useCommandBarCommands(onAddPayment, onAddIncome, onAddCar, reloadData);
+    const [addPayment, {setTrue: showAddPayment, setFalse: hideAddPayment}] = useBoolean(false)
+
+    const commands = useCommandBarCommands(showAddPayment, reloadData);
 
     const [selectedItem, setSelectedItem] = useState<PaymentId>(null)
     const hideEditPayment = () => setSelectedItem(null);
@@ -30,19 +28,28 @@ export const Payments: React.FC<PaymentsProps> = ({onAddPayment, onAddCar, onAdd
             {
 
                 payments &&
-                    <List
+                    <List<vPayment>
                         data={payments}
-                        onClick={(item: vPayment) => setSelectedItem(item.id)}
+                        onClick={(item) => setSelectedItem(item.id)}
                         sortConfig={sortConfig}
                         sortData={onSortPayments}
                         idField={'id'} />
+            }
+            {
+
+                <Panel
+                    isOpen={addPayment}
+                    headerText="Add Payment"
+                    onDismiss={hideAddPayment}>
+                    <PaymentForm onClose={hideAddPayment}/>
+                </Panel>
             }
             {
                 <Panel
                     isOpen={!!selectedItem}
                     headerText="Edit Payment"
                     onDismiss={hideEditPayment}>
-                    <PaymentForm onClose={hideEditPayment} paymentId={selectedItem}/>
+                    <PaymentForm onClose={hideEditPayment} id={selectedItem}/>
                 </Panel>
             }
         </>
@@ -100,8 +107,6 @@ const sortPayments = (payments: vPayment[], sortConfig: SortConfig) => {
 }
 
 function useCommandBarCommands(onAddPayment: () => void,
-                               onAddIncome: () => void,
-                               onAddCar: () => void,
                                reloadData: () => void): ICommandBarItemProps[] {
     const commands = useMemo(() => (
         [
@@ -134,10 +139,8 @@ function useCommandBarCommands(onAddPayment: () => void,
                 iconProps: {iconName: 'Refresh'},
                 onClick: reloadData
             }
-        ]), [reloadData, onAddPayment, onAddIncome, onAddCar])
+        ]), [reloadData, onAddPayment])
     return commands;
 }
-
-const commandBarStyles = {root: {padding: 0}};
 
 const defaultPaymentsSortConfig = {fieldName: 'paidDate', direction: SortDirection.desc};

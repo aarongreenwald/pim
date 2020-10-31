@@ -1,5 +1,15 @@
 import config from '../config/config';
-import {CarSummary, Category, CategoryId, Income, Payment, PaymentId, SpendingByCategory, vPayment} from '@pim/common';
+import {
+    CarSummary,
+    Category,
+    CategoryId,
+    Income,
+    IncomeId,
+    Payment,
+    PaymentId,
+    SpendingByCategory,
+    vPayment
+} from '@pim/common';
 
 const handleResponse = (res) => {
     if (res.status === 401) {
@@ -60,13 +70,29 @@ export const getCarSummary: () => Promise<CarSummary[]> = () =>
         .then(res => res.json());
 
 
-export const getIncome: () => Promise<Income[]> = () =>
+export const getAllIncome: () => Promise<Income[]> = () =>
     fetch(`${config.apiServiceUrl}/income`, {
         credentials: 'include',
     })
         .then(handleResponse)
         .then(res => res.json());
 
+export const getIncome: (incomeId: IncomeId) => Promise<Income> = (incomeId) =>
+    fetch(`${config.apiServiceUrl}/income/${incomeId}`, {
+        credentials: 'include',
+    })
+        .then(handleResponse)
+        .then(res => res.json());
+
+export const saveIncome: (income: Income) => Promise<Income> = (income) =>
+    fetch(`${config.apiServiceUrl}/income`, {
+        method: income.id === -1 ? 'POST' : 'PUT',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        credentials: 'include',
+        body: JSON.stringify(income)
+    }).then(handleResponse)
 
 export const getAllCategories = (): Promise<Category[]> =>
   fetch(`${config.apiServiceUrl}/categories`, {

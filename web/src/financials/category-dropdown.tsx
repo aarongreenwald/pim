@@ -12,7 +12,8 @@ interface CategoryDropdownProps {
 
 export const CategoryDropdown: React.FC<CategoryDropdownProps> = ({value, onChange, name}) => {
     const categories = useCategories();
-    const onChangeCallback = useCallback((event: any) => onChange(event.target.value), [onChange])
+    const onChangeCallback = useCallback((event: React.ChangeEvent<HTMLSelectElement>) =>
+        onChange(Number(event.target.value)), [onChange])
     return (
         <StyledSelect
             name={name}

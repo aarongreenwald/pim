@@ -1,4 +1,5 @@
 
-export interface PanelProps {
+export interface PanelProps<Tid> {
     onClose: () => void;
+    id?: Tid
 }

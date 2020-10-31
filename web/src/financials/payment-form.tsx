@@ -4,12 +4,14 @@ import styled from '@emotion/styled';
 import {Payment, PaymentId} from '@pim/common';
 import {format} from 'date-fns';
 import {getPayment, savePayment} from '../services/server-api';
-import {PrimaryButton, DefaultButton, Stack, TextField, ChoiceGroup} from '@fluentui/react'
+import {PrimaryButton, DefaultButton, Stack, TextField} from '@fluentui/react'
 import {PanelProps} from '../common/panel.types';
 import {CategoryDropdown} from './category-dropdown';
+import {currencyRadioOptions, defaultCurrency} from './currencies';
+import {horizontalChoiceGroup, stackTokens, StyledChoiceGroup} from './styles';
 
-export const PaymentForm: React.FC<PanelProps & {paymentId?: PaymentId}> = ({onClose, paymentId}) => {
-    const {payment, updatePayment, updateCurrency, updateCategory, submitForm} = usePaymentForm(onClose, paymentId);
+export const PaymentForm: React.FC<PanelProps<PaymentId>> = ({onClose, id}) => {
+    const {payment, updatePayment, updateCurrency, updateCategory, submitForm} = usePaymentForm(onClose, id);
 
     if (!payment) return null; //TODO show a spinner
 
@@ -44,7 +46,7 @@ export const PaymentForm: React.FC<PanelProps & {paymentId?: PaymentId}> = ({onC
                 label="Currency"
                 styles={horizontalChoiceGroup}
                 onChange={updateCurrency}
-                options={currencyOptions}/>
+                options={currencyRadioOptions}/>
 
             <StyledInput>
                 <CategoryDropdown
@@ -107,7 +109,7 @@ function usePaymentForm(onClose: () => void, paymentId?: PaymentId, ) {
         } else {
             onClose();
         }
-    }, [payment])
+    }, [payment, onClose])
     return {payment, updatePayment, updateCategory, updateCurrency, submitForm};
 }
 
@@ -118,15 +120,10 @@ function initializePayment(): Payment {
     categoryId: -1,
     amount: 0,
     counterparty: '',
-    currency: 'ILS',
+    currency: defaultCurrency,
     note: ''
   };
 }
-
-const currencyOptions = [
-    {key: 'USD', text: 'USD'},
-    {key: 'ILS', text: 'ILS'},
-];
 
 const StyledInput = styled.div`
   width: 100%;
@@ -135,13 +132,3 @@ const StyledInput = styled.div`
     width: 100%;
   } 
 `
-
-const horizontalChoiceGroup = { flexContainer: { display: 'flex' } };
-
-const StyledChoiceGroup = styled(ChoiceGroup)`  
-  & label {
-    margin-right: 8px;
-  }
-`
-
-const stackTokens = {childrenGap: 8};

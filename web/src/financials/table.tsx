@@ -1,9 +1,8 @@
 import * as React from 'react';
-import {useCallback, useMemo} from 'react';
+import {PropsWithChildren, useCallback, useMemo} from 'react';
 import {CheckboxVisibility, DetailsList, DetailsListLayoutMode, SelectionMode} from '@fluentui/react';
 
-// eslint-disable-next-line @typescript-eslint/ban-types
-interface ListProps<T extends object = {}> {
+interface ListProps<T = unknown> {
     data: T[];
     sortConfig?: SortConfig;
     sortData?: (sort: SortConfig) => void;
@@ -35,13 +34,11 @@ function getColumnRenderer(key: string) {
             value[key];
 }
 
-export const List: React.FC<ListProps> = ({
-                                               data,
-                                               sortConfig,
-                                               sortData,
-                                               idField,
-                                               onClick
-                                           }) => {
+export function List<T = unknown>({data,
+                                   sortConfig,
+                                   sortData,
+                                   idField,
+                                   onClick}: PropsWithChildren<ListProps<T>>): JSX.Element {
 
     const columns = useMemo(() => {
         if (!data.length) return [];
@@ -70,7 +67,7 @@ export const List: React.FC<ListProps> = ({
     }, [data, sortConfig, sortData])
 
 
-    const getKey = useCallback((item) => item[idField], []);
+    const getKey = useCallback((item) => item[idField], [idField]);
 
     return data.length ? (
         <DetailsList

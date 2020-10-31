@@ -3,6 +3,7 @@ import {
     Category,
     CategoryId,
     Income,
+    IncomeId,
     Payment,
     PaymentId,
     SpendingByCategory,
@@ -115,6 +116,77 @@ export const getAllIncome = async () => {
         `
     )
 }
+
+export const getIncome = async (id: IncomeId) => {
+    const db = await getDb();
+    return get<Income>(db,
+        `
+        select income_id id, 
+               source, 
+               paid_date paidDate, 
+               amount, 
+               currency, 
+               note
+        from income
+        where income_id = ?
+        `,
+        [id]
+    )
+}
+
+
+export const insertIncome = async (income: Income) => {
+    const sql = `
+    insert into main.income
+        (paid_date, source, amount, currency, note)
+    values (?,?,?,?,?)
+  `
+    //TODO: validations - the fallback to null done here forces the db to reject
+    //bad data but there should probably be a validation and sanitization step prior to getting here
+    //empty string isn't a valid counterparty, 0 isn't a valid amount. 0 could theoretically be a note but
+    //unlikely.
+    const params = [
+        new Date(income.paidDate), //TODO maybe save the data in yyyy-mm-dd so it's easier to use?
+        income.source || null,
+        income.amount || null,
+        income.currency || null,
+        income.note || null
+    ]
+    const db = await getDb(false);
+
+    const {lastId} = await run(db, sql, params)
+    //if the get() rejects but the run() resolved, the server will return 500 which is not good
+    //client will be tempted to retry, but the post was successful
+    return get<Income>(db, `select * from main.income where income_id = ?`, lastId)
+}
+
+export const updateIncome = async (income: Income) => {
+    const sql = `
+        update income
+        set paid_date = ?,
+            source = ?,
+            amount = ?,
+            currency = ?,        
+            note = ?
+        where income_id = ?        
+  `
+    //TODO: validations - the fallback to null done here forces the db to reject
+    //bad data but there should probably be a validation and sanitization step prior to getting here
+    //empty string isn't a valid counterparty, 0 isn't a valid amount. 0 could theoretically be a note but
+    //unlikely.
+    const params = [
+        new Date(income.paidDate), //TODO maybe save the data in yyyy-mm-dd so it's easier to use?
+        income.source || null,
+        income.amount || null,
+        income.currency || null,
+        income.note || null,
+        income.id
+    ]
+    const db = await getDb(false);
+
+    await run(db, sql, params)
+}
+
 
 export const getAllCarSummaries = async () => {
   const db = await getDb();

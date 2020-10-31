@@ -1,6 +1,7 @@
 export type Money = number;
 export type CategoryId = number;
 export type PaymentId = number;
+export type IncomeId = number;
 export type Currency = 'ILS' | 'USD';
 
 export interface Payment {
@@ -40,7 +41,7 @@ export interface CarSummary {
 }
 
 export interface Income {
-  id: number;
+  id: IncomeId;
   paidDate: string;
   source: string;
   amount: Money;
