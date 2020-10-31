@@ -1,6 +1,6 @@
 import {useEffect, useState} from 'react';
 import {getCarSummary} from '../services/server-api';
-import {List} from './table';
+import {List} from './list';
 import * as React from 'react';
 import {CarSummary} from '@pim/common';
 

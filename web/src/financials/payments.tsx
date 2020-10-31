@@ -3,7 +3,7 @@ import {useCallback, useEffect, useMemo, useState} from 'react';
 import {PaymentId, vPayment} from '@pim/common';
 import {getPayments} from '../services/server-api';
 import {CommandBar, ICommandBarItemProps, Panel} from '@fluentui/react';
-import {List, SortConfig, SortDirection} from './table';
+import {List, SortConfig, SortDirection} from './list';
 import {PaymentForm} from './payment-form';
 import {commandBarStyles} from './styles';
 import {useBoolean} from '@uifabric/react-hooks';

@@ -1,4 +1,4 @@
-import {List} from './table';
+import {List} from './list';
 import {useCallback, useEffect, useMemo, useState} from 'react';
 import * as React from 'react';
 import {getAllIncome} from '../services/server-api';

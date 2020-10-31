@@ -2,7 +2,7 @@ import {useEffect, useState} from 'react';
 import {CategoryId, SpendingByCategory} from '@pim/common';
 import {CategoryDropdown} from './category-dropdown';
 import {getSpendingByCategory} from '../services/server-api';
-import {List} from './table';
+import {List} from './list';
 import * as React from 'react';
 
 export const HistoryAnalysis: React.FC = () => {
