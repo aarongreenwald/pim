@@ -35,6 +35,7 @@ CREATE TABLE cash_assets_record(cash_assets_record_id integer primary key not nu
     ,record_date date NOT NULL
     ,cash_account_id int NOT NULL REFERENCES cash_account
     ,amount decimal(19,4) NOT NULL
+    ,unique(record_date, cash_account_id)
 );
 
 CREATE TABLE stock_transaction (stock_transaction_id integer primary key not null
@@ -46,6 +47,7 @@ CREATE TABLE stock_transaction (stock_transaction_id integer primary key not nul
 );
 
 create table cash_assets_allocation(cash_assets_allocation_id integer primary key not null
+    --consider a better name than record_date, since it's not a snapshot but a transaction
     ,record_date date NOT NULL
     ,allocation_code varchar(6) NOT NULL
     ,currency char(3) NOT NULL

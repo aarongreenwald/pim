@@ -89,44 +89,47 @@ from rollup_category rc left join category c on rc.category_id = c.category_id
                         left join category r on rc.root_category_id = r.category_id
 ;
 
+drop view if exists v_cash_assets_allocation;
+
+create view v_cash_assets_allocation as
+select allocation_code,
+       sum(case currency when 'USD' then amount else null end) usd,
+       sum(case currency when 'ILS' then amount else null end) ils
+from cash_assets_allocation
+group by allocation_code;
+
 
 /*
  v_unallocated_cash_snapshot represents the current status of unallocated money.
  It is essentially CAR - New Payments + New Income - Allocations
+ Consider the impact of off-by-one issues on dates. Payments/Income/Allocations are
+ booked on the day they ocurred, CAR is as of midnight of the record date.
  */
 drop view if exists v_unallocated_cash_snapshot;
 create view v_unallocated_cash_snapshot as
 with caa_summary as (
-    --this can be its own view
-    select record_date,
-           case currency when 'ILS' then amount else null end ils,
-           case currency when 'USD' then amount else null end usd,
-           sum(amount)                                        amount
-    from cash_assets_allocation
-    group by record_date, currency
+    select sum(ils) ils, sum(usd) usd
+    from v_cash_assets_allocation
 ),
-     current_caa as (
-         select record_date, ils, usd from caa_summary order by record_date desc limit 1
-     ),
-     current_car as
-         (select record_date, ils, usd from v_car_summary order by record_date desc limit 1),
-     all_data as (
-         select paid_date, ils * -1 ils, usd * -1 usd
-         from v_payment
-         where paid_date >= (select record_date from current_car)
-         union all
-         select record_date, ils, usd
-         from current_car
-         union all
-         select paid_date,
-                case currency when 'ILS' then amount else null end ils,
-                case currency when 'USD' then amount else null end usd
-         from income
-         where paid_date >= (select record_date from current_car)
-         union all
-         select record_date, ils * -1, usd * -1
-         from current_caa
-     )
+current_car as (
+    select record_date, ils, usd from v_car_summary order by record_date desc limit 1
+),
+all_data as (
+     select ils * -1 ils, usd * -1 usd
+     from v_payment
+     where paid_date >= (select record_date from current_car)
+     union all
+     select ils, usd
+     from current_car
+     union all
+     select case currency when 'ILS' then amount else null end ils,
+            case currency when 'USD' then amount else null end usd
+     from income
+     where paid_date >= (select record_date from current_car)
+     union all
+     select ils * -1, usd * -1
+     from caa_summary
+ )
 select sum(ils) ils, sum(usd) usd
 from all_data
 ;
