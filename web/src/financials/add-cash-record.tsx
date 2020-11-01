@@ -1,5 +1,5 @@
 import {PanelProps} from '../common/panel.types';
-import {DefaultButton, PrimaryButton, Stack, TextField} from '@fluentui/react';
+import {Checkbox, DefaultButton, PrimaryButton, Stack, TextField} from '@fluentui/react';
 import {stackTokens} from './styles';
 import {format} from 'date-fns';
 import * as React from 'react';
@@ -9,23 +9,37 @@ import {getActiveCashAccounts, getCashRecords, saveCashRecords} from '../service
 
 export const AddCashRecord: React.FC<PanelProps<string>> = ({onClose, id}) => {
     const {draft, accounts, updateDate, updateAccount, submitForm} = useCashRecordsForm(onClose, id);
+    const [showAllAccounts, setShowAllAccounts] = useState<boolean>(false);
 
+    //if editing an existing CAR, changing the date isn't allowed becase it'll just create a new
+    //CAR set without deleting the old. So you must delete the old manually by clearing the inputs
+    //and create a new one.
+    const allowSelectingDate = !id;
     return (
         <form>
             <Stack tokens={stackTokens}>
-                <TextField
-                    label={'Date'}
-                    type="date"
-                    onChange={updateDate}
-                    value={format(new Date(draft.recordDate), 'yyyy-MM-dd')}
-                    name="recordDate"/>
+                {
+                    allowSelectingDate &&
+                    <TextField
+                        label={'Date'}
+                        type="date"
+                        onChange={updateDate}
+                        value={format(new Date(draft.recordDate), 'yyyy-MM-dd')}
+                        name="recordDate"/>
+                }
+
+                <Checkbox
+                    label="Show all accounts"
+                    checked={showAllAccounts}
+                    onChange={(_, checked) => setShowAllAccounts(checked)}
+                />
 
                 {
-                    accounts?.map(account =>
+                    accounts?.filter(a => showAllAccounts || a.active || getAccountValue(draft, a) !== '').map(account =>
                         <TextField
                             key={account.id}
-                            label={account.name}
-                            value={draft.accounts[account.id] ? draft.accounts[account.id].toString() : ''}
+                            label={`${account.name} ${!account.active ? '(Inactive)' : ''}`}
+                            value={getAccountValue(draft, account)}
                             type="number"
                             name={`account_${account.id}`}
                             onChange={updateAccount}
@@ -33,8 +47,6 @@ export const AddCashRecord: React.FC<PanelProps<string>> = ({onClose, id}) => {
 
                     )
                 }
-
-
 
                 <Stack horizontal tokens={stackTokens}>
                     <PrimaryButton onClick={submitForm}>Save</PrimaryButton>
@@ -46,9 +58,23 @@ export const AddCashRecord: React.FC<PanelProps<string>> = ({onClose, id}) => {
     )
 }
 
+interface Draft {
+    recordDate: string | Date;
+    accounts: Record<number, number>
+}
+function getAccountValue(draft: Draft, account: CashAccount) {
+    //zeroes should be shown, other falsy values skipped
+    return typeof draft.accounts[account.id] !== 'undefined' ? draft.accounts[account.id].toString() : '';
+}
+
 
 function useCashRecordsForm(onClose: () => void, recordDate?: string) {
     const [accounts, setAccounts] = useState<CashAccount[]>()
+    const [draft, setDraft] = useState<Draft>({
+        recordDate: recordDate || new Date(),
+        accounts: {}
+    })
+
     useEffect(() => {
         getActiveCashAccounts().then(setAccounts)
     }, [])
@@ -66,11 +92,6 @@ function useCashRecordsForm(onClose: () => void, recordDate?: string) {
             )
         }
     }, [recordDate])
-
-    const [draft, setDraft] = useState({
-        recordDate: recordDate || new Date(),
-        accounts: {}
-    })
 
     const updateDate = useCallback(({target}) => {
         setDraft({
@@ -90,10 +111,12 @@ function useCashRecordsForm(onClose: () => void, recordDate?: string) {
     }, [draft])
 
     const submitForm = useCallback(async () => {
-        const balances = Object.keys(draft.accounts).map(key => ({
-            accountId: Number(key),
-            amount: Number(draft.accounts[key])
-        }))
+        const balances = Object.keys(draft.accounts)
+            .filter(key => draft.accounts[key] !== '') //only save explicit zeroes as zero, unfilled fields should not be set
+            .map(key => ({
+                accountId: Number(key),
+                amount: Number(draft.accounts[key])
+            }))
         await saveCashRecords(draft.recordDate, balances)
         onClose();
     }, [draft, onClose])

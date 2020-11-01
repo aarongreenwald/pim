@@ -7,6 +7,7 @@ import {useBoolean} from '@uifabric/react-hooks';
 import {CommandBar, ICommandBarItemProps, Panel} from '@fluentui/react';
 import {commandBarStyles} from './styles';
 import {AddCashRecord} from './add-cash-record';
+import {formatDay} from '../common/date.utils';
 
 export const CashRecordHistory: React.FC = () => {
     const [carSummary, setCarSummary] = useState<CarSummary[]>([]);
@@ -33,7 +34,7 @@ export const CashRecordHistory: React.FC = () => {
             {
                 <Panel
                     isOpen={addCar}
-                    headerText="Cash Assets"
+                    headerText="Add Cash Assets"
                     onDismiss={hideAddCar}>
                     <AddCashRecord onClose={hideAddCar} />
                 </Panel>
@@ -41,7 +42,7 @@ export const CashRecordHistory: React.FC = () => {
             {
                 <Panel
                     isOpen={!!selectedItem}
-                    headerText={`Edit: ${selectedItem}`}
+                    headerText={`Edit ${(formatDay(selectedItem))}`}
                     onDismiss={hideEditCar}>
                     <AddCashRecord onClose={() => setSelectedItem(null)} id={selectedItem}/>
                 </Panel>

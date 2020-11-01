@@ -44,6 +44,7 @@ export interface CashAccount {
   id: number;
   name: string;
   currency: Currency;
+  active: boolean;
 }
 
 export interface CashAssetRecord {

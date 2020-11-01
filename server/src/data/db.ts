@@ -209,9 +209,9 @@ export const getActiveCashAccounts = async () => {
         `
             select cash_account_id id,
                    name,
-                   currency
-            from cash_account
-            where active = 1 
+                   currency,
+                   active
+            from cash_account             
         `
     )
 }
