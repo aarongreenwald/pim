@@ -67,3 +67,19 @@ export interface SpendingByCategory {
   ils: Money;
   usd: Money;
 }
+
+export interface CashAssetAllocation {
+  allocationCode: string;
+  ils: Money;
+  usd: Money;
+}
+
+export interface UnallocatedCash {
+  ils: Money;
+  usd: Money;
+}
+
+export interface CashAllocationsDto {
+  unallocatedCashSnapshot: UnallocatedCash;
+  cashAssetsAllocation: CashAssetAllocation[];
+}

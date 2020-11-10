@@ -1,17 +1,30 @@
 import {useCallback, useEffect, useMemo, useState} from 'react';
-import {getCarSummary} from '../services/server-api';
+import {getCarSummary, getCashAllocations} from '../services/server-api';
 import {List} from './list';
 import * as React from 'react';
-import {CarSummary} from '@pim/common';
+import {CarSummary, CashAssetAllocation} from '@pim/common';
 import {useBoolean} from '@uifabric/react-hooks';
-import {CommandBar, ICommandBarItemProps, Panel} from '@fluentui/react';
+import {CommandBar, ICommandBarItemProps, Panel, Stack} from '@fluentui/react';
 import {commandBarStyles} from './styles';
 import {AddCashRecord} from './add-cash-record';
 import {formatDay} from '../common/date.utils';
 
 export const CashRecordHistory: React.FC = () => {
     const [carSummary, setCarSummary] = useState<CarSummary[]>([]);
-    const reloadData = useCallback(() => getCarSummary().then(setCarSummary), [])
+    const [cashAllocations, setCashAllocations] = useState<CashAssetAllocation[]>(null)
+    const reloadData = useCallback(() => {
+        getCarSummary().then(setCarSummary);
+        getCashAllocations().then(({cashAssetsAllocation, unallocatedCashSnapshot}) => {
+            setCashAllocations([
+                ...cashAssetsAllocation,
+                {
+                    allocationCode: 'Unallocated',
+                    ils: unallocatedCashSnapshot.ils,
+                    usd: unallocatedCashSnapshot.usd
+                }
+            ])
+        })
+    }, [])
     useEffect(() => {reloadData()}, [reloadData])
 
     const [addCar, {setTrue: showAddCar, setFalse: hideAddCar}] = useBoolean(false)
@@ -23,30 +36,38 @@ export const CashRecordHistory: React.FC = () => {
     return (
         <>
             <CommandBar items={commands} styles={commandBarStyles}/>
-            {
+            <Stack>
+                {
+                    cashAllocations &&
+                    <>
+                        <List<CashAssetAllocation>
+                            data={cashAllocations}
+                            idField={'allocationCode'} />
+                    </>
+                }
+                {
+                    carSummary &&
+                    <List<CarSummary>
+                        data={carSummary}
+                        onClick={car => setSelectedItem(car.recordDate)}
+                        idField={'recordDate'} />
+                }
+            </Stack>
 
-                carSummary &&
-                <List<CarSummary>
-                    data={carSummary}
-                    onClick={car => setSelectedItem(car.recordDate)}
-                    idField={'recordDate'} />
-            }
-            {
-                <Panel
-                    isOpen={addCar}
-                    headerText="Add Cash Assets"
-                    onDismiss={hideAddCar}>
-                    <AddCashRecord onClose={hideAddCar} />
-                </Panel>
-            }
-            {
-                <Panel
-                    isOpen={!!selectedItem}
-                    headerText={`Edit ${(formatDay(selectedItem))}`}
-                    onDismiss={hideEditCar}>
-                    <AddCashRecord onClose={() => setSelectedItem(null)} id={selectedItem}/>
-                </Panel>
-            }
+            <Panel
+                isOpen={addCar}
+                headerText="Add Cash Assets"
+                onDismiss={hideAddCar}>
+                <AddCashRecord onClose={hideAddCar} />
+            </Panel>
+
+            <Panel
+                isOpen={!!selectedItem}
+                headerText={`Edit ${(formatDay(selectedItem))}`}
+                onDismiss={hideEditCar}>
+                <AddCashRecord onClose={() => setSelectedItem(null)} id={selectedItem}/>
+            </Panel>
+
         </>
     )
 }

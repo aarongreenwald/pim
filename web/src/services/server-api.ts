@@ -2,6 +2,7 @@ import config from '../config/config';
 import {
     CarSummary,
     CashAccount,
+    CashAllocationsDto,
     CashAssetRecord,
     Category,
     CategoryId,
@@ -93,6 +94,13 @@ export const saveCashRecords = (recordDate: string | number | Date, accountBalan
 
 export const getCashRecords = (recordDate: string | number | Date): Promise<CashAssetRecord[]> =>
     fetch(`${config.apiServiceUrl}/car/records?recordDate=${recordDate}`, {
+        credentials: 'include',
+    })
+        .then(handleResponse)
+        .then(res => res.json())
+
+export const getCashAllocations = (): Promise<CashAllocationsDto> =>
+    fetch(`${config.apiServiceUrl}/cash-allocations`, {
         credentials: 'include',
     })
         .then(handleResponse)

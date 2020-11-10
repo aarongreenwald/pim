@@ -53,6 +53,19 @@ export const setupRoutes = (app: Express) => {
                 .then(data => res.send(JSON.stringify(data)))
         })
 
+    app.get('/cash-allocations', (req, res) => {
+        Promise.all([
+            //TODO consider combining this into one view
+            db.getUnallocatedCashSnapshot(),
+            db.getCashAssetsAllocation()
+        ]).then(([unallocatedCashSnapshot, cashAssetsAllocation]) => {
+            res.send(JSON.stringify({
+                unallocatedCashSnapshot,
+                cashAssetsAllocation
+            }))
+        })
+    })
+
     app.route('/income')
         .get((req, res) =>
             db.getAllIncome().then(data => res.send(JSON.stringify(data)))

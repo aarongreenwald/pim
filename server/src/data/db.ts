@@ -1,6 +1,7 @@
 import {
     CarSummary,
     CashAccount,
+    CashAssetAllocation,
     CashAssetRecord,
     Category,
     CategoryId,
@@ -253,6 +254,16 @@ export const updateCashAssetRecords = async (recordDate: string, accountBalances
     }
 
 
+}
+
+export const getCashAssetsAllocation = async () => {
+    const db = await getDb();
+    return all<CashAssetAllocation>(db, 'select allocation_code allocationCode, ils, usd from v_cash_assets_allocation')
+}
+
+export const getUnallocatedCashSnapshot = async () => {
+    const db = await getDb();
+    return get<CashAssetAllocation>(db, 'select ils, usd from v_unallocated_cash_snapshot')
 }
 
 export const getAllCategories = async () => {
