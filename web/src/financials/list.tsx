@@ -1,6 +1,8 @@
 import * as React from 'react';
 import {PropsWithChildren, useCallback, useMemo} from 'react';
-import {CheckboxVisibility, DetailsList, DetailsListLayoutMode, SelectionMode} from '@fluentui/react';
+import {CheckboxVisibility, DetailsList, DetailsListLayoutMode, IColumn, SelectionMode} from '@fluentui/react';
+import {currencyFields, currencySymbols} from './currencies';
+import styled from '@emotion/styled';
 
 interface ListProps<T = unknown> {
     data: T[];
@@ -12,7 +14,6 @@ interface ListProps<T = unknown> {
 
 
 const idFields = ['id', 'categoryId'];
-const currencyFields = ['ils', 'usd'];
 
 const fieldIsNotId = fieldName => !idFields.includes(fieldName)
 const formatFieldName = fieldName => {
@@ -26,11 +27,26 @@ const formatFieldName = fieldName => {
     return spaces.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
 }
 
+const Currency = ({value, currencyCode}) => {
+    if (!value && value !== 0) return null;
+    return (
+        <StyledCurrency>
+            <span>{currencySymbols[currencyCode]}</span>
+            <span>{value?.toFixed(2)}</span>
+        </StyledCurrency>
+    );
+}
+
+const StyledCurrency = styled.span`
+  display: flex;
+  justify-content: space-between;
+`
+
 function getColumnRenderer(key: string) {
     return (value) => key.toLowerCase().includes('date') ?
         new Date(value[key]).toDateString() :
         currencyFields.includes(key) ?
-            value[key]?.toFixed(2) :
+            <Currency value={value[key]} currencyCode={key}/> :
             value[key];
 }
 
@@ -46,10 +62,20 @@ export function List<T = unknown>({data,
         const keys = Object.keys(data[0]);
         return keys.filter(fieldIsNotId).map(key => ({
             key,
-            minWidth: 100,
+            minWidth: currencyFields.includes(key) ? 75 : 150,
+            maxWidth: currencyFields.includes(key) ? 75 : null,
             fieldName: key,
             onRender: getColumnRenderer(key),
             name: formatFieldName(key),
+            styles: currencyFields.includes(key) ? { //style the header
+                root: {
+                    textAlign: 'right',
+                    width: '100%',
+                },
+                cellName: {
+                    width: '100%'
+                }
+            } : null,
             isResizable: true,
             isSorted: sortConfig?.fieldName === key,
             isSortedDescending: sortConfig?.direction === SortDirection.desc,
@@ -63,7 +89,7 @@ export function List<T = unknown>({data,
                 };
                 sortData(newSort);
             }
-        }))
+        } as IColumn))
     }, [data, sortConfig, sortData])
 
 
