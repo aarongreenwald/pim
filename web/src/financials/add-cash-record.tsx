@@ -6,6 +6,7 @@ import * as React from 'react';
 import {useCallback, useEffect, useState} from 'react';
 import {CashAccount} from '@pim/common';
 import {getActiveCashAccounts, getCashRecords, saveCashRecords} from '../services/server-api';
+import {formatDay} from '../common/date.utils';
 
 export const AddCashRecord: React.FC<PanelProps<string>> = ({onClose, id}) => {
     const {draft, accounts, updateDate, updateAccount, submitForm} = useCashRecordsForm(onClose, id);
@@ -24,7 +25,7 @@ export const AddCashRecord: React.FC<PanelProps<string>> = ({onClose, id}) => {
                         label={'Date'}
                         type="date"
                         onChange={updateDate}
-                        value={format(new Date(draft.recordDate), 'yyyy-MM-dd')}
+                        value={formatDay(draft.recordDate)}
                         name="recordDate"/>
                 }
 
@@ -71,7 +72,7 @@ function getAccountValue(draft: Draft, account: CashAccount) {
 function useCashRecordsForm(onClose: () => void, recordDate?: string) {
     const [accounts, setAccounts] = useState<CashAccount[]>()
     const [draft, setDraft] = useState<Draft>({
-        recordDate: recordDate || new Date(),
+        recordDate: recordDate || formatDay(new Date()),
         accounts: {}
     })
 
