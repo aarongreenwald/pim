@@ -1,8 +1,8 @@
 import {useCallback, useEffect, useMemo, useState} from 'react';
-import {getCarSummary, getCashAllocations} from '../services/server-api';
+import {getCarSummary, getCashAllocations, getUnreportedSpending} from '../services/server-api';
 import {List} from './list';
 import * as React from 'react';
-import {CarSummary, CashAssetAllocation} from '@pim/common';
+import {CarSummary, CashAssetAllocation, UnreportedSpending} from '@pim/common';
 import {useBoolean} from '@uifabric/react-hooks';
 import {CommandBar, ICommandBarItemProps, Panel, Stack} from '@fluentui/react';
 import {commandBarStyles} from './styles';
@@ -12,6 +12,7 @@ import {formatDay} from '../common/date.utils';
 export const CashRecordHistory: React.FC = () => {
     const [carSummary, setCarSummary] = useState<CarSummary[]>([]);
     const [cashAllocations, setCashAllocations] = useState<CashAssetAllocation[]>(null)
+    const [unreportedSpending, setUnreportedSpending] = useState<UnreportedSpending[]>(null);
     const reloadData = useCallback(() => {
         getCarSummary().then(setCarSummary);
         getCashAllocations().then(({cashAssetsAllocation, unallocatedCashSnapshot}) => {
@@ -24,6 +25,7 @@ export const CashRecordHistory: React.FC = () => {
                 }
             ])
         })
+        getUnreportedSpending().then(setUnreportedSpending);
     }, [])
     useEffect(() => {reloadData()}, [reloadData])
 
@@ -51,6 +53,12 @@ export const CashRecordHistory: React.FC = () => {
                         data={carSummary}
                         onClick={car => setSelectedItem(car.recordDate)}
                         idField={'recordDate'} />
+                }
+                {
+                    unreportedSpending &&
+                    <List<UnreportedSpending>
+                        data={unreportedSpending}
+                        idField={'endDate'} />
                 }
             </Stack>
 

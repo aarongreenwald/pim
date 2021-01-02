@@ -10,6 +10,7 @@ import {
     Payment,
     PaymentId,
     SpendingByCategory,
+    UnreportedSpending,
     vPayment
 } from '@pim/common';
 import {all, beginTransaction, commitTransaction, get, getDb, rollbackTransaction, run} from './db.helpers';
@@ -265,6 +266,12 @@ export const getUnallocatedCashSnapshot = async () => {
     const db = await getDb();
     return get<CashAssetAllocation>(db, 'select ils, usd from v_unallocated_cash_snapshot')
 }
+
+export const getUnreportedSpending = async () => {
+    const db = await getDb();
+    return all<UnreportedSpending>(db, 'select start_date startDate, end_date endDate, ils, usd from v_unreported_spending')
+}
+
 
 export const getAllCategories = async () => {
   const db = await getDb();

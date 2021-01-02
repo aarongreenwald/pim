@@ -11,6 +11,7 @@ import {
     Payment,
     PaymentId,
     SpendingByCategory,
+    UnreportedSpending,
     vPayment
 } from '@pim/common';
 
@@ -106,6 +107,12 @@ export const getCashAllocations = (): Promise<CashAllocationsDto> =>
         .then(handleResponse)
         .then(res => res.json())
 
+export const getUnreportedSpending = (): Promise<UnreportedSpending[]> =>
+    fetch(`${config.apiServiceUrl}/unreported-spending`, {
+        credentials: 'include',
+    })
+        .then(handleResponse)
+        .then(res => res.json())
 
 export const getAllIncome: () => Promise<Income[]> = () =>
     fetch(`${config.apiServiceUrl}/income`, {

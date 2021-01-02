@@ -66,6 +66,11 @@ export const setupRoutes = (app: Express) => {
         })
     })
 
+    app.get('/unreported-spending', (req, res) => {
+        db.getUnreportedSpending()
+            .then(data => res.send(JSON.stringify(data)))
+    })
+
     app.route('/income')
         .get((req, res) =>
             db.getAllIncome().then(data => res.send(JSON.stringify(data)))

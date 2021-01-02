@@ -83,3 +83,10 @@ export interface CashAllocationsDto {
   unallocatedCashSnapshot: UnallocatedCash;
   cashAssetsAllocation: CashAssetAllocation[];
 }
+
+export interface UnreportedSpending {
+  startDate: string;
+  endDate: string;
+  ils: Money;
+  usd: Money;
+}
