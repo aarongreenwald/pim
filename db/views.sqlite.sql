@@ -134,3 +134,60 @@ select sum(ils) ils, sum(usd) usd
 from all_data
 ;
 
+drop view if exists v_period;
+create view v_period as
+select
+    coalesce(lead(record_date) over (order by record_date desc), 0) start_date,
+    record_date - (24 * 60 * 60) end_date
+from v_car_summary
+union all
+select max(record_date), 4102358400000 from v_car_summary
+;
+
+/*
+ Unreported spending is Starting CAR + Income - Spending - Ending CAR
+ TODO for some reason trying to filter out the first period throws an error unless
+ it's in the HAVING. Also fix the hardcoding for max end_date
+ */
+drop view if exists v_unreported_spending;
+create view v_unreported_spending as
+with
+    period as (
+      select * from v_period
+      where end_date < 4102358400000
+    ),
+    spending_by_period as (
+        select end_date, -1 * sum(ils) ils, -1 * sum(usd) usd
+        from period left join v_payment p
+            on paid_date >= period.start_date and paid_date <= period.end_date
+        group by end_date
+    ),
+    income_by_period as (
+        select end_date,
+               sum(case currency when 'ILS' then amount else null end) ils,
+               sum(case currency when 'USD' then amount else null end) usd
+        from period  left join income
+            on paid_date >= period.start_date and paid_date <= period.end_date
+        group by end_date
+    ),
+    combined as (
+        select period.end_date, ils, usd
+        from v_car_summary inner join period
+            on record_date = period.start_date
+        union all
+        select * from income_by_period
+        union all
+        select * from spending_by_period
+        union all
+        --ending CAR is the CAR on the day after the period ends (period end date is
+        --defined as the day before the next CAR)
+        select period.end_date, -1 * ils, -1 * usd
+        from v_car_summary inner join period
+            on record_date = period.end_date + (24 * 60 * 60)
+    )
+select p.start_date, p.end_date,
+       sum(ils) ils, sum(usd) usd
+from combined inner join v_period p
+    on combined.end_date = p.end_date
+group by p.start_date, p.end_date
+having p.start_date > 0;
