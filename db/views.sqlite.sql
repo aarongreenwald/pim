@@ -191,3 +191,23 @@ from combined inner join v_period p
     on combined.end_date = p.end_date
 group by p.start_date, p.end_date
 having p.start_date > 0;
+
+/*
+ TODO check that this is right. It would be better to leave the currency unpivoted until later,
+ as a future improvement. Also, consider a way to expose the breakdown of allocations at a given date
+ */
+;drop view if exists v_unallocated_cash_history
+;create view v_unallocated_cash_history as
+    with car_date_allocations as (
+        select car.record_date,
+               sum(case caa.currency when 'ILS' then amount else 0 end) ils,
+               sum(case caa.currency when 'USD' then amount else 0 end) usd
+        from v_car_summary car
+                 inner join cash_assets_allocation caa on car.record_date > caa.record_date
+        group by car.record_date
+    )
+     select car.record_date
+          , car.ils - alloc.ils ils
+          , car.usd - alloc.usd usd
+     from v_car_summary car
+              inner join car_date_allocations alloc on car.record_date = alloc.record_date
