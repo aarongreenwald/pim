@@ -33,6 +33,7 @@ export const Payments: React.FC = () => {
                         onClick={(item) => setSelectedItem(item.id)}
                         sortConfig={sortConfig}
                         sortData={onSortPayments}
+                        searchableTextFields={textFields}
                         idField={'id'} />
             }
             {
@@ -142,5 +143,7 @@ function useCommandBarCommands(onAddPayment: () => void,
         ]), [reloadData, onAddPayment])
     return commands;
 }
+
+const textFields = ['counterparty', 'note', 'categoryName']
 
 const defaultPaymentsSortConfig = {fieldName: 'paidDate', direction: SortDirection.desc};

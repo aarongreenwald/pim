@@ -1,17 +1,25 @@
 import * as React from 'react';
 import {PropsWithChildren, useCallback, useMemo} from 'react';
-import {CheckboxVisibility, DetailsList, DetailsListLayoutMode, IColumn, SelectionMode} from '@fluentui/react';
+import {
+    CheckboxVisibility,
+    ColumnActionsMode,
+    DetailsList,
+    DetailsListLayoutMode,
+    IColumn,
+    SelectionMode
+} from '@fluentui/react';
 import {currencyFields, currencySymbols} from './currencies';
 import styled from '@emotion/styled';
+import {useDebouncedInput} from '../common/debounced-input.hook';
 
 interface ListProps<T = unknown> {
     data: T[];
     sortConfig?: SortConfig;
     sortData?: (sort: SortConfig) => void;
     idField: string;
+    searchableTextFields?: string[];
     onClick?: (row: T) => void;
 }
-
 
 const idFields = ['id', 'categoryId'];
 
@@ -54,6 +62,7 @@ export function List<T = unknown>({data,
                                    sortConfig,
                                    sortData,
                                    idField,
+                                   searchableTextFields,
                                    onClick}: PropsWithChildren<ListProps<T>>): JSX.Element {
 
     const columns = useMemo(() => {
@@ -92,21 +101,43 @@ export function List<T = unknown>({data,
         } as IColumn))
     }, [data, sortConfig, sortData])
 
+    const {inputVal, debouncedValue, updateValue} = useDebouncedInput();
+    const filteredData = useMemo(() =>
+        debouncedValue ?
+            filterRows(data, debouncedValue, searchableTextFields) :
+            data,
+        [data, debouncedValue, searchableTextFields])
 
     const getKey = useCallback((item) => item[idField], [idField]);
-
-    return data.length ? (
-        <DetailsList
-            checkboxVisibility={CheckboxVisibility.hidden}
-            items={data}
-            columns={columns}
-            getKey={getKey}
-            compact
-            onActiveItemChanged={onClick}
-            layoutMode={DetailsListLayoutMode.fixedColumns}
-            selectionMode={onClick ? SelectionMode.single : SelectionMode.none}/>
-    ) : null;
+    return (
+        <>
+            {
+                searchableTextFields &&
+                <input value={inputVal} onChange={val => updateValue(val.target.value)}/>
+            }
+            {
+                !!filteredData.length &&
+                <DetailsList
+                    checkboxVisibility={CheckboxVisibility.hidden}
+                    items={filteredData}
+                    columns={columns}
+                    getKey={getKey}
+                    compact
+                    onActiveItemChanged={onClick}
+                    layoutMode={DetailsListLayoutMode.fixedColumns}
+                    selectionMode={onClick ? SelectionMode.single : SelectionMode.none}/>
+            }
+        </>
+    )
 }
+
+
+function filterRows<T>(data: T[], filterText: string, textFields: string[]) {
+    const searchStr = filterText.trim().toLowerCase();
+    return data.filter(row => textFields.some(key => row[key]?.toLowerCase().includes(searchStr)));
+}
+
+
 
 const defaultSortDirection = (fieldName: string): number =>
     fieldName.toLowerCase().includes('date') ?
