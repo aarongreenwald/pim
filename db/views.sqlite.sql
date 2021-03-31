@@ -96,7 +96,8 @@ select allocation_code,
        sum(case currency when 'USD' then amount else null end) usd,
        sum(case currency when 'ILS' then amount else null end) ils
 from cash_assets_allocation
-group by allocation_code;
+group by allocation_code
+having coalesce(usd, 0) <> 0 or coalesce(ils, 0) <> 0;
 
 
 /*
