@@ -6,6 +6,7 @@ import {
     DetailsList,
     DetailsListLayoutMode,
     IColumn,
+    SearchBox,
     SelectionMode
 } from '@fluentui/react';
 import {currencyFields, currencySymbols} from './currencies';
@@ -113,7 +114,13 @@ export function List<T = unknown>({data,
         <>
             {
                 searchableTextFields &&
-                <input value={inputVal} onChange={val => updateValue(val.target.value)}/>
+                <SearchBox
+                    styles={searchStyles}
+                    underlined
+                    placeholder={'Search'}
+                    onChange={val => updateValue(val.target.value)}
+                    onClear={() => updateValue('')}
+                    value={inputVal}/>
             }
             {
                 !!filteredData.length &&
@@ -137,12 +144,12 @@ function filterRows<T>(data: T[], filterText: string, textFields: string[]) {
     return data.filter(row => textFields.some(key => row[key]?.toLowerCase().includes(searchStr)));
 }
 
-
-
 const defaultSortDirection = (fieldName: string): number =>
     fieldName.toLowerCase().includes('date') ?
         SortDirection.desc :
-        SortDirection.asc
+        SortDirection.asc;
+
+const searchStyles = {root: {maxWidth: 300}};
 
 export interface SortConfig {
     fieldName: string;
