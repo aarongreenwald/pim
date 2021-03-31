@@ -114,6 +114,6 @@ function useCommandBarCommands(onAddCar: () => void,
                 iconProps: {iconName: 'Refresh'},
                 onClick: reloadData
             }
-        ]), [reloadData, onAddCar])
+        ]), [reloadData, onAddCar, onAddCaa])
     return commands;
 }

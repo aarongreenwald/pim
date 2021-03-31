@@ -1,6 +1,5 @@
 import {useCallback, useState} from 'react';
 import * as React from 'react';
-import styled from '@emotion/styled';
 import {CashAssetAllocationRecord, PaymentId} from '@pim/common';
 import {format} from 'date-fns';
 import {saveAllocationRecord} from '../services/server-api';

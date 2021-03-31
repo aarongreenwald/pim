@@ -15,7 +15,6 @@ import {
     UnreportedSpending,
     vPayment
 } from '@pim/common';
-import {all} from '../../../server/src/data/db.helpers';
 
 const handleResponse = (res) => {
     if (res.status === 401) {
@@ -82,7 +81,7 @@ export const getActiveCashAccounts: () => Promise<CashAccount[]> = () =>
         .then(handleResponse)
         .then(res => res.json());
 
-export const saveCashRecords = (recordDate: string | number | Date, accountBalances: CashAssetRecord[]) =>
+export const saveCashRecords = (recordDate: string | number | Date, accountBalances: CashAssetRecord[]): Promise<void> =>
     fetch(`${config.apiServiceUrl}/car/records`, {
         method: 'PUT',
         headers: {

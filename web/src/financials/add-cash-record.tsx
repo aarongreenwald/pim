@@ -1,7 +1,6 @@
 import {PanelProps} from '../common/panel.types';
 import {Checkbox, DefaultButton, PrimaryButton, Stack, TextField} from '@fluentui/react';
 import {stackTokens} from './styles';
-import {format} from 'date-fns';
 import * as React from 'react';
 import {useCallback, useEffect, useState} from 'react';
 import {CashAccount} from '@pim/common';
