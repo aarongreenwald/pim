@@ -63,6 +63,8 @@ export const insertPayment = async (payment: Payment) => {
     //unlikely. make sure to enable FK support in sqlite or categoryId won't be checked
     const params = [
         new Date(payment.paidDate), //TODO maybe save the data in yyyy-mm-dd so it's easier to use?
+        payment.incurredBeginDate ? new Date(payment.incurredBeginDate) : null,
+        payment.incurredEndDate ? new Date(payment.incurredEndDate) : null,
         payment.counterparty || null,
         payment.amount || null,
         payment.currency || null,
@@ -82,7 +84,7 @@ export const updatePayment = async (payment: Payment) => {
         update payment
         set paid_date = ?,
             incurred_begin_date = ?,
-            payment.incurred_begin_date = ?,
+            incurred_end_date = ?,
             counterparty = ?,
             amount = ?,
             currency = ?,
@@ -96,6 +98,8 @@ export const updatePayment = async (payment: Payment) => {
     //unlikely. make sure to enable FK support in sqlite or categoryId won't be checked
     const params = [
         new Date(payment.paidDate), //TODO maybe save the data in yyyy-mm-dd so it's easier to use?
+        payment.incurredBeginDate ? new Date(payment.incurredBeginDate) : null,
+        payment.incurredEndDate ? new Date(payment.incurredEndDate) : null,
         payment.counterparty || null,
         payment.amount || null,
         payment.currency || null,
