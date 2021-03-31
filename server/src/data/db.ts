@@ -2,6 +2,7 @@ import {
     CarSummary,
     CashAccount,
     CashAssetAllocation,
+    CashAssetAllocationRecord,
     CashAssetRecord,
     Category,
     CategoryId,
@@ -53,8 +54,8 @@ export const getPayment: (id: PaymentId) => Promise<Payment> = async id => {
 export const insertPayment = async (payment: Payment) => {
     const sql = `
     insert into payment
-        (paid_date, counterparty, amount, currency, category_id, note)
-    values (?,?,?,?,?,?)
+        (paid_date, incurred_begin_date, incurred_end_date, counterparty, amount, currency, category_id, note)
+    values (?,?,?,?,?,?,?,?)
   `
     //TODO: validations - the fallback to null done here forces the db to reject
     //bad data but there should probably be a validation and sanitization step prior to getting here
@@ -80,6 +81,8 @@ export const updatePayment = async (payment: Payment) => {
     const sql = `
         update payment
         set paid_date = ?,
+            incurred_begin_date = ?,
+            payment.incurred_begin_date = ?,
             counterparty = ?,
             amount = ?,
             currency = ?,
@@ -291,4 +294,26 @@ export const getSpendingByCategory = async (rootCategoryId: CategoryId) => {
                 on p.category_id = rc.category_id and rc.root_category_id = ?
             group by rc.group_category_id, rc.group_category_name
         `, [rootCategoryId])
+}
+
+export const insertCashAssetAllocationRecord = async (allocationRecord: CashAssetAllocationRecord) => {
+    const sql = `
+    insert into cash_assets_allocation
+        (record_date, allocation_code, amount, currency, note)
+    values (?,?,?,?,?)
+  `
+    //TODO: validations - the fallback to null done here forces the db to reject
+    //bad data but there should probably be a validation and sanitization step prior to getting here
+    //empty string isn't a valid allocation, 0 isn't a valid amount.
+    const params = [
+        new Date(allocationRecord.recordDate), //TODO maybe save the data in yyyy-mm-dd so it's easier to use?
+        allocationRecord.allocationCode || null,
+        allocationRecord.amount || null,
+        allocationRecord.currency || null,
+        allocationRecord.note || null
+    ]
+    const db = await getDb(false);
+
+    const {lastId} = await run(db, sql, params)
+    return lastId
 }

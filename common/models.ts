@@ -68,6 +68,15 @@ export interface SpendingByCategory {
   usd: Money;
 }
 
+export interface CashAssetAllocationRecord {
+  // id: ;
+  recordDate: string;
+  amount: Money;
+  currency: Currency;
+  allocationCode: string;
+  note?: string;
+}
+
 export interface CashAssetAllocation {
   allocationCode: string;
   ils: Money;

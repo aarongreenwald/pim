@@ -8,6 +8,7 @@ import {CommandBar, ICommandBarItemProps, Panel, Stack} from '@fluentui/react';
 import {commandBarStyles} from './styles';
 import {AddCashRecord} from './add-cash-record';
 import {formatDay} from '../common/date.utils';
+import {AddCashAssetAllocation} from './add-cash-asset-allocation';
 
 export const CashRecordHistory: React.FC = () => {
     const [carSummary, setCarSummary] = useState<CarSummary[]>([]);
@@ -30,7 +31,8 @@ export const CashRecordHistory: React.FC = () => {
     useEffect(() => {reloadData()}, [reloadData])
 
     const [addCar, {setTrue: showAddCar, setFalse: hideAddCar}] = useBoolean(false)
-    const commands = useCommandBarCommands(showAddCar, reloadData);
+    const [addCaa, {setTrue: showAddCaa, setFalse: hideAddCaa}] = useBoolean(false)
+    const commands = useCommandBarCommands(showAddCar, showAddCaa, reloadData);
 
     const [selectedItem, setSelectedItem] = useState<string>(null)
     const hideEditCar = () => setSelectedItem(null);
@@ -70,6 +72,13 @@ export const CashRecordHistory: React.FC = () => {
             </Panel>
 
             <Panel
+                isOpen={addCaa}
+                headerText="Update Cash Allocations"
+                onDismiss={hideAddCaa}>
+                <AddCashAssetAllocation onClose={hideAddCaa} />
+            </Panel>
+
+            <Panel
                 isOpen={!!selectedItem}
                 headerText={`Edit ${(formatDay(selectedItem))}`}
                 onDismiss={hideEditCar}>
@@ -81,6 +90,7 @@ export const CashRecordHistory: React.FC = () => {
 }
 
 function useCommandBarCommands(onAddCar: () => void,
+                               onAddCaa: () => void,
                                reloadData: () => void): ICommandBarItemProps[] {
     const commands = useMemo(() => (
         [
@@ -90,6 +100,13 @@ function useCommandBarCommands(onAddCar: () => void,
                 text: 'Cash Assets',
                 iconProps: {iconName: 'Add'},
                 onClick: onAddCar,
+            },
+            {
+                split: true,
+                key: 'newCaa',
+                text: 'Update Allocations',
+                iconProps: {iconName: 'Edit'},
+                onClick: onAddCaa,
             },
             {
                 key: 'refresh',

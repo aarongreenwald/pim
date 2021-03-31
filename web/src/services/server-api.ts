@@ -3,6 +3,7 @@ import {
     CarSummary,
     CashAccount,
     CashAllocationsDto,
+    CashAssetAllocationRecord,
     CashAssetRecord,
     Category,
     CategoryId,
@@ -14,6 +15,7 @@ import {
     UnreportedSpending,
     vPayment
 } from '@pim/common';
+import {all} from '../../../server/src/data/db.helpers';
 
 const handleResponse = (res) => {
     if (res.status === 401) {
@@ -153,6 +155,16 @@ export const savePayment = (payment: Payment): Promise<Payment[]> =>
         },
         credentials: 'include',
         body: JSON.stringify(payment)
+    }).then(handleResponse)
+
+export const saveAllocationRecord = (allocation: CashAssetAllocationRecord): Promise<void> =>
+    fetch(`${config.apiServiceUrl}/cash-allocations`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        credentials: 'include',
+        body: JSON.stringify(allocation)
     }).then(handleResponse)
 
 export function getSpendingByCategory(rootCategoryId: CategoryId): Promise<SpendingByCategory[]> {

@@ -66,6 +66,15 @@ export const setupRoutes = (app: Express) => {
         })
     })
 
+    app.post('/cash-allocations', jsonParser, (req, res) => {
+        db.insertCashAssetAllocationRecord(req.body)
+            .then(() => res.status(200).send())
+            .catch(ex => {
+                console.error(ex)
+                res.status(500).send(ex)
+            })
+    })
+
     app.get('/unreported-spending', (req, res) => {
         db.getUnreportedSpending()
             .then(data => res.send(JSON.stringify(data)))
