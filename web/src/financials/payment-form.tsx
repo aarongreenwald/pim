@@ -49,12 +49,11 @@ export const PaymentForm: React.FC<PanelProps<PaymentId>> = ({onClose, id}) => {
                 onChange={updatePayment}
             />
 
-            <StyledInput>
-                <CategoryDropdown
-                    value={payment.categoryId}
-                    onChange={updateCategory}>
-                </CategoryDropdown>
-            </StyledInput>
+            <CategoryDropdown
+                showLabel
+                value={payment.categoryId}
+                onChange={updateCategory}>
+            </CategoryDropdown>
 
             <TextField
                 label="Notes"
