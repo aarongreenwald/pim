@@ -38,13 +38,14 @@ from cash_assets_record
 
 drop view if exists v_category;
 create view v_category as
-WITH RECURSIVE all_categories(category_id, name, level, parent) AS (
-    select category_id, name, 0 as level, parent_category_id
+WITH RECURSIVE all_categories(category_id, hierarchical_name, name, level, parent) AS (
+    select category_id, name, name, 0 as level, parent_category_id
     from category
     where parent_category_id is null
     UNION ALL
     SELECT category.category_id,
            replace(hex(zeroblob(level + 1)), '00', '--') || category.name,
+           category.name,
            level + 1,
            parent_category_id
     FROM category

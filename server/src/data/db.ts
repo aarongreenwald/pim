@@ -282,7 +282,7 @@ export const getUnreportedSpending = async () => {
 
 export const getAllCategories = async () => {
   const db = await getDb();
-  const sql = 'select category_id as id, name from v_category';
+  const sql = 'select category_id as id, name, hierarchical_name hierarchicalName, level from v_category';
   return all<Category>(db, sql)
 }
 

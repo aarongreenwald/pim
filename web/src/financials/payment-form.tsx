@@ -50,7 +50,6 @@ export const PaymentForm: React.FC<PanelProps<PaymentId>> = ({onClose, id}) => {
 
             <StyledInput>
                 <CategoryDropdown
-                    name="categoryId"
                     value={payment.categoryId}
                     onChange={updateCategory}>
                 </CategoryDropdown>

@@ -32,6 +32,8 @@ export interface vPayment {
 export interface Category {
   id: CategoryId;
   name: string;
+  hierachicalName: string;
+  level: number;
 }
 
 export interface CarSummary {
