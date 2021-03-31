@@ -7,7 +7,7 @@ import {getPayment, savePayment} from '../services/server-api';
 import {PrimaryButton, DefaultButton, Stack, TextField} from '@fluentui/react'
 import {PanelProps} from '../common/panel.types';
 import {CategoryDropdown} from './category-dropdown';
-import {currencyRadioOptions, defaultCurrency} from './currencies';
+import {currencyRadioOptions, currencySymbols, defaultCurrency} from './currencies';
 import {horizontalChoiceGroup, stackTokens, StyledChoiceGroup} from './styles';
 
 export const PaymentForm: React.FC<PanelProps<PaymentId>> = ({onClose, id}) => {
@@ -33,20 +33,21 @@ export const PaymentForm: React.FC<PanelProps<PaymentId>> = ({onClose, id}) => {
                 onChange={updatePayment}
             />
 
-            <TextField
-                label="Amount"
-                value={payment.amount ? payment.amount.toString() : ''}
-                type="number"
-                name="amount"
-                onChange={updatePayment}
-            />
-
             <StyledChoiceGroup
                 selectedKey={payment.currency}
                 label="Currency"
                 styles={horizontalChoiceGroup}
                 onChange={updateCurrency}
                 options={currencyRadioOptions}/>
+
+            <TextField
+                label="Amount"
+                value={payment.amount ? payment.amount.toString() : ''}
+                prefix={currencySymbols[payment.currency.toLowerCase()]}
+                type="number"
+                name="amount"
+                onChange={updatePayment}
+            />
 
             <StyledInput>
                 <CategoryDropdown
