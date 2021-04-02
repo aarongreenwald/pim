@@ -1,7 +1,6 @@
 import {useCallback, useEffect, useState} from 'react';
 import * as React from 'react';
 import {Payment, PaymentId} from '@pim/common';
-import {format} from 'date-fns';
 import {getPayment, savePayment} from '../services/server-api';
 import {PrimaryButton, DefaultButton, Stack, TextField} from '@fluentui/react'
 import {PanelProps} from '../common/panel.types';
@@ -9,6 +8,7 @@ import {CategoryDropdown} from './category-dropdown';
 import {currencyRadioOptions, defaultCurrency} from './currencies';
 import {horizontalChoiceGroup, stackTokens, StyledChoiceGroup} from './styles';
 import {CurrencyInput} from './currency-input';
+import {formatDay} from '../common/date.utils';
 
 export const PaymentForm: React.FC<PanelProps<PaymentId>> = ({onClose, id}) => {
     const {payment, updatePayment, updateCurrency, updateCategory, submitForm} = usePaymentForm(onClose, id);
@@ -22,7 +22,7 @@ export const PaymentForm: React.FC<PanelProps<PaymentId>> = ({onClose, id}) => {
                label={'Date'}
                type="date"
                onChange={updatePayment}
-               value={format(new Date(payment.paidDate), 'yyyy-MM-dd')}
+               value={formatDay(payment.paidDate)}
                name="paidDate"/>
 
             {/* todo begin/end incurred dates */}
@@ -113,7 +113,7 @@ function usePaymentForm(onClose: () => void, paymentId?: PaymentId, ) {
 function initializePayment(): Payment {
   return {
     id: -1,
-    paidDate: format(new Date(), 'yyyy-MM-dd'),
+    paidDate: formatDay(new Date()),
     categoryId: -1,
     amount: null,
     counterparty: '',
