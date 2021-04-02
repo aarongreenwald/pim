@@ -59,5 +59,14 @@ create table cash_assets_allocation(cash_assets_allocation_id integer primary ke
 create table financial_constants(
     code varchar(10) not null primary key,
     amount decimal(19,4) not null
+);
 
-)
+create table fuel_log(
+    fuel_log_id integer primary key not null
+    ,timestamp datetime NOT NULL
+    ,odometer integer NOT NULL
+    ,liters decimal(6,4) NOT NULL
+    ,is_full boolean NOT NULL DEFAULT TRUE
+    ,note text NULL
+    ,payment_id integer NOT NULL REFERENCES payment
+);

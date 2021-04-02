@@ -213,3 +213,32 @@ having p.start_date > 0;
           , car.usd - alloc.usd usd
      from v_car_summary car
               inner join car_date_allocations alloc on car.record_date = alloc.record_date
+
+;drop view if exists v_fuel_log
+;create view v_fuel_log as
+    -- TODO handle is_full = false
+    with withkm as (
+        select *
+             , odometer - lag(odometer) over (order by odometer asc) kilometers
+        from fuel_log
+    ) select
+        fuel_log_id
+           , timestamp
+           , odometer
+           , liters
+           , kilometers
+           , kilometers * 1.0 / liters km_per_liter
+           , note
+           , is_full
+           , payment_id
+    from withkm
+    order by odometer desc
+
+
+;drop view if exists v_fuel_log_summary
+;create view v_fuel_log_summary as
+    select sum(kilometers) kilometers,
+           sum(liters) liters,
+           sum(amount) ils,
+           sum(kilometers) * 1.0 / sum(liters) kilometers_per_liter
+    from v_fuel_log a left join payment b on a.payment_id = b.payment_id

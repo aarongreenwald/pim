@@ -6,6 +6,9 @@ import {
     CashAssetRecord,
     Category,
     CategoryId,
+    FuelLog,
+    FuelLogSummary,
+    NewFuelLogDto,
     Income,
     IncomeId,
     Payment,
@@ -74,9 +77,7 @@ export const insertPayment = async (payment: Payment) => {
     const db = await getDb(false);
 
     const {lastId} = await run(db, sql, params)
-    //if the get() rejects but the run() resolved, the server will return 500 which is not good
-    //client will be tempted to retry, but the post was successful
-    return get<Payment>(db, `select * from payment where payment_id = ?`, lastId)
+    return lastId;
 }
 
 export const updatePayment = async (payment: Payment) => {
@@ -320,4 +321,58 @@ export const insertCashAssetAllocationRecord = async (allocationRecord: CashAsse
 
     const {lastId} = await run(db, sql, params)
     return lastId
+}
+
+export const getFuelLog: () => Promise<FuelLog[]> = async () => {
+    const db = await getDb();
+    const sql = `
+        select fuel_log_id id, timestamp, km_per_liter kilometersPerLiter, odometer, liters, kilometers, note, is_full isFull, payment_id paymentId 
+        from v_fuel_log
+    `;
+    return all<FuelLog>(db, sql)
+}
+
+export const getFuelLogSummary: () => Promise<FuelLogSummary> = async () => {
+    const db = await getDb();
+    const sql = `
+        select liters, kilometers, kilometers_per_liter kilometersPerLiter, ils
+        from v_fuel_log_summary
+    `;
+    return get<FuelLogSummary>(db, sql)
+}
+
+export const insertFuelLog = async (fuelLogDto: NewFuelLogDto) => {
+    //TODO do all this in a single transaction
+
+    const paymentId = await insertPayment({
+        id: -1, //For typescript, this is ignored
+        paidDate: fuelLogDto.timestamp.toString(),
+        //TODO counterparty should be settable, the categoryId should be based on the constants table, and
+        //the currency shouldn't be hardcoded (in general the fuel log feature is "single currency", fix this.
+        counterparty: 'Gas Station',
+        categoryId: 14,
+        currency: 'ILS',
+        amount: fuelLogDto.price * fuelLogDto.liters,
+        note: fuelLogDto.note
+    })
+
+    const sql = `
+    insert into fuel_log 
+        (timestamp, odometer, liters, is_full, note, payment_id)
+    values (?,?,?,?,?,?)
+  `
+    //TODO: validations - the fallback to null done here forces the db to reject
+    //bad data but there should probably be a validation and sanitization step prior to getting here
+    //empty string isn't a valid allocation, 0 isn't a valid amount.
+    const params = [
+        fuelLogDto.timestamp,
+        fuelLogDto.odometer,
+        fuelLogDto.liters,
+        fuelLogDto.isFull,
+        fuelLogDto.note,
+        paymentId
+    ];
+    const db = await getDb(false);
+    const {lastId} = await run(db, sql, params)
+    return {paymentId, fuelLogId: lastId}
 }

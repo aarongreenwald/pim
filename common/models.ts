@@ -101,3 +101,37 @@ export interface UnreportedSpending {
   ils: Money;
   usd: Money;
 }
+
+export interface FuelLog {
+  id: number;
+  timestamp: Date;
+  odometer: number;
+  liters: number;
+  kilometers: number;
+  kilometersPerLiter: number;
+  note?: string;
+  isFull: boolean;
+  paymentId: PaymentId;
+}
+
+export interface FuelLogSummary {
+  liters: number;
+  kilometers: number;
+  kilometersPerLiter: number;
+  ils: Money;
+}
+
+export interface FuelLogDto {
+  fuelLog: FuelLog[];
+  summary: FuelLogSummary;
+}
+
+export interface NewFuelLogDto {
+  id: number;
+  timestamp: Date;
+  odometer: number;
+  liters: number;
+  price: Money;
+  note?: string;
+  isFull: boolean;
+}

@@ -52,7 +52,7 @@ const StyledCurrency = styled.span`
 `
 
 function getColumnRenderer(key: string) {
-    return (value) => key.toLowerCase().includes('date') ?
+    return (value) => key.toLowerCase().includes('date') || key.toLowerCase() === 'timestamp' ? //TODO - consider putting the time portion in a tooltip or perhaps as part of the string
         new Date(value[key]).toDateString() :
         currencyFields.includes(key) ?
             <Currency value={value[key]} currencyCode={key}/> :

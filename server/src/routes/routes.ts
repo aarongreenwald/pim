@@ -109,4 +109,18 @@ export const setupRoutes = (app: Express) => {
         db.getSpendingByCategory((req.query as any).rootCategoryId).then(data => res.send(JSON.stringify(data)))
     })
 
+    app.route('/fuel-log')
+        .get((req, res) => {
+            Promise.all([db.getFuelLog(), db.getFuelLogSummary()])
+                .then(([fuelLog, summary]) => res.send(JSON.stringify({fuelLog, summary})))
+        })
+        .post(jsonParser, (req, res) => {
+            db.insertFuelLog(req.body)
+                .then(() => res.send(200))
+                .catch(ex => {
+                    console.error(ex)
+                    res.status(500).send(ex)
+                })
+        })
+
 }

@@ -7,6 +7,9 @@ import {
     CashAssetRecord,
     Category,
     CategoryId,
+    FuelLog,
+    FuelLogSummary,
+    NewFuelLogDto,
     Income,
     IncomeId,
     Payment,
@@ -172,3 +175,21 @@ export function getSpendingByCategory(rootCategoryId: CategoryId): Promise<Spend
     }).then(handleResponse)
         .then(res => res.json())
 }
+
+export const getFuelLog: () => Promise<{ fuelLog: FuelLog[]; summary: FuelLogSummary }> = () =>
+    fetch(`${config.apiServiceUrl}/fuel-log`, {
+        credentials: 'include',
+    })
+        .then(handleResponse)
+        .then(res => res.json());
+
+
+export const saveFuelLog = (fuelLog: NewFuelLogDto): Promise<void> =>
+    fetch(`${config.apiServiceUrl}/fuel-log`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        credentials: 'include',
+        body: JSON.stringify(fuelLog)
+    }).then(handleResponse)
