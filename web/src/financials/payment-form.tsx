@@ -6,8 +6,9 @@ import {getPayment, savePayment} from '../services/server-api';
 import {PrimaryButton, DefaultButton, Stack, TextField} from '@fluentui/react'
 import {PanelProps} from '../common/panel.types';
 import {CategoryDropdown} from './category-dropdown';
-import {currencyRadioOptions, currencySymbols, defaultCurrency} from './currencies';
+import {currencyRadioOptions, defaultCurrency} from './currencies';
 import {horizontalChoiceGroup, stackTokens, StyledChoiceGroup} from './styles';
+import {CurrencyInput} from './currency-input';
 
 export const PaymentForm: React.FC<PanelProps<PaymentId>> = ({onClose, id}) => {
     const {payment, updatePayment, updateCurrency, updateCategory, submitForm} = usePaymentForm(onClose, id);
@@ -39,11 +40,9 @@ export const PaymentForm: React.FC<PanelProps<PaymentId>> = ({onClose, id}) => {
                 onChange={updateCurrency}
                 options={currencyRadioOptions}/>
 
-            <TextField
-                label="Amount"
-                value={payment.amount ? payment.amount.toString() : ''}
-                prefix={currencySymbols[payment.currency.toLowerCase()]}
-                type="number"
+            <CurrencyInput
+                amount={payment.amount}
+                currency={payment.currency}
                 name="amount"
                 onChange={updatePayment}
             />
@@ -116,7 +115,7 @@ function initializePayment(): Payment {
     id: -1,
     paidDate: format(new Date(), 'yyyy-MM-dd'),
     categoryId: -1,
-    amount: 0,
+    amount: null,
     counterparty: '',
     currency: defaultCurrency,
     note: ''

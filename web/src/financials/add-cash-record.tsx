@@ -6,6 +6,7 @@ import {useCallback, useEffect, useState} from 'react';
 import {CashAccount} from '@pim/common';
 import {getActiveCashAccounts, getCashRecords, saveCashRecords} from '../services/server-api';
 import {formatDay} from '../common/date.utils';
+import {CurrencyInput} from './currency-input';
 
 export const AddCashRecord: React.FC<PanelProps<string>> = ({onClose, id}) => {
     const {draft, accounts, updateDate, updateAccount, submitForm} = useCashRecordsForm(onClose, id);
@@ -35,12 +36,12 @@ export const AddCashRecord: React.FC<PanelProps<string>> = ({onClose, id}) => {
                 />
 
                 {
-                    accounts?.filter(a => showAllAccounts || a.active || getAccountValue(draft, a) !== '').map(account =>
-                        <TextField
+                    accounts?.filter(a => showAllAccounts || a.active || typeof getAccountValue(draft, a) !== 'undefined').map(account =>
+                        <CurrencyInput
                             key={account.id}
                             label={`${account.name} ${!account.active ? '(Inactive)' : ''}`}
-                            value={getAccountValue(draft, account)}
-                            type="number"
+                            amount={getAccountValue(draft, account)}
+                            currency={account.currency}
                             name={`account_${account.id}`}
                             onChange={updateAccount}
                         />
@@ -64,7 +65,7 @@ interface Draft {
 }
 function getAccountValue(draft: Draft, account: CashAccount) {
     //zeroes should be shown, other falsy values skipped
-    return typeof draft.accounts[account.id] !== 'undefined' ? draft.accounts[account.id].toString() : '';
+    return draft.accounts[account.id];
 }
 
 

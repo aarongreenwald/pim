@@ -8,6 +8,7 @@ import {PanelProps} from '../common/panel.types';
 import {currencyRadioOptions, defaultCurrency} from './currencies';
 import {horizontalChoiceGroup, stackTokens, StyledChoiceGroup} from './styles';
 import {formatDay} from '../common/date.utils';
+import {CurrencyInput} from './currency-input';
 
 export const AddCashAssetAllocation: React.FC<PanelProps<PaymentId>> = ({onClose}) => {
     const {allocation, updateRecord, updateCurrency, submitForm} = useCaaForm();
@@ -31,10 +32,9 @@ export const AddCashAssetAllocation: React.FC<PanelProps<PaymentId>> = ({onClose
                 onChange={updateRecord}
             />
 
-            <TextField
-                label="Amount"
-                value={allocation.amount ? allocation.amount.toString() : ''}
-                type="number"
+            <CurrencyInput
+                amount={allocation.amount}
+                currency={allocation.currency}
                 name="amount"
                 onChange={updateRecord}
             />
@@ -45,8 +45,6 @@ export const AddCashAssetAllocation: React.FC<PanelProps<PaymentId>> = ({onClose
                 styles={horizontalChoiceGroup}
                 onChange={updateCurrency}
                 options={currencyRadioOptions}/>
-
-
 
             <TextField
                 label="Notes"
@@ -92,7 +90,7 @@ function initializeRecord(): CashAssetAllocationRecord {
   return {
     // id: -1,
     recordDate: format(new Date(), 'yyyy-MM-dd'),
-    amount: 0,
+    amount: null,
     allocationCode: '',
     currency: defaultCurrency,
     note: ''

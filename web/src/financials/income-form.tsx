@@ -7,6 +7,7 @@ import {PanelProps} from '../common/panel.types';
 import {horizontalChoiceGroup, stackTokens, StyledChoiceGroup} from './styles';
 import {currencyRadioOptions, defaultCurrency} from './currencies';
 import {formatDay} from '../common/date.utils';
+import {CurrencyInput} from './currency-input';
 
 export const IncomeForm: React.FC<PanelProps<IncomeId>> = ({onClose, id}) => {
     const {income, updateIncome, updateCurrency, submitForm} = useIncomeForm(onClose, id);
@@ -30,10 +31,9 @@ export const IncomeForm: React.FC<PanelProps<IncomeId>> = ({onClose, id}) => {
                 onChange={updateIncome}
             />
 
-            <TextField
-                label="Amount"
-                value={income.amount ? income.amount.toString() : ''}
-                type="number"
+            <CurrencyInput
+                amount={income.amount}
+                currency={income.currency}
                 name="amount"
                 onChange={updateIncome}
             />
@@ -99,7 +99,7 @@ function initializeIncome(): Income {
   return {
     id: -1,
     paidDate: formatDay(new Date()),
-    amount: 0,
+    amount: null,
     source: '',
     currency: defaultCurrency,
     note: ''

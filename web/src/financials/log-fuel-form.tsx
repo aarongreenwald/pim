@@ -5,6 +5,7 @@ import * as React from 'react';
 import {useCallback, useState} from 'react';
 import {NewFuelLogDto} from '@pim/common';
 import {saveFuelLog} from '../services/server-api';
+import {CurrencyInput} from './currency-input';
 
 export const LogFuelForm: React.FC<PanelProps<number>> = ({onClose}) => {
     const {fuelLog, updateFuelLog, submitForm} = useLogFuelForm(onClose);
@@ -36,10 +37,9 @@ export const LogFuelForm: React.FC<PanelProps<number>> = ({onClose}) => {
                     onChange={updateFuelLog}
                 />
 
-                <TextField
+                <CurrencyInput
+                    amount={fuelLog.price}
                     label="Price"
-                    value={fuelLog.price ? fuelLog.price.toString() : ''}
-                    type="number"
                     name="price"
                     onChange={updateFuelLog}
                 />
@@ -85,7 +85,7 @@ function initializeFuelLog(): NewFuelLogDto {
     return {
         id: -1,
         timestamp: new Date(),
-        price: 0, //TODO set to previously used price
+        price: null, //TODO set to previously used price
         odometer: 0,
         liters: 0,
         note: '',
