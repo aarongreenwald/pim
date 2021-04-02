@@ -1,6 +1,5 @@
 import {useCallback, useEffect, useState} from 'react';
 import * as React from 'react';
-import styled from '@emotion/styled';
 import {Payment, PaymentId} from '@pim/common';
 import {format} from 'date-fns';
 import {getPayment, savePayment} from '../services/server-api';
@@ -123,11 +122,3 @@ function initializePayment(): Payment {
     note: ''
   };
 }
-
-const StyledInput = styled.div`
-  width: 100%;
-  
-  select { 
-    width: 100%;
-  } 
-`

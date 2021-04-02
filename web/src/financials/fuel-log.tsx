@@ -17,7 +17,7 @@ export const FuelHistory: React.FC = () => {
 
     useEffect(() => {
         reloadData();
-    }, [])
+    }, [reloadData])
 
     const [addFuelLog, {setTrue: showAddFuelLog, setFalse: hideAddFuelLog}] = useBoolean(false)
 

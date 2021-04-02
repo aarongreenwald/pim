@@ -20,7 +20,6 @@ export const LogFuelForm: React.FC<PanelProps<number>> = ({onClose}) => {
                 {/*    value={fuelLog.timestamp?.toString()}*/}
                 {/*    name="timestamp"/>*/}
 
-
                 <TextField
                     label="Odometer"
                     value={fuelLog.odometer ? fuelLog.odometer.toString() : ''}
@@ -73,10 +72,12 @@ function useLogFuelForm(onClose: () => void) {
             [target.name]: target.value
         })
     }, [fuelLog])
+
     const submitForm = useCallback(async () => {
         await saveFuelLog(fuelLog)
         onClose()
-    }, [fuelLog])
+    }, [fuelLog, onClose])
+
     return {fuelLog, updateFuelLog, submitForm};
 }
 
