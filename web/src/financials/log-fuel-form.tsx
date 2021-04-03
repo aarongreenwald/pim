@@ -6,7 +6,7 @@ import {useCallback, useState} from 'react';
 import {FuelLog, NewFuelLogDto} from '@pim/common';
 import {saveFuelLog} from '../services/server-api';
 import {CurrencyInput} from './currency-input';
-import {FuelLogCard} from './fuel-log-card';
+import {FuelLogPreviewCard} from './fuel-log-preview-card';
 
 export const LogFuelForm: React.FC<PanelProps<number, FuelLog>> = ({onClose, onSave, data}) => {
     const previousFuelLog = data;
@@ -57,7 +57,10 @@ export const LogFuelForm: React.FC<PanelProps<number, FuelLog>> = ({onClose, onS
                     onChange={updateFuelLog}/>
 
                 <Label>Preview</Label>
-                <FuelLogCard kilometersPerLiter={kml} kilometers={km} totalCost={totalCost} />
+                <FuelLogPreviewCard
+                    kilometersPerLiter={kml}
+                    kilometers={km}
+                    totalCost={totalCost} />
 
                 <Stack horizontal tokens={stackTokens}>
                     <PrimaryButton onClick={submitForm}>Save</PrimaryButton>

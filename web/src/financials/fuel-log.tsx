@@ -1,12 +1,13 @@
 import * as React from 'react';
 import {useCallback, useEffect, useMemo, useState} from 'react';
-import {FuelLog, FuelLogDto} from '@pim/common';
+import {FuelLogDto, PaymentId} from '@pim/common';
 import {getFuelLog} from '../services/server-api';
-import {CommandBar, ICommandBarItemProps, Panel} from '@fluentui/react';
-import {List} from './list';
+import {CommandBar, ICommandBarItemProps, Panel, List as FluentList, Text} from '@fluentui/react';
 import {commandBarStyles} from './styles';
 import {useBoolean} from '@uifabric/react-hooks';
 import {LogFuelForm} from './log-fuel-form';
+import {FuelLogCard} from './fuel-log-card';
+import {PaymentForm} from './payment-form';
 
 export const FuelHistory: React.FC = () => {
     const [fuelLog, setFuelLog] = useState<FuelLogDto>()
@@ -20,6 +21,8 @@ export const FuelHistory: React.FC = () => {
     }, [reloadData])
 
     const [addFuelLog, {setTrue: showAddFuelLog, setFalse: hideAddFuelLog}] = useBoolean(false)
+    const [selectedPayment, setSelectedPayment] = useState<PaymentId>(null)
+    const hideEditPayment = () => setSelectedPayment(null);
 
     const commands = useCommandBarCommands(showAddFuelLog, reloadData);
 
@@ -27,21 +30,39 @@ export const FuelHistory: React.FC = () => {
         <>
             <CommandBar items={commands} styles={commandBarStyles}/>
             {
+                fuelLog && <FluentList
+                    items={fuelLog.fuelLog}
+                    onRenderCell={f =>
+                        <Text>
+                            <FuelLogCard fuelLog={f}
+                                         onViewPayment={() => setSelectedPayment(f.paymentId)}/>
+                        </Text>
+                    }
+                />
 
-                fuelLog &&
-                    <List<FuelLog>
-                        data={fuelLog.fuelLog}
-                        idField={'id'} />
             }
-            {
 
-                <Panel
-                    isOpen={addFuelLog}
-                    headerText="Log Fuel"
-                    onDismiss={hideAddFuelLog}>
-                    <LogFuelForm onClose={hideAddFuelLog} onSave={reloadData} data={fuelLog?.fuelLog[0]}/>
-                </Panel>
-            }
+            {/*{*/}
+
+            {/*    fuelLog &&*/}
+            {/*        <List<FuelLog>*/}
+            {/*            data={fuelLog.fuelLog}*/}
+            {/*            idField={'id'} />*/}
+            {/*}*/}
+
+            <Panel
+                isOpen={addFuelLog}
+                headerText="Log Fuel"
+                onDismiss={hideAddFuelLog}>
+                <LogFuelForm onClose={hideAddFuelLog} onSave={reloadData} data={fuelLog?.fuelLog[0]}/>
+            </Panel>
+
+            <Panel
+                isOpen={!!selectedPayment}
+                headerText="Edit Payment"
+                onDismiss={hideEditPayment}>
+                <PaymentForm onClose={hideEditPayment} id={selectedPayment}/>
+            </Panel>
         </>
 
     )
