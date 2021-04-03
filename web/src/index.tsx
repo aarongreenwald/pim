@@ -14,6 +14,7 @@ import {useBoolean} from '@uifabric/react-hooks';
 import styled from '@emotion/styled';
 import {SwipeableDrawer} from '@material-ui/core';
 import {Income} from './financials/income';
+import {FuelHistory} from './financials/fuel-log';
 
 initializeIcons();
 
@@ -35,6 +36,9 @@ const App = ({onLogout}) => {
                 <Switch>
                     <Route path="/income">
                         <Income />
+                    </Route>
+                    <Route path="/fuel">
+                        <FuelHistory />
                     </Route>
                     <Route path="/spending">
                         <FinancialsHome />
@@ -64,6 +68,11 @@ const navGroups = [
                 key: 'income',
                 name: 'Income',
                 url: '#/income'
+            },
+            {
+                key: 'fuel',
+                name: 'Fuel Log',
+                url: '#/fuel'
             }
         ]
     }
