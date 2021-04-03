@@ -1,4 +1,4 @@
-import {currencySymbols, defaultCurrency} from './currencies';
+import {currencySymbols} from './currencies';
 import * as React from 'react';
 import {FuelLog, PaymentId} from '@pim/common';
 import {FontIcon, Link} from '@fluentui/react'

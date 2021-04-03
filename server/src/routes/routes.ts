@@ -113,6 +113,10 @@ export const setupRoutes = (app: Express) => {
         .get((req, res) => {
             Promise.all([db.getFuelLog(), db.getFuelLogSummary()])
                 .then(([fuelLog, summary]) => res.send(JSON.stringify({fuelLog, summary})))
+                .catch(ex => {
+                    console.error(ex)
+                    res.status(500).send(ex)
+                })
         })
         .post(jsonParser, (req, res) => {
             db.insertFuelLog(req.body)

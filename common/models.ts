@@ -112,6 +112,8 @@ export interface FuelLog {
   note?: string;
   isFull: boolean;
   paymentId: PaymentId;
+  totalCost: Money;
+  currency: Currency;
 }
 
 export interface FuelLogSummary {

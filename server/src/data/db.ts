@@ -326,7 +326,9 @@ export const insertCashAssetAllocationRecord = async (allocationRecord: CashAsse
 export const getFuelLog: () => Promise<FuelLog[]> = async () => {
     const db = await getDb();
     const sql = `
-        select fuel_log_id id, timestamp, km_per_liter kilometersPerLiter, odometer, liters, kilometers, note, is_full isFull, payment_id paymentId 
+        select fuel_log_id id, timestamp, km_per_liter kilometersPerLiter, odometer, liters, kilometers, note, is_full isFull, payment_id paymentId
+            , amount totalCost
+            , currency
         from v_fuel_log
     `;
     return all<FuelLog>(db, sql)
@@ -352,7 +354,7 @@ export const insertFuelLog = async (fuelLogDto: NewFuelLogDto) => {
         counterparty: 'Gas Station',
         categoryId: 14,
         currency: 'ILS',
-        amount: fuelLogDto.price * fuelLogDto.liters,
+        amount: Math.round(fuelLogDto.price * fuelLogDto.liters * 100) / 100,
         note: fuelLogDto.note
     })
 

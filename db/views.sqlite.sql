@@ -228,17 +228,20 @@ having p.start_date > 0;
            , liters
            , kilometers
            , kilometers * 1.0 / liters km_per_liter
-           , note
+           , withkm.note
            , is_full
-           , payment_id
+           , withkm.payment_id
+           , payment.amount
+           , payment.currency
     from withkm
+        left join payment on withkm.payment_id = payment.payment_id
     order by odometer desc
 
-
+--For now assume all entries are in the same currency
 ;drop view if exists v_fuel_log_summary
 ;create view v_fuel_log_summary as
     select sum(kilometers) kilometers,
            sum(liters) liters,
            sum(amount) ils,
            sum(kilometers) * 1.0 / sum(liters) kilometers_per_liter
-    from v_fuel_log a left join payment b on a.payment_id = b.payment_id
+    from v_fuel_log
