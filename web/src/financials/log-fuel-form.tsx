@@ -1,14 +1,19 @@
 import {PanelProps} from '../common/panel.types';
-import {DefaultButton, PrimaryButton, Stack, TextField} from '@fluentui/react';
+import {DefaultButton, Label, PrimaryButton, Stack, TextField} from '@fluentui/react';
 import {stackTokens} from './styles';
 import * as React from 'react';
 import {useCallback, useState} from 'react';
-import {NewFuelLogDto} from '@pim/common';
+import {FuelLog, NewFuelLogDto} from '@pim/common';
 import {saveFuelLog} from '../services/server-api';
 import {CurrencyInput} from './currency-input';
+import {FuelLogCard} from './fuel-log-card';
 
-export const LogFuelForm: React.FC<PanelProps<number>> = ({onClose}) => {
-    const {fuelLog, updateFuelLog, submitForm} = useLogFuelForm(onClose);
+export const LogFuelForm: React.FC<PanelProps<number, FuelLog>> = ({onClose, onSave, data}) => {
+    const previousFuelLog = data;
+    const {fuelLog, updateFuelLog, submitForm} = useLogFuelForm(onClose, onSave);
+    const km = Math.max(fuelLog.odometer - previousFuelLog?.odometer, 0);
+    const kml = fuelLog.liters ? km / fuelLog.liters : null;
+    const totalCost = fuelLog.liters * fuelLog.price;
 
     return (
         <form>
@@ -51,6 +56,8 @@ export const LogFuelForm: React.FC<PanelProps<number>> = ({onClose}) => {
                     multiline
                     onChange={updateFuelLog}/>
 
+                <Label>Preview</Label>
+                <FuelLogCard kilometersPerLiter={kml} kilometers={km} totalCost={totalCost} />
 
                 <Stack horizontal tokens={stackTokens}>
                     <PrimaryButton onClick={submitForm}>Save</PrimaryButton>
@@ -63,7 +70,7 @@ export const LogFuelForm: React.FC<PanelProps<number>> = ({onClose}) => {
 }
 
 
-function useLogFuelForm(onClose: () => void) {
+function useLogFuelForm(onClose: () => void, onSave: () => void) {
     const [fuelLog, setFuelLog] = useState<NewFuelLogDto>(initializeFuelLog())
 
     const updateFuelLog = useCallback(({target}) => {
@@ -75,8 +82,9 @@ function useLogFuelForm(onClose: () => void) {
 
     const submitForm = useCallback(async () => {
         await saveFuelLog(fuelLog)
+        onSave()
         onClose()
-    }, [fuelLog, onClose])
+    }, [fuelLog, onClose, onSave])
 
     return {fuelLog, updateFuelLog, submitForm};
 }
