@@ -2,7 +2,7 @@ import {useCallback, useEffect, useState} from 'react';
 import * as React from 'react';
 import {Payment, PaymentId} from '@pim/common';
 import {getPayment, savePayment} from '../services/server-api';
-import {PrimaryButton, DefaultButton, Stack, TextField} from '@fluentui/react'
+import {PrimaryButton, DefaultButton, Stack, TextField, Toggle, Spinner} from '@fluentui/react'
 import {PanelProps} from '../common/panel.types';
 import {CategoryDropdown} from './category-dropdown';
 import {currencyRadioOptions, defaultCurrency} from './currencies';
@@ -11,21 +11,56 @@ import {CurrencyInput} from './currency-input';
 import {formatDay} from '../common/date.utils';
 
 export const PaymentForm: React.FC<PanelProps<PaymentId>> = ({onClose, id}) => {
-    const {payment, updatePayment, updateCurrency, updateCategory, submitForm} = usePaymentForm(onClose, id);
+    const {
+        payment,
+        updatePayment,
+        updateCurrency,
+        updateCategory,
+        submitForm,
+        saveAndClose,
+        showIncurredDates,
+        setShowIncurredDates
+    } = usePaymentForm(onClose, id);
 
-    if (!payment) return null; //TODO show a spinner
+    if (!payment) return <Spinner />;
 
     return (
       <form>
         <Stack tokens={stackTokens}>
-            <TextField
-               label={'Date'}
-               type="date"
-               onChange={updatePayment}
-               value={formatDay(payment.paidDate)}
-               name="paidDate"/>
+            <Stack horizontal tokens={stackTokens}>
+                <TextField
+                   styles={{root: {flex: 1}}}
+                   label={'Date'}
+                   type="date"
+                   onChange={updatePayment}
+                   value={formatDay(payment.paidDate)}
+                   name="paidDate"/>
 
-            {/* todo begin/end incurred dates */}
+                <Toggle
+                    label={'Incurred'}
+                    checked={showIncurredDates}
+                    onChange={(_, val) => setShowIncurredDates(val)}/>
+            </Stack>
+            {
+                showIncurredDates &&
+                <>
+                    <TextField
+                        label={'Incurred Begin'}
+                        type="date"
+                        onChange={updatePayment}
+                        value={payment.incurredBeginDate ? formatDay(payment.incurredBeginDate) : undefined}
+                        name="incurredBeginDate"/>
+
+                    <TextField
+                        label={'Incurred End'}
+                        type="date"
+                        onChange={updatePayment}
+                        value={payment.incurredEndDate ? formatDay(payment.incurredEndDate) : undefined}
+                        name="incurredEndDate"/>
+                </>
+            }
+
+
             <TextField
                 label="Counterparty"
                 name="counterparty"
@@ -62,6 +97,11 @@ export const PaymentForm: React.FC<PanelProps<PaymentId>> = ({onClose, id}) => {
 
             <Stack horizontal tokens={stackTokens}>
                 <PrimaryButton onClick={submitForm}>Save</PrimaryButton>
+                {
+                    !id &&
+                    <PrimaryButton onClick={saveAndClose}>Save & Close</PrimaryButton>
+                }
+
                 <DefaultButton onClick={onClose}>Cancel</DefaultButton>
             </Stack>
 
@@ -71,11 +111,20 @@ export const PaymentForm: React.FC<PanelProps<PaymentId>> = ({onClose, id}) => {
 }
 
 function usePaymentForm(onClose: () => void, paymentId?: PaymentId, ) {
+    const [showIncurredDates, setShowIncurredDates] = useState<boolean>(false);
     const [payment, setPayment] = useState<Payment>(paymentId ? null : initializePayment())
 
     useEffect(() => {
         if (paymentId) {
-            getPayment(paymentId).then(setPayment)
+            getPayment(paymentId)
+                .then(payment => {
+                    if (payment.incurredBeginDate || payment.incurredEndDate) {
+                        setShowIncurredDates(true);
+                    }
+                    return payment;
+                })
+                .then(setPayment)
+            //TODO cleanup - if the panel is closed before the request finishes an error is thrown
         }
     }, [paymentId])
 
@@ -99,21 +148,50 @@ function usePaymentForm(onClose: () => void, paymentId?: PaymentId, ) {
             [target.name]: target.value
         })
     }, [payment])
+
+    const saveAndClose  = useCallback(async () => {
+        await savePayment(preparePayment(payment, showIncurredDates))
+        onClose();
+    }, [payment, onClose, showIncurredDates])
+
+    /**
+     * submit changes its behavior depending on whether this is a new payment (form stays open, another payment is added)
+     * or editing an existing payment (close the form).
+     */
     const submitForm = useCallback(async () => {
-        await savePayment(payment)
-        if (payment.id === -1) {
-            setPayment(initializePayment())
+        if (payment.id !== -1) {
+            await saveAndClose();
         } else {
-            onClose();
+            await savePayment(preparePayment(payment, showIncurredDates))
+            setShowIncurredDates(false)
+            setPayment(initializePayment(payment.paidDate))
+            //TODO focus on date field
         }
-    }, [payment, onClose])
-    return {payment, updatePayment, updateCategory, updateCurrency, submitForm};
+    }, [payment, saveAndClose, showIncurredDates])
+    return {
+        payment,
+        updatePayment,
+        updateCategory,
+        updateCurrency,
+        submitForm,
+        saveAndClose,
+        showIncurredDates,
+        setShowIncurredDates
+    };
 }
 
-function initializePayment(): Payment {
+const preparePayment = (payment: Payment, useIncurredDates: boolean): Payment => ({
+    ...payment,
+    incurredBeginDate: useIncurredDates ? payment.incurredBeginDate : null,
+    incurredEndDate: useIncurredDates ? payment.incurredEndDate : null,
+})
+
+function initializePayment(paidDate = formatDay(new Date())): Payment {
   return {
     id: -1,
-    paidDate: formatDay(new Date()),
+    paidDate,
+    incurredBeginDate: paidDate,
+    incurredEndDate: paidDate,
     categoryId: -1,
     amount: null,
     counterparty: '',
