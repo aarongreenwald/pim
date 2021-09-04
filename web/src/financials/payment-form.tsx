@@ -1,8 +1,8 @@
-import {useCallback, useEffect, useState} from 'react';
+import {useCallback, useEffect, useRef, useState} from 'react';
 import * as React from 'react';
 import {Payment, PaymentId} from '@pim/common';
 import {getPayment, savePayment} from '../services/server-api';
-import {PrimaryButton, DefaultButton, Stack, TextField, Toggle, Spinner} from '@fluentui/react'
+import {PrimaryButton, DefaultButton, Stack, TextField, Toggle, Spinner, ITextField} from '@fluentui/react'
 import {PanelProps} from '../common/panel.types';
 import {CategoryDropdown} from './category-dropdown';
 import {currencyRadioOptions, defaultCurrency} from './currencies';
@@ -19,7 +19,8 @@ export const PaymentForm: React.FC<PanelProps<PaymentId>> = ({onClose, id}) => {
         submitForm,
         saveAndClose,
         showIncurredDates,
-        setShowIncurredDates
+        setShowIncurredDates,
+        formStartRef
     } = usePaymentForm(onClose, id);
 
     if (!payment) return <Spinner />;
@@ -30,6 +31,7 @@ export const PaymentForm: React.FC<PanelProps<PaymentId>> = ({onClose, id}) => {
             <Stack horizontal tokens={stackTokens}>
                 <TextField
                    styles={{root: {flex: 1}}}
+                   componentRef={formStartRef}
                    label={'Date'}
                    type="date"
                    onChange={updatePayment}
@@ -113,6 +115,7 @@ export const PaymentForm: React.FC<PanelProps<PaymentId>> = ({onClose, id}) => {
 function usePaymentForm(onClose: () => void, paymentId?: PaymentId, ) {
     const [showIncurredDates, setShowIncurredDates] = useState<boolean>(false);
     const [payment, setPayment] = useState<Payment>(paymentId ? null : initializePayment())
+    const formStartRef = useRef<ITextField>();
 
     useEffect(() => {
         if (paymentId) {
@@ -165,7 +168,7 @@ function usePaymentForm(onClose: () => void, paymentId?: PaymentId, ) {
             await savePayment(preparePayment(payment, showIncurredDates))
             setShowIncurredDates(false)
             setPayment(initializePayment(payment.paidDate))
-            //TODO focus on date field
+            formStartRef.current.focus();
         }
     }, [payment, saveAndClose, showIncurredDates])
     return {
@@ -176,7 +179,8 @@ function usePaymentForm(onClose: () => void, paymentId?: PaymentId, ) {
         submitForm,
         saveAndClose,
         showIncurredDates,
-        setShowIncurredDates
+        setShowIncurredDates,
+        formStartRef
     };
 }
 
