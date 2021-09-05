@@ -16,7 +16,7 @@ import {currencyFields, currencySymbols} from './currencies';
 import styled from '@emotion/styled';
 import {useDebouncedInput} from '../common/debounced-input.hook';
 import {formatDay} from '../common/date.utils';
-import {Money} from '@pim/common';
+import {Currency, Money} from '@pim/common';
 import {CurrencyInput} from './currency-input';
 
 interface ListProps<T = unknown> {
@@ -203,13 +203,13 @@ const CurrencyFilterMenu: React.FC<FilterMenuProps> = ({column, columnFilters, s
         <CurrencyInput
             label="Minimum"
             amount={minInputVal}
-            currency={column.key as any}
+            currency={column.key as Currency}
             onChange={(_, value) => updateMinValue(value)}
         />
         <CurrencyInput
             label="Maximum"
             amount={maxInputVal}
-            currency={column.key as any}
+            currency={column.key as Currency}
             onChange={(_, value) => updateMaxValue(value)}
         />
         <DefaultButton onClick={() => {
@@ -297,10 +297,10 @@ function rowMatchesColumnFilters<T>(row: T, filters: ColumnFilters): boolean {
         if (currencyFields.includes(key)) {
             const filter = filters[key] as CurrencyColumnFilters;
             const amount = row[key];
-            if (filter.min.toString() !== '' && amount < filter.min) {
+            if (filter.min?.toString() !== '' && amount < filter.min) {
                 return false
             }
-            if (filter.max.toString() !== '' &&amount > filter.max) {
+            if (filter.max?.toString() !== '' &&amount > filter.max) {
                 return false
             }
         }
