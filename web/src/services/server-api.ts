@@ -193,3 +193,5 @@ export const saveFuelLog = (fuelLog: NewFuelLogDto): Promise<void> =>
         credentials: 'include',
         body: JSON.stringify(fuelLog)
     }).then(handleResponse)
+
+// const debugSleep = (ms) => (...args) => new Promise(resolve => setTimeout(resolve, ms, args))

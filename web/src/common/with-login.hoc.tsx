@@ -1,7 +1,7 @@
 import {useCallback, useEffect, useState} from 'react';
 import {getLoggedIn, login, logout} from '../services/server-api';
 import styled from '@emotion/styled';
-import {ActionButton} from '@fluentui/react';
+import {ActionButton, Spinner} from '@fluentui/react';
 import * as React from 'react';
 
 function LoginForm({onLoggedIn}: {onLoggedIn: (success: boolean) => void}) {
@@ -22,26 +22,40 @@ function LoginForm({onLoggedIn}: {onLoggedIn: (success: boolean) => void}) {
 const StyledForm = styled.form`
     display: flex;
     justify-content: center;
+    height: 100vh;
+    align-items: center;
 `
 
 function useLoginState() {
     //TODO put a logout function on the context and use it elsewhere
     //TODO any 401 anywhere should flip the loggedIn state to false
     const [loggedIn, setLoggedIn] = useState<boolean>(false)
+    const [loading, setLoading] = useState<boolean>(true)
     useEffect(() => {
-        getLoggedIn().then(setLoggedIn)
+        setLoading(true)
+        getLoggedIn().then(res => {
+            setLoading(false);
+            setLoggedIn(res);
+        })
     }, [])
     const onLogout = useCallback(() => {
         logout().then(success => setLoggedIn(success ? false : loggedIn))
     }, [loggedIn])
-    return {loggedIn, setLoggedIn, onLogout};
+    return {loggedIn, setLoggedIn, onLogout, loading};
 }
 
 export function withLogin (WrappedComponent) {
     return function Component() {
-        const {loggedIn, setLoggedIn, onLogout} = useLoginState();
+        const {loggedIn, setLoggedIn, onLogout, loading} = useLoginState();
+
+        if (loading) {
+            return <Spinner styles={spinnerStyles}/>
+        }
+
         return loggedIn ?
             <WrappedComponent onLogout={onLogout}/> :
             <LoginForm onLoggedIn={setLoggedIn}/>
     }
 }
+
+const spinnerStyles = {root: {height: '100vh'}};
