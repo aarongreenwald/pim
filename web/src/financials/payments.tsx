@@ -41,6 +41,7 @@ export const Payments: React.FC = () => {
                 <Panel
                     isOpen={addPayment}
                     headerText="Add Payment"
+                    isBlocking={false}
                     onDismiss={hideAddPayment}>
                     <PaymentForm onClose={hideAddPayment}/>
                 </Panel>
@@ -49,6 +50,7 @@ export const Payments: React.FC = () => {
                 <Panel
                     isOpen={!!selectedItem}
                     headerText="Edit Payment"
+                    isBlocking={false}
                     onDismiss={hideEditPayment}>
                     <PaymentForm onClose={hideEditPayment} id={selectedItem}/>
                 </Panel>
