@@ -5,7 +5,7 @@ import {Currency, Money} from '@pim/common';
 
 export const CurrencyInput: React.FC<CurrencyInputProps> = ({
                                                             amount,
-                                                            currency= defaultCurrency,
+                                                            currency = defaultCurrency,
                                                             onChange,
                                                             name,
                                                             label= 'Amount'}) => (
