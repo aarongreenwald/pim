@@ -6,15 +6,19 @@ const uuid = require('uuid')
 
 fs.mkdir('./temporary_files', err => {});
 
+async function getPathDetails<P, ResBody, ReqBody, ReqQuery>(path: string) {
+    const fullPath = `${CONTENT_DIRECTORY}/${replaceSpaces(`./${path}`)}`
+    const data = await fs.promises.stat(fullPath);
+    const isRoot = !data
+    const isDirectory = isRoot || data.isDirectory();
+    const directoryPath = isDirectory ? fullPath : fullPath.split('/').slice(0, -1).join('/');
+    return {path, fullPath, isDirectory, directoryPath};
+}
+
 export const setupFileserverRoutes = (app: Express) => {
 
     app.get('/notes/path', async (req, res) => {
-        const {path} = req.query;
-        const fullPath = `${CONTENT_DIRECTORY}/${replaceSpaces(`./${path}`)}`
-        const data: any = await stat(fullPath);
-        const isRoot = !data
-        const isDirectory = isRoot || data.isDirectory();
-        const directoryPath = isDirectory ? fullPath : fullPath.split('/').slice(0, -1).join('/');
+        const {path, fullPath, isDirectory, directoryPath} = await getPathDetails(req.query.path as string);
         const directoryInfo = await getDirectoryInfo(directoryPath)
         const fileContent = isDirectory || isBinary(path as string) ? null : await fs.promises.readFile(fullPath, 'utf8');
 
@@ -29,26 +33,18 @@ export const setupFileserverRoutes = (app: Express) => {
     })
 
     app.get('/notes/download', async (req, res) => {
-        const {path} = req.query;
-        const fullPath = `${CONTENT_DIRECTORY}/${replaceSpaces(`./${path}`)}`
-        const data: any = await stat(fullPath);
-        const isRoot = !data
-        const isDirectory = isRoot || data.isDirectory();
+        const {path, fullPath, isDirectory} = await getPathDetails(req.query.path as string);
 
         if (isDirectory) {
             zipAndReturn(res, fullPath, path)
         } else {
-            res.setHeader("content-type",'application/file');
+            res.setHeader('content-type','application/file');
             fs.createReadStream(fullPath).pipe(res);
         }
     })
 
     app.get('/notes/viewfile', async (req, res) => {
-        const {path} = req.query;
-        const fullPath = `${CONTENT_DIRECTORY}/${replaceSpaces(`./${path}`)}`
-        const data: any = await stat(fullPath);
-        const isRoot = !data
-        const isDirectory = isRoot || data.isDirectory();
+        const {path, fullPath, isDirectory} = await getPathDetails(req.query.path as string);
 
         if (isDirectory) {
             res.status(500).send('Path is a directory')
@@ -62,7 +58,7 @@ export const setupFileserverRoutes = (app: Express) => {
 
     const getDirectoryInfo = async (path: string) => {
         try {
-            const contents: any = await readdir(path)
+            const contents = await fs.promises.readdir(path)
             const promises = contents.map(name => getStats(name, path))
             return await Promise.all(promises);
         } catch (ex) {
@@ -78,14 +74,6 @@ export const setupFileserverRoutes = (app: Express) => {
 const isBinary = (path: string) => mimeType(path) !== 'text/plain';
 
 const CONTENT_DIRECTORY = process.env.CONTENT_DIRECTORY || './'
-
-const stat = path => new Promise((resolve, reject) => {
-    fs.stat(path, (err, result) => {
-        if (err) reject(err)
-
-        resolve(result)
-    })
-})
 
 const filename = (path) => path.split('/').pop()
 
@@ -123,14 +111,6 @@ const zipAndReturn = (res, fullPath, path) => {
     })
 }
 
-const readdir = dir => new Promise((resolve, reject) => {
-    fs.readdir(dir, (err, result) => {
-        if (err) reject(err)
-
-        resolve(result)
-    })
-})
-
 const buildBreadcrumbs = path => {
     path = cleanPath(path)
 
@@ -143,15 +123,12 @@ const buildBreadcrumbs = path => {
     }, [])
 }
 
-const getStats = (name, dir) => new Promise((resolve, reject) => {
-    fs.stat(`${dir}/${name}`, (err, stats) => {
-        if (err) reject(err)
-
-        resolve({
-            isDirectory: stats && stats.isDirectory(),
-            name,
-            isPlainText: mimeType(name) === 'text/plain',
-            openInBrowser: openInBrowser(name)
-        })
-    })
-})
+const getStats = async (name, dir) => {
+    const stats = await fs.promises.stat(`${dir}/${name}`)
+    return {
+        isDirectory: stats && stats.isDirectory(),
+        name,
+        isPlainText: mimeType(name) === 'text/plain',
+        openInBrowser: openInBrowser(name)
+    }
+}
