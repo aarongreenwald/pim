@@ -1,11 +1,5 @@
 import * as React from 'react'
 import {render} from 'react-dom'
-import {
-    HashRouter,
-    Switch,
-    Route,
-    Redirect
-} from 'react-router-dom';
 import {FinancialsHome} from './financials/finacials.home';
 import { initializeIcons } from '@uifabric/icons';
 import {withLogin} from './common/with-login.hoc';
@@ -15,6 +9,13 @@ import styled from '@emotion/styled';
 import {SwipeableDrawer} from '@material-ui/core';
 import {Income} from './financials/income';
 import {FuelHistory} from './financials/fuel-log';
+import { Notes } from './notes/notes.index';
+import {
+    HashRouter as Router,
+    Switch,
+    Route,
+} from 'react-router-dom';
+import {Redirect} from 'react-router';
 
 initializeIcons();
 
@@ -27,7 +28,7 @@ const App = ({onLogout}) => {
                 <ActionButton iconProps={{iconName: 'CollapseMenu'}} onClick={showNav}/>
                 <ActionButton iconProps={{iconName: 'SignOut'}} text={'Logout'} onClick={onLogout}/>
             </StyledAppHeader>
-            <HashRouter>
+            <Router>
                 <SwipeableDrawer onClose={hideNav} onOpen={showNav} open={shouldShowNav}>
                     <Nav groups={navGroups}
                          onLinkClick={hideNav}
@@ -43,11 +44,13 @@ const App = ({onLogout}) => {
                     <Route path="/spending">
                         <FinancialsHome />
                     </Route>
+                    <Route path="/notes" component={Notes}>
+                    </Route>
                     <Route path="/">
                         <Redirect to="/spending" />
                     </Route>
                 </Switch>
-            </HashRouter>
+            </Router>
         </>
     );
 }
@@ -73,6 +76,11 @@ const navGroups = [
                 key: 'fuel',
                 name: 'Fuel Log',
                 url: '#/fuel'
+            },
+            {
+                key: 'notes',
+                name: 'Notes',
+                url: '#/notes'
             }
         ]
     }

@@ -194,4 +194,16 @@ export const saveFuelLog = (fuelLog: NewFuelLogDto): Promise<void> =>
         body: JSON.stringify(fuelLog)
     }).then(handleResponse)
 
+export const getNotes = (path: string) => {
+    return fetch(`${config.apiServiceUrl}/notes/${path}`, {credentials: 'include'})
+        .then(handleResponse)
+        .then(res => res.text())
+        .then(text => {
+            try {
+                return JSON.parse(text)
+            } catch {
+                return text;
+            }
+        })
+}
 // const debugSleep = (ms) => (...args) => new Promise(resolve => setTimeout(resolve, ms, args))

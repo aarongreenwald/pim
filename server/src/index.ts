@@ -1,3 +1,5 @@
+import {setupFileserverRoutes} from './fileserver';
+
 if (process.env.DOTENV) {
     require('dotenv').config({path: process.env.DOTENV})
 }
@@ -16,6 +18,7 @@ app.use((req, res, next) => {
 setupAuth(app);
 
 setupRoutes(app);
+setupFileserverRoutes(app);
 
 express()
     .use('/api', app)
