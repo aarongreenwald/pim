@@ -13,22 +13,24 @@ export function Notes() {
         getNotes(path ?? '').then(setNotes)
     }, [path])
 
-
     if (!notes) return <Spinner />;
-
-    if (typeof notes === 'string') {
-        return <div>{notes}</div>
-    }
 
     const {
         breadcrumbs,
-        directory,
-        items
+        path: directory,
+        directoryInfo,
+        fileContent,
+        isDirectory
     } = notes;
     return (
         <div>
             <Breadcrumbs breadcrumbs={breadcrumbs} />
-            <DirectoryContents directory={directory} contents={items}/>
+            {
+                isDirectory && <DirectoryContents directory={directory} contents={directoryInfo}/>
+            }
+            {
+                fileContent && <div dangerouslySetInnerHTML={{__html: fileContent.replace(/\n/g, '<br />')}}/>
+            }
         </div>
     )
 }
@@ -47,8 +49,18 @@ const DirectoryContents = ({directory, contents}) => (
         {contents.map((item) =>
             <tr key={item.name}>
                 <td>{item.isDirectory ? 'D' : 'F' }</td>
-                <td><Link to={`/notes?path=${directory}/${item.name}&view=true`}>{item.name}</Link></td>
-                <td><a href={`/api/notes/${directory}/${item.name}?download=true`}>&#8595;</a></td>
+                {
+                    item.isPlainText ?
+                        <td><Link to={`/notes?path=${directory}/${item.name}`}>{item.name}</Link></td> :
+                        <td>{item.name}</td>
+                }
+
+                <td><a href={`/api/notes/download?path=${directory}/${item.name}`} download={item.name}>&#8595;</a></td>
+                {
+                    item.openInBrowser &&
+                    <td><a href={`/api/notes/viewfile?path=${directory}/${item.name}`}>??</a></td>
+                }
+
             </tr>
         )}
         </tbody>

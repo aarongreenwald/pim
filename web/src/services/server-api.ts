@@ -195,7 +195,7 @@ export const saveFuelLog = (fuelLog: NewFuelLogDto): Promise<void> =>
     }).then(handleResponse)
 
 export const getNotes = (path: string) => {
-    return fetch(`${config.apiServiceUrl}/notes/${path}`, {credentials: 'include'})
+    return fetch(`${config.apiServiceUrl}/notes/path?path=${path}`, {credentials: 'include'})
         .then(handleResponse)
         .then(res => res.text())
         .then(text => {
