@@ -2,12 +2,14 @@ import {Express} from 'express';
 import fs from 'fs';
 import {exec} from 'child_process';
 import {resolvePath} from '../utils/utils';
+import {NotesPathDto, DirectoryItem, Breadcrumb} from "@pim/common";
 const uuid = require('uuid')
 
 const NOTES_PATH = process.env.NOTES_PATH;
 if (!NOTES_PATH) {
     throw 'Environment variable NOTES_PATH is not set!'
 }
+
 
 export const setupNotesRoutes = (app: Express) => {
 
@@ -16,14 +18,15 @@ export const setupNotesRoutes = (app: Express) => {
         const directoryInfo = await getDirectoryInfo(directoryPath)
         const fileContent = isDirectory || isBinary(path as string) ? null : await fs.promises.readFile(fullPath, 'utf8');
 
-        res.send({
+        const response: NotesPathDto = {
             isDirectory,
             path: cleanPath(path),
             breadcrumbs: buildBreadcrumbs(path),
             directoryInfo,
             fileContent,
             isPlainText: !isDirectory && mimeType(path) === 'text/plain'
-        })
+        };
+        res.send(response)
     })
 
     app.get('/notes/download', async (req, res) => {
@@ -50,7 +53,7 @@ export const setupNotesRoutes = (app: Express) => {
         }
     })
 
-    const getDirectoryInfo = async (path: string) => {
+    const getDirectoryInfo: (path: string) => Promise<DirectoryItem[]> = async (path: string) => {
         try {
             const contents = await fs.promises.readdir(path)
             const promises = contents.map(name => getStats(name, path))
@@ -114,7 +117,7 @@ const zipAndReturn = (res, fullPath, path) => {
     })
 }
 
-const buildBreadcrumbs = path => {
+const buildBreadcrumbs: (path: string) => Breadcrumb[] = path => {
     path = cleanPath(path)
 
     return path.split('/').reduce((acc, name, i) => {
@@ -123,7 +126,7 @@ const buildBreadcrumbs = path => {
             path: '/' + path.split('/').splice(0, i + 1).filter(x => x).join('/')
         })
         return acc
-    }, [])
+    }, [] as Breadcrumb[])
 }
 
 const getStats = async (name, dir) => {

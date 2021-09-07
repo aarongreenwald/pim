@@ -17,7 +17,7 @@ import {
     SpendingByCategory,
     UnreportedSpending,
     vPayment,
-    NotesPath
+    NotesPathDto
 } from '@pim/common';
 
 const handleResponse = (res) => {
@@ -195,7 +195,7 @@ export const saveFuelLog = (fuelLog: NewFuelLogDto): Promise<void> =>
         body: JSON.stringify(fuelLog)
     }).then(handleResponse)
 
-export const getNotes: (path: string) => Promise<NotesPath> = (path: string) => {
+export const getNotes: (path: string) => Promise<NotesPathDto> = (path: string) => {
     return fetch(`${config.apiServiceUrl}/notes/path?path=${path}`, {credentials: 'include'})
         .then(handleResponse)
         .then(res => res.json());

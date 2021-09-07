@@ -6,10 +6,11 @@ import {Link} from 'react-router-dom';
 import {useLocation} from 'react-router';
 import Editor from '@monaco-editor/react';
 import ReactMarkdown from 'react-markdown';
+import {NotesPathDto} from '@pim/common';
 
 
 export function Notes() {
-    const [notes, setNotes] = useState(null)
+    const [notes, setNotes] = useState<NotesPathDto>(null)
     const location = useLocation()
     const path = getPath(location)
     useEffect(() => {

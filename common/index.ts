@@ -1,1 +1,2 @@
-export * from './models';
+export * from './financials.models';
+export  * from './notes.models';

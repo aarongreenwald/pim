@@ -137,8 +137,3 @@ export interface NewFuelLogDto {
   note?: string;
   isFull: boolean;
 }
-
-//TODO
-export interface NotesPath {
-
-}
