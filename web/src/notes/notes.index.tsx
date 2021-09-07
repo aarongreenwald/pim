@@ -1,9 +1,12 @@
 import * as React from 'react';
 import {useEffect, useState} from 'react';
 import {getNotes} from '../services/server-api';
-import {Spinner} from '@fluentui/react';
+import {PrimaryButton, Spinner} from '@fluentui/react';
 import {Link} from 'react-router-dom';
 import {useLocation} from 'react-router';
+import Editor from '@monaco-editor/react';
+import ReactMarkdown from 'react-markdown';
+
 
 export function Notes() {
     const [notes, setNotes] = useState(null)
@@ -23,15 +26,37 @@ export function Notes() {
         isDirectory
     } = notes;
     return (
-        <div>
+        <>
             <Breadcrumbs breadcrumbs={breadcrumbs} />
             {
                 isDirectory && <DirectoryContents directory={directory} contents={directoryInfo}/>
             }
             {
-                fileContent && <div dangerouslySetInnerHTML={{__html: fileContent.replace(/\n/g, '<br />')}}/>
+                fileContent && <FileContent content={fileContent} />
             }
-        </div>
+        </>
+    )
+}
+
+const FileContent = ({content}) => {
+    const [editMode, setEditMode] = useState(false);
+
+    return (
+        <>
+            {
+                editMode ?
+                    <PrimaryButton onClick={() => setEditMode(false)}>Exit</PrimaryButton> :
+                    <PrimaryButton onClick={() => setEditMode(true)}>Edit</PrimaryButton>
+            }
+            {
+                editMode ? <Editor
+                        options={{wordWrap: 'on'}}
+                        defaultLanguage="markdown"
+                        height='80vh'
+                        defaultValue={content}
+                    /> : <ReactMarkdown>{content}</ReactMarkdown>
+            }
+        </>
     )
 }
 
