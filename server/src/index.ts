@@ -1,9 +1,8 @@
-import {setupFileserverRoutes} from './fileserver';
-
 if (process.env.DOTENV) {
     require('dotenv').config({path: process.env.DOTENV})
 }
-import {setupRoutes} from './routes/routes';
+import {setupNotesRoutes} from './routes/notes';
+import {setupFinancialsRoutes} from './routes/financials';
 import express from 'express';
 import {setupAuth} from './auth/auth';
 const app = express()
@@ -17,8 +16,8 @@ app.use((req, res, next) => {
 
 setupAuth(app);
 
-setupRoutes(app);
-setupFileserverRoutes(app);
+setupFinancialsRoutes(app);
+setupNotesRoutes(app);
 
 express()
     .use('/api', app)

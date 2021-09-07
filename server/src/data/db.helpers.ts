@@ -1,4 +1,5 @@
 import sqlite from 'sqlite3';
+import {resolvePath} from "../utils/utils";
 
 const DATABASE_PATH = process.env.DATABASE_PATH;
 if (!DATABASE_PATH) {
@@ -87,9 +88,5 @@ export const rollbackTransaction = (db) =>
     new Promise(resolve => db.exec('rollback transaction', resolve));
 
 
-/*
-  Simple utility to expand ~ in paths to the user's home dir. Only handles tilde as
-  first character.
- */
-const resolvePath = path => path.startsWith('~') ? path.replace('~', require('os').homedir()) : path;
+
 

@@ -1,21 +1,15 @@
-import {Express} from "express";
-import helmet, {contentSecurityPolicy} from "helmet";
-const fs = require('fs');
-const {exec} = require('child_process')
+import {Express} from 'express';
+import fs from 'fs';
+import {exec} from 'child_process';
+import {resolvePath} from '../utils/utils';
 const uuid = require('uuid')
 
-fs.mkdir('./temporary_files', err => {});
-
-async function getPathDetails<P, ResBody, ReqBody, ReqQuery>(path: string) {
-    const fullPath = `${CONTENT_DIRECTORY}/${replaceSpaces(`./${path}`)}`
-    const data = await fs.promises.stat(fullPath);
-    const isRoot = !data
-    const isDirectory = isRoot || data.isDirectory();
-    const directoryPath = isDirectory ? fullPath : fullPath.split('/').slice(0, -1).join('/');
-    return {path, fullPath, isDirectory, directoryPath};
+const NOTES_PATH = process.env.NOTES_PATH;
+if (!NOTES_PATH) {
+    throw 'Environment variable NOTES_PATH is not set!'
 }
 
-export const setupFileserverRoutes = (app: Express) => {
+export const setupNotesRoutes = (app: Express) => {
 
     app.get('/notes/path', async (req, res) => {
         const {path, fullPath, isDirectory, directoryPath} = await getPathDetails(req.query.path as string);
@@ -71,9 +65,18 @@ export const setupFileserverRoutes = (app: Express) => {
     }
 }
 
+async function getPathDetails<P, ResBody, ReqBody, ReqQuery>(path: string) {
+    const fullPath = `${CONTENT_DIRECTORY}/${replaceSpaces(`./${path}`)}`
+    const data = await fs.promises.stat(fullPath);
+    const isRoot = !data
+    const isDirectory = isRoot || data.isDirectory();
+    const directoryPath = isDirectory ? fullPath : fullPath.split('/').slice(0, -1).join('/');
+    return {path, fullPath, isDirectory, directoryPath};
+}
+
 const isBinary = (path: string) => mimeType(path) !== 'text/plain';
 
-const CONTENT_DIRECTORY = process.env.CONTENT_DIRECTORY || './'
+const CONTENT_DIRECTORY = resolvePath(process.env.NOTES_PATH)
 
 const filename = (path) => path.split('/').pop()
 
@@ -132,3 +135,5 @@ const getStats = async (name, dir) => {
         openInBrowser: openInBrowser(name)
     }
 }
+
+fs.mkdir('./temporary_files', err => {});

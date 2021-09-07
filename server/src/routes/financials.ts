@@ -3,7 +3,7 @@ import bodyParser from 'body-parser';
 import {Express} from 'express';
 const jsonParser = bodyParser.json();
 
-export const setupRoutes = (app: Express) => {
+export const setupFinancialsRoutes = (app: Express) => {
 
     app.route('/payments')
         .get((req, res) => {
