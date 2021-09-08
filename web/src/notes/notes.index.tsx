@@ -13,7 +13,7 @@ export const Notes: React.FC = () => {
 
     const onSaveContent = useCallback((content: string) => {
         return saveFileContent(fileSystemItem.path, content).then(setFileSystemItem)
-    }, [fileSystemItem?.path]);
+    }, [fileSystemItem?.path, setFileSystemItem]);
 
     if (!fileSystemItem) return <Spinner />;
 

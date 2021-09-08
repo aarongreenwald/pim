@@ -2,7 +2,7 @@ import * as React from 'react';
 import {useState} from 'react';
 import {FileSystemItemType} from '@pim/common';
 import {createItem} from '../services/server-api';
-import {IconButton, PrimaryButton, Stack, TextField} from '@fluentui/react';
+import {DefaultButton, IconButton, PrimaryButton, Stack, TextField} from '@fluentui/react';
 import {horizontalChoiceGroup, StyledChoiceGroup} from '../financials/styles';
 import {Link} from 'react-router-dom';
 
@@ -38,6 +38,7 @@ const DirectoryCommandBar = ({currentDirectory}) => {
                         onChange={(_, val) => setNewItemType(val.key as FileSystemItemType)}
                         options={itemTypeRadioOptions}/>
                     <PrimaryButton disabled={!name} onClick={saveFile}>Create</PrimaryButton>
+                    <DefaultButton onClick={() => setShowNewItemForm(false)}>Cancel</DefaultButton>
                 </Stack>
             }
         </>
