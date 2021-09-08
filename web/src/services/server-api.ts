@@ -17,7 +17,7 @@ import {
     SpendingByCategory,
     UnreportedSpending,
     vPayment,
-    NotesPathDto
+    NotesPathDto, FileSystemItemType
 } from '@pim/common';
 
 const handleResponse = (res) => {
@@ -200,4 +200,11 @@ export const getNotes: (path: string) => Promise<NotesPathDto> = (path: string) 
         .then(handleResponse)
         .then(res => res.json());
 }
+
+export const createItem = (path: string, name: string, type: FileSystemItemType): Promise<void> =>
+    fetch(`${config.apiServiceUrl}/notes/path?type=${type}&path=${path}&name=${name}`, {
+        method: 'POST',
+        credentials: 'include'
+    }).then(handleResponse)
+
 // const debugSleep = (ms) => (...args) => new Promise(resolve => setTimeout(resolve, ms, args))

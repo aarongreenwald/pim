@@ -18,3 +18,5 @@ export interface Breadcrumb {
     name: string;
     path: string;
 }
+
+export type FileSystemItemType = 'F' | 'D';

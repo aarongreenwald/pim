@@ -2,7 +2,8 @@ import {Express} from 'express';
 import fs from 'fs';
 import {exec} from 'child_process';
 import {resolvePath} from '../utils/utils';
-import {NotesPathDto, DirectoryItem, Breadcrumb} from "@pim/common";
+import {NotesPathDto, DirectoryItem, Breadcrumb, FileSystemItemType} from "@pim/common";
+import path from 'path';
 const uuid = require('uuid')
 
 const NOTES_PATH = process.env.NOTES_PATH;
@@ -14,18 +15,7 @@ if (!NOTES_PATH) {
 export const setupNotesRoutes = (app: Express) => {
 
     app.get('/notes/path', async (req, res) => {
-        const {path, fullPath, isDirectory, directoryPath} = await getPathDetails(req.query.path as string);
-        const directoryInfo = await getDirectoryInfo(directoryPath)
-        const fileContent = isDirectory || isBinary(path as string) ? null : await fs.promises.readFile(fullPath, 'utf8');
-
-        const response: NotesPathDto = {
-            isDirectory,
-            path: cleanPath(path),
-            breadcrumbs: buildBreadcrumbs(path),
-            directoryInfo,
-            fileContent,
-            isPlainText: !isDirectory && mimeType(path) === 'text/plain'
-        };
+        const response = await getPath(req.query.path as string);
         res.send(response)
     })
 
@@ -53,17 +43,56 @@ export const setupNotesRoutes = (app: Express) => {
         }
     })
 
-    const getDirectoryInfo: (path: string) => Promise<DirectoryItem[]> = async (path: string) => {
+    app.post('/notes/path', async (req, res) => {
+        const fullPath = getFullPath(req.query.path as string);
+        const itemType = req.query.type as FileSystemItemType;
+        const name = req.query.name as string;
         try {
-            const contents = await fs.promises.readdir(path)
-            const promises = contents.map(name => getStats(name, path))
-            return await Promise.all(promises);
-        } catch (ex) {
-            if (ex.code === 'ENOENT') {
-                throw `404 Directory ${path} not found.`
+            if (itemType === 'F') {
+                await fs.promises.writeFile(path.join(fullPath, name), '', {flag: 'wx'})
             } else {
-                throw `500 ${ex}`
+                await fs.promises.mkdir(path.join(fullPath, name), {recursive: true})
             }
+            // const result = await getPath(path.join(req.query.path as string, name))
+            // res.send(result)
+            res.send(200)
+        } catch (ex) {
+            if (ex.code === 'EEXIST') {
+                res.status(500).send(`Path ${req.query.path} already exists`)
+            }
+            res.status(500).send(ex)
+        }
+
+    })
+
+}
+
+const getPath: (relativePath: string) => Promise<NotesPathDto> = async (relativePath) => {
+    const {path, fullPath, isDirectory, directoryPath} = await getPathDetails(relativePath);
+    const directoryInfo = await getDirectoryInfo(directoryPath)
+    const fileContent = isDirectory || isBinary(path as string) ? null : await fs.promises.readFile(fullPath, 'utf8');
+
+    const response: NotesPathDto = {
+        isDirectory,
+        path: cleanPath(path),
+        breadcrumbs: buildBreadcrumbs(path),
+        directoryInfo,
+        fileContent,
+        isPlainText: !isDirectory && mimeType(path) === 'text/plain'
+    };
+    return response;
+}
+
+const getDirectoryInfo: (path: string) => Promise<DirectoryItem[]> = async (path: string) => {
+    try {
+        const contents = await fs.promises.readdir(path)
+        const promises = contents.map(name => getStats(name, path))
+        return await Promise.all(promises);
+    } catch (ex) {
+        if (ex.code === 'ENOENT') {
+            throw `404 Directory ${path} not found.`
+        } else {
+            throw `500 ${ex}`
         }
     }
 }
@@ -76,6 +105,9 @@ async function getPathDetails<P, ResBody, ReqBody, ReqQuery>(path: string) {
     const directoryPath = isDirectory ? fullPath : fullPath.split('/').slice(0, -1).join('/');
     return {path, fullPath, isDirectory, directoryPath};
 }
+
+const getFullPath = (path: string) => `${CONTENT_DIRECTORY}/${replaceSpaces(`./${path}`)}`
+
 
 const isBinary = (path: string) => mimeType(path) !== 'text/plain';
 
@@ -126,7 +158,10 @@ const buildBreadcrumbs: (path: string) => Breadcrumb[] = path => {
             path: '/' + path.split('/').splice(0, i + 1).filter(x => x).join('/')
         })
         return acc
-    }, [] as Breadcrumb[])
+    }, [{
+        name: 'root',
+        path: '.'
+    }] as Breadcrumb[])
 }
 
 const getStats = async (name, dir) => {

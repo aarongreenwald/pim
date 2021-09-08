@@ -1,13 +1,13 @@
 import * as React from 'react';
-import {useEffect, useState} from 'react';
-import {getNotes} from '../services/server-api';
-import {PrimaryButton, Spinner} from '@fluentui/react';
+import {useCallback, useEffect, useState} from 'react';
+import {createItem, getNotes} from '../services/server-api';
+import {ChoiceGroup, IconButton, PrimaryButton, Spinner, Stack, TextField} from '@fluentui/react';
 import {Link} from 'react-router-dom';
 import {useLocation} from 'react-router';
 import Editor from '@monaco-editor/react';
 import ReactMarkdown from 'react-markdown';
-import {NotesPathDto} from '@pim/common';
-
+import {FileSystemItemType, NotesPathDto} from '@pim/common';
+import {horizontalChoiceGroup, StyledChoiceGroup} from '../financials/styles';
 
 export function Notes() {
     const [notes, setNotes] = useState<NotesPathDto>(null)
@@ -30,10 +30,46 @@ export function Notes() {
         <>
             <Breadcrumbs breadcrumbs={breadcrumbs} />
             {
+                isDirectory && <DirectoryCommandBar currentDirectory={path}/>
+            }
+
+
+            {
                 isDirectory && <DirectoryContents directory={directory} contents={directoryInfo}/>
             }
             {
-                fileContent && <FileContent content={fileContent} />
+                !isDirectory && <FileContent content={fileContent} />
+            }
+        </>
+    )
+}
+
+export const itemTypeRadioOptions = [{key: 'F', text: 'File'}, {key: 'D', text: 'Directory'}]
+
+
+const DirectoryCommandBar = ({currentDirectory}) => {
+    const [showNewItemForm, setShowNewItemForm] = useState(false)
+    const [newItemType, setNewItemType] = useState<FileSystemItemType>('F')
+    const [name, setName] = useState('')
+    const saveFile = () => {
+        //TODO after creating navigate to the newly recreated path
+        createItem(currentDirectory, name, newItemType).then(() => setShowNewItemForm(false))
+    }
+
+    return (
+        <>
+            <IconButton iconProps={{iconName: 'Add'}} onClick={()=> setShowNewItemForm(true)} />
+            {
+                showNewItemForm &&
+                <Stack horizontal>
+                    <TextField placeholder={'Name'} value={name} onChange={(_, val) => setName(val)}/>
+                    <StyledChoiceGroup
+                        selectedKey={newItemType}
+                        styles={horizontalChoiceGroup}
+                        onChange={(_, val) => setNewItemType(val.key as FileSystemItemType)}
+                        options={itemTypeRadioOptions}/>
+                    <PrimaryButton disabled={!name} onClick={saveFile}>Create</PrimaryButton>
+                </Stack>
             }
         </>
     )
