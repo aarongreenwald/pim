@@ -17,7 +17,9 @@ import {
     SpendingByCategory,
     UnreportedSpending,
     vPayment,
-    NotesPathDto, FileSystemItemType
+    FileSystemItemType,
+    File,
+    Directory
 } from '@pim/common';
 
 const handleResponse = (res) => {
@@ -195,7 +197,7 @@ export const saveFuelLog = (fuelLog: NewFuelLogDto): Promise<void> =>
         body: JSON.stringify(fuelLog)
     }).then(handleResponse)
 
-export const getNotes: (path: string) => Promise<NotesPathDto> = (path: string) => {
+export const getNotes: (path: string) => Promise<File | Directory> = (path: string) => {
     return fetch(`${config.apiServiceUrl}/notes/path?path=${path}`, {credentials: 'include'})
         .then(handleResponse)
         .then(res => res.json());
@@ -207,7 +209,7 @@ export const createItem = (path: string, name: string, type: FileSystemItemType)
         credentials: 'include'
     }).then(handleResponse)
 
-export const saveFileContent = (path: string, content: string): Promise<NotesPathDto> =>
+export const saveFileContent = (path: string, content: string): Promise<File | Directory> =>
     fetch(`${config.apiServiceUrl}/notes/files?&path=${path}`, {
         method: 'PUT',
         body: content,

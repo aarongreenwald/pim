@@ -2,7 +2,7 @@ import {Express} from 'express';
 import fs from 'fs';
 import {exec} from 'child_process';
 import {resolvePath} from '../utils/utils';
-import {NotesPathDto, DirectoryItem, Breadcrumb, FileSystemItemType} from "@pim/common";
+import {FileSystemItem, DirectoryItem, Breadcrumb, FileSystemItemType, Directory, File} from "@pim/common";
 import path from 'path';
 import bodyParser from 'body-parser';
 const uuid = require('uuid')
@@ -61,18 +61,19 @@ export const setupNotesRoutes = (app: Express) => {
         const fullPath = getFullPath(req.query.path as string);
         const itemType = req.query.type as FileSystemItemType;
         const name = req.query.name as string;
+        const createdPath = path.join(fullPath, name);
         try {
             if (itemType === 'F') {
-                await fs.promises.writeFile(path.join(fullPath, name), '', {flag: 'wx'})
+                await fs.promises.writeFile(createdPath, '', {flag: 'wx'})
             } else {
-                await fs.promises.mkdir(path.join(fullPath, name), {recursive: true})
+                await fs.promises.mkdir(createdPath, {recursive: true})
             }
             // const result = await getPath(path.join(req.query.path as string, name))
             // res.send(result)
             res.send(200)
         } catch (ex) {
             if (ex.code === 'EEXIST') {
-                res.status(500).send(`Path ${req.query.path} already exists`)
+                res.status(500).send(`Path ${createdPath} already exists`)
             }
             res.status(500).send(ex)
         }
@@ -81,16 +82,16 @@ export const setupNotesRoutes = (app: Express) => {
 
 }
 
-const getPath: (relativePath: string) => Promise<NotesPathDto> = async (relativePath) => {
+const getPath: (relativePath: string) => Promise<Directory | File> = async (relativePath) => {
     const {path, fullPath, isDirectory, directoryPath} = await getPathDetails(relativePath);
     const directoryInfo = await getDirectoryInfo(directoryPath)
     const fileContent = isDirectory || isBinary(path as string) ? null : await fs.promises.readFile(fullPath, 'utf8');
 
-    const response: NotesPathDto = {
-        isDirectory,
+    const response: Directory | File = {
+        type: isDirectory ? 'D' : 'F',
         path: cleanPath(path),
         breadcrumbs: buildBreadcrumbs(path),
-        directoryInfo,
+        directoryContents: directoryInfo,
         fileContent,
         isPlainText: !isDirectory && mimeType(path) === 'text/plain'
     };

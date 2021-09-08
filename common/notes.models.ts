@@ -1,10 +1,17 @@
-export interface NotesPathDto {
-    path: string;
-    isDirectory: boolean;
+export interface File extends  FileSystemItem<'F'> {
     isPlainText: boolean;
+}
+
+export interface Directory extends  FileSystemItem<'D'> {
+
+}
+
+export interface FileSystemItem<T extends FileSystemItemType> {
+    type: T;
+    path: string;
     fileContent: string | null;
     breadcrumbs: Breadcrumb[];
-    directoryInfo: DirectoryItem[];
+    directoryContents: DirectoryItem[];
 }
 
 export interface DirectoryItem {
