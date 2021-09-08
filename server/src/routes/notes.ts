@@ -4,7 +4,9 @@ import {exec} from 'child_process';
 import {resolvePath} from '../utils/utils';
 import {NotesPathDto, DirectoryItem, Breadcrumb, FileSystemItemType} from "@pim/common";
 import path from 'path';
+import bodyParser from 'body-parser';
 const uuid = require('uuid')
+const textParser = bodyParser.text();
 
 const NOTES_PATH = process.env.NOTES_PATH;
 if (!NOTES_PATH) {
@@ -40,6 +42,18 @@ export const setupNotesRoutes = (app: Express) => {
             res.setHeader('Content-Type', mimeType(path));
             res.setHeader('filename', filename(path))
             res.sendFile(fullPath)
+        }
+    })
+
+    app.put('/notes/files', textParser, async (req, res) => {
+        const fullPath = getFullPath(req.query.path as string);
+
+        try {
+            await fs.promises.writeFile(fullPath, req.body);
+            const result = await getPath(req.query.path as string)
+            res.send(result)
+        } catch (ex) {
+            res.status(500).send(ex)
         }
     })
 

@@ -1,7 +1,7 @@
 import * as React from 'react';
-import {useCallback, useEffect, useState} from 'react';
-import {createItem, getNotes} from '../services/server-api';
-import {ChoiceGroup, IconButton, PrimaryButton, Spinner, Stack, TextField} from '@fluentui/react';
+import {useCallback, useEffect, useRef, useState} from 'react';
+import {createItem, getNotes, saveFileContent} from '../services/server-api';
+import {IconButton, PrimaryButton, Spinner, Stack, TextField} from '@fluentui/react';
 import {Link} from 'react-router-dom';
 import {useLocation} from 'react-router';
 import Editor from '@monaco-editor/react';
@@ -9,13 +9,17 @@ import ReactMarkdown from 'react-markdown';
 import {FileSystemItemType, NotesPathDto} from '@pim/common';
 import {horizontalChoiceGroup, StyledChoiceGroup} from '../financials/styles';
 
-export function Notes() {
+export const Notes: React.FC = () => {
     const [notes, setNotes] = useState<NotesPathDto>(null)
     const location = useLocation()
     const path = getPath(location)
     useEffect(() => {
         getNotes(path ?? '').then(setNotes)
     }, [path])
+
+    const onSaveContent = useCallback((content: string) => {
+        return saveFileContent(notes.path, content).then(setNotes)
+    }, [notes?.path]);
 
     if (!notes) return <Spinner />;
 
@@ -32,17 +36,15 @@ export function Notes() {
             {
                 isDirectory && <DirectoryCommandBar currentDirectory={path}/>
             }
-
-
             {
                 isDirectory && <DirectoryContents directory={directory} contents={directoryInfo}/>
             }
             {
-                !isDirectory && <FileContent content={fileContent} />
+                !isDirectory && <FileContent content={fileContent} onSaveContent={onSaveContent}/>
             }
         </>
     )
-}
+};
 
 export const itemTypeRadioOptions = [{key: 'F', text: 'File'}, {key: 'D', text: 'Directory'}]
 
@@ -75,14 +77,42 @@ const DirectoryCommandBar = ({currentDirectory}) => {
     )
 }
 
-const FileContent = ({content}) => {
+const FileContent = ({content, onSaveContent}) => {
+    const [saving, setSaving] = useState(false)
     const [editMode, setEditMode] = useState(false);
+    const editorRef = useRef(null);
+
+    const onEditorMount = editor => editorRef.current = editor
+
+    const saveContent = useCallback(() => {
+        const draft = editorRef.current.getValue();
+        if (content !== draft) {
+            setSaving(true)
+            onSaveContent(draft).then(() => setSaving(false))
+        }
+    }, [onSaveContent, setSaving, content])
+
+    const onExit = async () => {
+        await saveContent()
+        setEditMode(false);
+    }
+
+    useEffect(() => {
+        const interval = setInterval(() => saveContent(), 1000 * 30)
+        return () => clearInterval(interval)
+    }, [content, saveContent])
 
     return (
         <>
             {
                 editMode ?
-                    <PrimaryButton onClick={() => setEditMode(false)}>Exit</PrimaryButton> :
+                    <>
+                        <PrimaryButton onClick={onExit}>Exit</PrimaryButton>
+                        <PrimaryButton onClick={saveContent}>Save</PrimaryButton>
+                        {
+                            saving && <Spinner />
+                        }
+                    </>:
                     <PrimaryButton onClick={() => setEditMode(true)}>Edit</PrimaryButton>
             }
             {
@@ -91,6 +121,7 @@ const FileContent = ({content}) => {
                         defaultLanguage="markdown"
                         height='80vh'
                         defaultValue={content}
+                        onMount={onEditorMount}
                     /> : <ReactMarkdown>{content}</ReactMarkdown>
             }
         </>

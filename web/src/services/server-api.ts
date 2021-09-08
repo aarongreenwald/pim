@@ -207,4 +207,12 @@ export const createItem = (path: string, name: string, type: FileSystemItemType)
         credentials: 'include'
     }).then(handleResponse)
 
+export const saveFileContent = (path: string, content: string): Promise<NotesPathDto> =>
+    fetch(`${config.apiServiceUrl}/notes/files?&path=${path}`, {
+        method: 'PUT',
+        body: content,
+        credentials: 'include'
+    }).then(handleResponse)
+      .then(res => res.json());
+
 // const debugSleep = (ms) => (...args) => new Promise(resolve => setTimeout(resolve, ms, args))
