@@ -12,13 +12,15 @@ export interface FileSystemItem<T extends FileSystemItemType> {
     fileContent: string | null;
     breadcrumbs: Breadcrumb[];
     directoryContents: DirectoryItem[];
+    pendingCommit: boolean;
 }
 
 export interface DirectoryItem {
     openInBrowser: boolean;
     isPlainText: boolean;
     name: string;
-    isDirectory: boolean
+    isDirectory: boolean;
+    pendingCommit?: boolean;
 }
 
 export interface Breadcrumb {

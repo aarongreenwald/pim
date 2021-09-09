@@ -217,4 +217,16 @@ export const saveFileContent = (path: string, content: string): Promise<File | D
     }).then(handleResponse)
       .then(res => res.json());
 
+export const commitPath = (path: string): Promise<File | Directory> =>
+    fetch(`${config.apiServiceUrl}/notes/commit?&path=${path}`, {
+        method: 'PUT',
+        credentials: 'include'
+    }).then(handleResponse);
+
+export const gitPull = () =>
+    fetch(`${config.apiServiceUrl}/notes/pull`, {
+        method: 'PUT',
+        credentials: 'include'
+    }).then(handleResponse);
+
 // const debugSleep = (ms) => (...args) => new Promise(resolve => setTimeout(resolve, ms, args))

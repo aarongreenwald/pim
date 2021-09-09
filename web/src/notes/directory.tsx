@@ -7,16 +7,16 @@ import {horizontalChoiceGroup, StyledChoiceGroup} from '../financials/styles';
 import {Link} from 'react-router-dom';
 
 
-export const Directory = ({path, contents}) => {
+export const Directory = ({path, contents, onCommit}) => {
     return (
         <>
-            <DirectoryCommandBar currentDirectory={path}/>
+            <DirectoryCommandBar currentDirectory={path} onCommit={onCommit}/>
             <DirectoryContents directory={path} contents={contents}/>
         </>
     )
 }
 
-const DirectoryCommandBar = ({currentDirectory}) => {
+const DirectoryCommandBar = ({currentDirectory, onCommit}) => {
     const [showNewItemForm, setShowNewItemForm] = useState(false)
     const [newItemType, setNewItemType] = useState<FileSystemItemType>('F')
     const [name, setName] = useState('')
@@ -28,6 +28,7 @@ const DirectoryCommandBar = ({currentDirectory}) => {
     return (
         <>
             <IconButton iconProps={{iconName: 'Add'}} onClick={() => setShowNewItemForm(true)}/>
+            <IconButton iconProps={{iconName: 'Save'}} onClick={onCommit}/>
             {
                 showNewItemForm &&
                 <Stack horizontal>
@@ -51,6 +52,7 @@ const DirectoryContents = ({directory, contents}) => (
         {contents.map((item) =>
             <tr key={item.name}>
                 <td>{item.isDirectory ? 'D' : 'F'}</td>
+                <td>{item.pendingCommit ? '*' : ' '}</td>
                 {
                     item.isPlainText ?
                         <td><Link to={`/notes?path=${directory}/${item.name}`}>{item.name}</Link></td> :

@@ -7,12 +7,13 @@ import path from 'path';
 import bodyParser from 'body-parser';
 const uuid = require('uuid')
 const textParser = bodyParser.text();
-
+import simpleGit, {SimpleGit} from 'simple-git';
 const NOTES_PATH = process.env.NOTES_PATH;
 if (!NOTES_PATH) {
     throw 'Environment variable NOTES_PATH is not set!'
 }
-
+const CONTENT_DIRECTORY = resolvePath(process.env.NOTES_PATH)
+const git: SimpleGit = simpleGit(CONTENT_DIRECTORY);
 
 export const setupNotesRoutes = (app: Express) => {
 
@@ -80,12 +81,71 @@ export const setupNotesRoutes = (app: Express) => {
 
     })
 
+    app.put('/notes/pull', async (req, res) => {
+        //This shouldn't really be necessary every, but until the system is stable it's a good stop-gap
+        try {
+            await git.pull(['--rebase'])
+            res.send(200)
+        } catch (ex) {
+            res.status(500).send(ex)
+        }
+    })
+
+    app.put('/notes/commit', async (req, res) => {
+        const fullPath = getFullPath(req.query.path as string);
+        const message = req.query.message as string;
+
+        try {
+            await git.commit(message || 'Updated via pim webapp', fullPath)
+            await git.push()
+            res.send(200)
+        } catch (ex) {
+            res.status(500).send(ex)
+        }
+
+    })
+
 }
+
+const getGitChanges = async (path: string) => {
+    //ideally nothing should ever be anything but modified - delete/create should commit immediately,
+    //and there's no reason to  add without committing. But just in case the status gets screwed up, it's worth
+    //considering all kinds of changes. Renames are tricky so it's not worth it, handle it separately
+
+    const {modified, not_added, created, staged, deleted} = await git.status([path])
+    const changed = [...modified, ...not_added, ...created, ...staged, ...deleted];
+    //git.status() uses --porcelain which always returns a status relative to the path root, even if I cwd to the path and call status on '.'
+    //attempt to relativize the paths
+    const pathRelativeToRepoRoot = getPathRelativeToRepoRoot(path)
+    console.log({path, pathRelativeToRepoRoot})
+    return changed
+}
+
+const getPathRelativeToRepoRoot = (path: string) => {
+    const root = path.indexOf('./')
+    return root !== -1 ? path.substring(root) : path
+}
+
 
 const getPath: (relativePath: string) => Promise<Directory | File> = async (relativePath) => {
     const {path, fullPath, isDirectory, directoryPath} = await getPathDetails(relativePath);
     const directoryInfo = await getDirectoryInfo(directoryPath)
     const fileContent = isDirectory || isBinary(path as string) ? null : await fs.promises.readFile(fullPath, 'utf8');
+    const gitChanges = await getGitChanges(fullPath)
+
+    gitChanges.forEach(changedPath => {
+        const sanitized = changedPath.includes(' ') ? changedPath.substring(1, changedPath.length - 1) : changedPath;
+        const split = sanitized.split('/');
+        let index = -1
+        let section = 0
+        while (index === -1 && section < split.length) {
+            index = directoryInfo.findIndex(d => d.name === split[section])
+            section++
+        }
+        if (index !== -1) directoryInfo[index].pendingCommit = true
+    })
+
+    console.log(directoryInfo)
 
     const response: Directory | File = {
         type: isDirectory ? 'D' : 'F',
@@ -93,6 +153,7 @@ const getPath: (relativePath: string) => Promise<Directory | File> = async (rela
         breadcrumbs: buildBreadcrumbs(path),
         directoryContents: directoryInfo,
         fileContent,
+        pendingCommit: !!gitChanges.length,
         isPlainText: !isDirectory && mimeType(path) === 'text/plain'
     };
     return response;
@@ -125,8 +186,6 @@ const getFullPath = (path: string) => `${CONTENT_DIRECTORY}/${replaceSpaces(`./$
 
 
 const isBinary = (path: string) => mimeType(path) !== 'text/plain';
-
-const CONTENT_DIRECTORY = resolvePath(process.env.NOTES_PATH)
 
 const filename = (path) => path.split('/').pop()
 

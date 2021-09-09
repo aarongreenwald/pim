@@ -1,7 +1,7 @@
 import * as React from 'react';
 import {useCallback, useEffect, useState} from 'react';
-import {getNotes, saveFileContent} from '../services/server-api';
-import {Spinner} from '@fluentui/react';
+import {getNotes, saveFileContent, commitPath, gitPull} from '../services/server-api';
+import {DefaultButton, Spinner} from '@fluentui/react';
 import {useLocation} from 'react-router';
 import {Directory, File} from '@pim/common';
 import {FileContent} from './file';
@@ -15,6 +15,10 @@ export const Notes: React.FC = () => {
         return saveFileContent(fileSystemItem.path, content).then(setFileSystemItem)
     }, [fileSystemItem?.path, setFileSystemItem]);
 
+    const onCommit = useCallback(() => {
+        commitPath(fileSystemItem.path) //TODO update the status, support a message
+    }, [fileSystemItem?.path])
+
     if (!fileSystemItem) return <Spinner />;
 
     const {
@@ -22,17 +26,19 @@ export const Notes: React.FC = () => {
         path,
         directoryContents,
         fileContent,
+        pendingCommit,
         type,
     } = fileSystemItem;
 
     return (
         <>
             <Breadcrumbs breadcrumbs={breadcrumbs} />
+            <DefaultButton onClick={gitPull}>Pull</DefaultButton>
             {
-                type === 'D' && <DirectoryViewer path={path} contents={directoryContents} />
+                type === 'D' && <DirectoryViewer path={path} contents={directoryContents} onCommit={onCommit} />
             }
             {
-                type === 'F' && <FileContent content={fileContent} onSaveContent={onSaveContent}/>
+                type === 'F' && <FileContent content={fileContent} onSaveContent={onSaveContent} pendingCommit={pendingCommit} onCommit={onCommit}/>
             }
         </>
     )
