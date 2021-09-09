@@ -31,7 +31,10 @@ export const FileEditor = ({content, onSaveContent, onExitEditor}) => {
         const draft = getEditorValue();
         if (content !== draft) {
             setSaving(true)
-            onSaveContent(draft).then(() => setSaving(false))
+            onSaveContent(draft).then(() => {
+                setIsEditorDirty(getEditorValue() === draft)
+                setSaving(false);
+            })
         }
     }, [onSaveContent, setSaving, content, getEditorValue])
 
