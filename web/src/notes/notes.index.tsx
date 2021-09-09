@@ -32,8 +32,8 @@ export const Notes: React.FC = () => {
 
     return (
         <>
-            <Breadcrumbs breadcrumbs={breadcrumbs} />
             <DefaultButton onClick={gitPull}>Pull</DefaultButton>
+            <Breadcrumbs breadcrumbs={breadcrumbs} />
             {
                 type === 'D' && <DirectoryViewer path={path} contents={directoryContents} onCommit={onCommit} />
             }

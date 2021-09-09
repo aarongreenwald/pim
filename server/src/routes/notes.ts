@@ -54,6 +54,7 @@ export const setupNotesRoutes = (app: Express) => {
             const result = await getPath(req.query.path as string)
             res.send(result)
         } catch (ex) {
+            console.error(ex)
             res.status(500).send(ex)
         }
     })
@@ -74,8 +75,10 @@ export const setupNotesRoutes = (app: Express) => {
             res.send(200)
         } catch (ex) {
             if (ex.code === 'EEXIST') {
+                console.warn(ex)
                 res.status(500).send(`Path ${createdPath} already exists`)
             }
+            console.error(ex)
             res.status(500).send(ex)
         }
 
@@ -84,11 +87,14 @@ export const setupNotesRoutes = (app: Express) => {
     app.put('/notes/pull', async (req, res) => {
         //This shouldn't really be necessary every, but until the system is stable it's a good stop-gap
         try {
-            await git.stash()
+            const stash = await git.stash()
             await git.pull(['--rebase'])
-            await git.stash(['pop'])
+            if (stash !== 'No local changes to save') {
+                await git.stash(['pop'])
+            }
             res.send(200)
         } catch (ex) {
+            console.error(ex)
             res.status(500).send(ex)
         }
     })
@@ -104,6 +110,7 @@ export const setupNotesRoutes = (app: Express) => {
             await git.push()
             res.send(200)
         } catch (ex) {
+            console.error(ex)
             res.status(500).send(ex)
         }
 
@@ -148,8 +155,6 @@ const getPath: (relativePath: string) => Promise<Directory | File> = async (rela
         }
         if (index !== -1) directoryInfo[index].pendingCommit = true
     })
-
-    console.log(directoryInfo)
 
     const response: Directory | File = {
         type: isDirectory ? 'D' : 'F',
