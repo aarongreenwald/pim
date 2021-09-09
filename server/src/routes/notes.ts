@@ -84,7 +84,9 @@ export const setupNotesRoutes = (app: Express) => {
     app.put('/notes/pull', async (req, res) => {
         //This shouldn't really be necessary every, but until the system is stable it's a good stop-gap
         try {
+            await git.stash()
             await git.pull(['--rebase'])
+            await git.stash(['pop'])
             res.send(200)
         } catch (ex) {
             res.status(500).send(ex)
@@ -96,6 +98,8 @@ export const setupNotesRoutes = (app: Express) => {
         const message = req.query.message as string;
 
         try {
+            //add() is necessary in case there are new files. existing files are automatically added by the commit() command
+            await git.add(fullPath)
             await git.commit(message || 'Updated via pim webapp', fullPath)
             await git.push()
             res.send(200)
