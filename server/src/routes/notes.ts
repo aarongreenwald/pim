@@ -85,11 +85,11 @@ export const setupNotesRoutes = (app: Express) => {
     })
 
     app.put('/notes/pull', async (req, res) => {
-        //This shouldn't really be necessary every, but until the system is stable it's a good stop-gap
+        //This shouldn't really be necessary ever, but until the system is stable it's a good stop-gap
         try {
             const stash = await git.stash()
             await git.pull(['--rebase'])
-            if (stash !== 'No local changes to save') {
+            if (!stash.includes('No local changes to save')) {
                 await git.stash(['pop'])
             }
             res.send(200)
