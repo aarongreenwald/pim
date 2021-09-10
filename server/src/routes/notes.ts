@@ -2,12 +2,12 @@ import {Express} from 'express';
 import fs from 'fs';
 import {exec} from 'child_process';
 import {resolvePath} from '../utils/utils';
-import {FileSystemItem, DirectoryItem, Breadcrumb, FileSystemItemType, Directory, File} from "@pim/common";
+import {FileSystemItem, DirectoryItem, Breadcrumb, FileSystemItemType, Directory, File, GitStatus} from "@pim/common";
 import path from 'path';
 import bodyParser from 'body-parser';
 const uuid = require('uuid')
 const textParser = bodyParser.text();
-import simpleGit, {SimpleGit} from 'simple-git';
+import simpleGit, {SimpleGit, StatusResult} from 'simple-git';
 const NOTES_PATH = process.env.NOTES_PATH;
 if (!NOTES_PATH) {
     throw 'Environment variable NOTES_PATH is not set!'
@@ -92,7 +92,9 @@ export const setupNotesRoutes = (app: Express) => {
             if (!stash.includes('No local changes to save')) {
                 await git.stash(['pop'])
             }
-            res.send(200)
+            //no need to fetch first, most likely even if the pull failed the fetch part succeeded and the status will reflect the remote
+            const status = await git.status()
+            res.send(toGitStatus(status))
         } catch (ex) {
             console.error(ex)
             res.status(500).send(ex)
@@ -116,7 +118,19 @@ export const setupNotesRoutes = (app: Express) => {
 
     })
 
+    app.get('/notes/status', async(req, res) => {
+        //must fetch before getting status so the 'behind' is updated
+        const status = await git.fetch().status()
+        res.send(toGitStatus(status))
+    })
+
 }
+
+const toGitStatus = (status: StatusResult) => ({
+    ...status,
+    notAdded: status.not_added,
+    isClean: status.isClean(),
+} as unknown as GitStatus)
 
 const getGitChanges = async (path: string) => {
     //ideally nothing should ever be anything but modified - delete/create should commit immediately,

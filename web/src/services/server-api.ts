@@ -19,7 +19,7 @@ import {
     vPayment,
     FileSystemItemType,
     File,
-    Directory
+    Directory, GitStatus
 } from '@pim/common';
 
 const handleResponse = (res) => {
@@ -223,10 +223,18 @@ export const commitPath = (path: string): Promise<File | Directory> =>
         credentials: 'include'
     }).then(handleResponse);
 
-export const gitPull = () =>
+export const gitPull: () => Promise<GitStatus> = () =>
     fetch(`${config.apiServiceUrl}/notes/pull`, {
         method: 'PUT',
         credentials: 'include'
-    }).then(handleResponse);
+    })
+        .then(handleResponse)
+        .then(res => res.json());
+
+export const getGitStatus: () => Promise<GitStatus> = () =>
+    fetch(`${config.apiServiceUrl}/notes/status`, {credentials: 'include'})
+        .then(handleResponse)
+        .then(res => res.json());
+
 
 // const debugSleep = (ms) => (...args) => new Promise(resolve => setTimeout(resolve, ms, args))

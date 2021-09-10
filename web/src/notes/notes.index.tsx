@@ -1,14 +1,23 @@
 import * as React from 'react';
 import {useCallback, useEffect, useState} from 'react';
-import {getNotes, saveFileContent, commitPath, gitPull} from '../services/server-api';
+import {getNotes, saveFileContent, commitPath, gitPull, getGitStatus} from '../services/server-api';
 import {DefaultButton, Spinner} from '@fluentui/react';
 import {useLocation} from 'react-router';
-import {Directory, File} from '@pim/common';
+import {Directory, File, GitStatus} from '@pim/common';
 import {FileContent} from './file';
 import {Directory as DirectoryViewer} from './directory';
 import {Breadcrumbs} from './breadcrumbs';
 
 export const Notes: React.FC = () => {
+    const [gitStatus, setGitStatus] = useState<GitStatus>(null)
+    useEffect(() => {
+        getGitStatus().then(setGitStatus)
+    }, [setGitStatus])
+
+    const pullGit = useCallback(() => {
+        gitPull().then(setGitStatus)
+    }, [setGitStatus])
+
     const {fileSystemItem, setFileSystemItem} = useFileSystemItem();
 
     const onSaveContent = useCallback((content: string) => {
@@ -32,7 +41,10 @@ export const Notes: React.FC = () => {
 
     return (
         <>
-            <DefaultButton onClick={gitPull}>Pull</DefaultButton>
+            {
+                gitStatus?.behind && <DefaultButton onClick={pullGit}>Pull</DefaultButton>
+            }
+
             <Breadcrumbs breadcrumbs={breadcrumbs} />
             {
                 type === 'D' && <DirectoryViewer path={path} contents={directoryContents} onCommit={onCommit} />
