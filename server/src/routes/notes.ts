@@ -110,7 +110,8 @@ export const setupNotesRoutes = (app: Express) => {
             await git.add(fullPath)
             await git.commit(message || 'Updated via pim webapp', fullPath)
             await git.push()
-            res.send(200)
+            const result = await getPath(req.query.path as string)
+            res.send(result)
         } catch (ex) {
             console.error(ex)
             res.status(500).send(ex)

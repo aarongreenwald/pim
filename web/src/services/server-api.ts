@@ -221,7 +221,9 @@ export const commitPath = (path: string): Promise<File | Directory> =>
     fetch(`${config.apiServiceUrl}/notes/commit?&path=${path}`, {
         method: 'PUT',
         credentials: 'include'
-    }).then(handleResponse);
+    })
+        .then(handleResponse)
+        .then(res => res.json());
 
 export const gitPull: () => Promise<GitStatus> = () =>
     fetch(`${config.apiServiceUrl}/notes/pull`, {

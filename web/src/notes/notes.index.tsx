@@ -9,23 +9,26 @@ import {Directory as DirectoryViewer} from './directory';
 import {Breadcrumbs} from './breadcrumbs';
 
 export const Notes: React.FC = () => {
+    const {fileSystemItem, setFileSystemItem, refresh} = useFileSystemItem();
+
     const [gitStatus, setGitStatus] = useState<GitStatus>(null)
     useEffect(() => {
         getGitStatus().then(setGitStatus)
     }, [setGitStatus])
 
     const pullGit = useCallback(() => {
-        gitPull().then(setGitStatus)
-    }, [setGitStatus])
-
-    const {fileSystemItem, setFileSystemItem} = useFileSystemItem();
+        gitPull()
+            .then(setGitStatus)
+            .then(refresh)
+    }, [setGitStatus, refresh])
 
     const onSaveContent = useCallback((content: string) => {
         return saveFileContent(fileSystemItem.path, content).then(setFileSystemItem)
     }, [fileSystemItem?.path, setFileSystemItem]);
 
     const onCommit = useCallback(() => {
-        commitPath(fileSystemItem.path) //TODO update the status, support a message
+        //todo add support for specifying a commit message
+        commitPath(fileSystemItem.path).then(setFileSystemItem)
     }, [fileSystemItem?.path])
 
     if (!fileSystemItem) return <Spinner />;
@@ -42,7 +45,7 @@ export const Notes: React.FC = () => {
     return (
         <>
             {
-                gitStatus?.behind && <DefaultButton onClick={pullGit}>Pull</DefaultButton>
+                gitStatus?.behind ? <DefaultButton onClick={pullGit}>Pull</DefaultButton> : null
             }
 
             <Breadcrumbs breadcrumbs={breadcrumbs} />
@@ -60,10 +63,13 @@ function useFileSystemItem() {
     const [fileSystemItem, setFileSystemItem] = useState<File | Directory>(null)
     const location = useLocation()
     const path = getPath(location)
-    useEffect(() => {
+
+    const refresh = useCallback(() => {
         getNotes(path ?? '').then(setFileSystemItem)
-    }, [path])
-    return {fileSystemItem, setFileSystemItem}
+    }, [path, setFileSystemItem])
+
+    useEffect(() => refresh(), [refresh])
+    return {fileSystemItem, setFileSystemItem, refresh}
 }
 
 
