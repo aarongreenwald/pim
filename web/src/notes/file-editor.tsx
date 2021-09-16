@@ -13,7 +13,7 @@ export const FileEditor = ({content, onSaveContent, onExitEditor}) => {
     const [saving, setSaving] = useState(false)
     const [wordWrap, setWordWrap] = useState(true)
     //TODO automatically use ace on mobile, or configure ace to be as nice as monaco somehow
-    const [editor, setEditor] = useState<'monaco' | 'ace'>('monaco')
+    const [editor, setEditor] = useState<'monaco' | 'ace'>('ace')
     const editorRef = useRef(null);
     const [isEditorDirty, setIsEditorDirty] = useState(false)
 
