@@ -87,12 +87,21 @@ export const setupNotesRoutes = (app: Express) => {
     app.put('/notes/pull', async (req, res) => {
         //This shouldn't really be necessary ever, but until the system is stable it's a good stop-gap
         try {
-            const stash = await git.stash()
-            await git.pull(['--rebase'])
-            if (!stash.includes('No local changes to save')) {
-                await git.stash(['pop'])
-            }
+            await gitPullRebase();
             //no need to fetch first, most likely even if the pull failed the fetch part succeeded and the status will reflect the remote
+            const status = await git.status()
+            res.send(toGitStatus(status))
+        } catch (ex) {
+            console.error(ex)
+            res.status(500).send(ex)
+        }
+    })
+
+    app.put('/notes/push', async (req, res) => {
+        //This shouldn't really be necessary ever, but until the system is stable it's a good stop-gap
+        try {
+            await gitPullRebase();
+            await git.push();
             const status = await git.status()
             res.send(toGitStatus(status))
         } catch (ex) {
@@ -145,6 +154,14 @@ const getGitChanges = async (path: string) => {
     const pathRelativeToRepoRoot = getPathRelativeToRepoRoot(path)
     console.log({path, pathRelativeToRepoRoot})
     return changed
+}
+
+async function gitPullRebase() {
+    const stash = await git.stash()
+    await git.pull(['--rebase'])
+    if (!stash.includes('No local changes to save')) {
+        await git.stash(['pop'])
+    }
 }
 
 const getPathRelativeToRepoRoot = (path: string) => {

@@ -233,6 +233,15 @@ export const gitPull: () => Promise<GitStatus> = () =>
         .then(handleResponse)
         .then(res => res.json());
 
+
+export const gitPush: () => Promise<GitStatus> = () =>
+    fetch(`${config.apiServiceUrl}/notes/push`, {
+        method: 'PUT',
+        credentials: 'include'
+    })
+        .then(handleResponse)
+        .then(res => res.json());
+
 export const getGitStatus: () => Promise<GitStatus> = () =>
     fetch(`${config.apiServiceUrl}/notes/status`, {credentials: 'include'})
         .then(handleResponse)

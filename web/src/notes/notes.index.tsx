@@ -1,6 +1,6 @@
 import * as React from 'react';
 import {useCallback, useEffect, useState} from 'react';
-import {getNotes, saveFileContent, commitPath, gitPull, getGitStatus} from '../services/server-api';
+import {getNotes, saveFileContent, commitPath, gitPull, gitPush, getGitStatus} from '../services/server-api';
 import {DefaultButton, Spinner} from '@fluentui/react';
 import {useLocation} from 'react-router';
 import {Directory, File, GitStatus} from '@pim/common';
@@ -18,6 +18,12 @@ export const Notes: React.FC = () => {
 
     const pullGit = useCallback(() => {
         gitPull()
+            .then(setGitStatus)
+            .then(refresh)
+    }, [setGitStatus, refresh])
+
+    const pushGit = useCallback(() => {
+        gitPush()
             .then(setGitStatus)
             .then(refresh)
     }, [setGitStatus, refresh])
@@ -46,6 +52,10 @@ export const Notes: React.FC = () => {
         <>
             {
                 gitStatus?.behind ? <DefaultButton onClick={pullGit}>Pull</DefaultButton> : null
+            }
+
+            {
+                gitStatus?.ahead ? <DefaultButton onClick={pushGit}>Push</DefaultButton> : null
             }
 
             <Breadcrumbs breadcrumbs={breadcrumbs} />
