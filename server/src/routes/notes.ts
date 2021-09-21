@@ -18,8 +18,18 @@ const git: SimpleGit = simpleGit(CONTENT_DIRECTORY);
 export const setupNotesRoutes = (app: Express) => {
 
     app.get('/notes/path', async (req, res) => {
-        const response = await getPath(req.query.path as string);
-        res.send(response)
+        try {
+            const response = await getPath(req.query.path as string);
+            res.send(response)
+        } catch (ex) {
+            console.error(ex)
+            if (ex.code === 'ENOENT') {
+                res.status(404).send(ex)
+            } else {
+                res.status(500).send(ex)
+            }
+        }
+
     })
 
     app.get('/notes/download', async (req, res) => {
