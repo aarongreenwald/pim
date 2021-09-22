@@ -247,5 +247,10 @@ export const getGitStatus: () => Promise<GitStatus> = () =>
         .then(handleResponse)
         .then(res => res.json());
 
+export const searchNotes: (query: string) => Promise<any> = (query) =>
+    fetch(`${config.apiServiceUrl}/notes/search?query=${query}`, {credentials: 'include'})
+        .then(handleResponse)
+        .then(res => res.json());
+
 
 // const debugSleep = (ms) => (...args) => new Promise(resolve => setTimeout(resolve, ms, args))

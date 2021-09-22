@@ -1,15 +1,28 @@
 import * as React from 'react';
 import {useCallback, useEffect, useState} from 'react';
-import {getNotes, saveFileContent, commitPath, gitPull, gitPush, getGitStatus} from '../services/server-api';
-import {IconButton, Spinner} from '@fluentui/react';
+import {
+    getNotes,
+    saveFileContent,
+    commitPath,
+    gitPull,
+    gitPush,
+    getGitStatus,
+    searchNotes
+} from '../services/server-api';
+import {IconButton, Panel, SearchBox, Spinner} from '@fluentui/react';
+import {Link} from 'react-router-dom';
 import {useLocation} from 'react-router';
 import {Directory, File, GitStatus} from '@pim/common';
 import {FileContent} from './file';
 import {Directory as DirectoryViewer} from './directory';
 import {Breadcrumbs} from './breadcrumbs';
+import {useDebouncedInput} from '../common/debounced-input.hook';
+import ReactMarkdown from 'react-markdown';
+
 
 export const Notes: React.FC = () => {
     const {fileSystemItem, setFileSystemItem, refresh} = useFileSystemItem();
+    const [showSearch, setShowSearch] = useState(false)
 
     const [gitStatus, setGitStatus] = useState<GitStatus>(null)
     useEffect(() => {
@@ -51,6 +64,7 @@ export const Notes: React.FC = () => {
     return (
         <>
             <Breadcrumbs breadcrumbs={breadcrumbs} />
+            <IconButton iconProps={{iconName: 'Search'}} title="Search" onClick={() => setShowSearch(true)} />
             {
                 gitStatus?.behind? <IconButton iconProps={{iconName: 'Download'}} title="Git Pull" onClick={pullGit}/> : null
             }
@@ -63,9 +77,44 @@ export const Notes: React.FC = () => {
             {
                 type === 'F' && <FileContent content={fileContent} onSaveContent={onSaveContent} pendingCommit={pendingCommit} onCommit={onCommit}/>
             }
+            <Panel isOpen={showSearch} onDismiss={() => setShowSearch(false)}>
+                <Search onDismiss={() => setShowSearch(false)}/>
+            </Panel>
         </>
     )
 };
+
+const Search = ({onDismiss}) => {
+    const {inputVal, debouncedValue, updateValue} = useDebouncedInput('')
+    const [searchResults, setSearchResults] = useState(null)
+    useEffect(() => {
+        if (!debouncedValue) return;
+
+        searchNotes(debouncedValue).then(setSearchResults)
+    }, [debouncedValue])
+    
+    return (
+        <>
+            <SearchBox value={inputVal}
+                       onChange={(_, val) => updateValue(val)}
+                       onSearch={() => searchNotes(debouncedValue).then(setSearchResults)}/>
+            {
+                searchResults?.names.map(name =>
+                    <Link key={name} to={`/notes/?path=${name}`} onClick={onDismiss}>{name}</Link>
+                )
+            }
+            {
+                searchResults?.contents.map((result) =>
+                    <div key={`${result.path}_${result.lineNumber}`}>
+                        <Link to={`/notes/?path=${result.path}`} onClick={onDismiss}>{result.path}</Link>
+                        <ReactMarkdown>{result.text}</ReactMarkdown>
+                    </div>
+                )
+            }
+        </>
+        )
+    
+}
 
 function useFileSystemItem() {
     const [fileSystemItem, setFileSystemItem] = useState<File | Directory>(null)

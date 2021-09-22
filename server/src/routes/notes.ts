@@ -8,6 +8,9 @@ import bodyParser from 'body-parser';
 const uuid = require('uuid')
 const textParser = bodyParser.text();
 import simpleGit, {SimpleGit, StatusResult} from 'simple-git';
+import util from "util";
+const execp = util.promisify(exec);
+
 const NOTES_PATH = process.env.NOTES_PATH;
 if (!NOTES_PATH) {
     throw 'Environment variable NOTES_PATH is not set!'
@@ -143,6 +146,31 @@ export const setupNotesRoutes = (app: Express) => {
         const status = await git.fetch().status()
         res.send(toGitStatus(status))
     })
+
+    app.get('/notes/search', async (req, res) => {
+       const query = req.query.query;
+       console.log(`Executing: grep -inr ${query} . in ${CONTENT_DIRECTORY}`)
+
+       const {stdout: contents, stderr: contentsErr} = await execp(`cd ${CONTENT_DIRECTORY} && grep -inr '${query}' .`);
+       if (contentsErr) throw contentsErr;
+
+        const {stdout: names, stderr: namesErr} = await execp(`cd ${CONTENT_DIRECTORY} && find . -name '*${query}*'`);
+        if (namesErr) throw namesErr;
+
+        const results = contents.split('\n').filter(Boolean).map(result => {
+           const parts = result.split(':');
+           return {
+               path: parts[0],
+               lineNumber: parts[1],
+               text: parts[2]
+           }
+       })
+
+       res.send({
+           names: names.split('\n').filter(Boolean),
+           contents: results
+       })
+    });
 
 }
 
