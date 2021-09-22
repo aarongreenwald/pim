@@ -149,26 +149,35 @@ export const setupNotesRoutes = (app: Express) => {
 
     app.get('/notes/search', async (req, res) => {
        const query = req.query.query;
-       console.log(`Executing: grep -inr ${query} . in ${CONTENT_DIRECTORY}`)
 
-       const {stdout: contents, stderr: contentsErr} = await execp(`cd ${CONTENT_DIRECTORY} && grep -inr '${query}' .`);
-       if (contentsErr) throw contentsErr;
+        const results = await Promise.all([
+            execp(`cd ${CONTENT_DIRECTORY} && grep -inr '${query}' .`),
+            //TODO I'd like to return directories as well (exclude by -xtype f) but not every file in the directory
+            execp(`cd ${CONTENT_DIRECTORY} && find . -iname '*${query}*' -xtype f -not -path ./.git`)
+        ])
+        const {stdout: contents, stderr: contentsErr} = results[0];
+        const {stdout: names, stderr: namesErr} = results[1];
 
-        const {stdout: names, stderr: namesErr} = await execp(`cd ${CONTENT_DIRECTORY} && find . -name '*${query}*'`);
-        if (namesErr) throw namesErr;
+        if (contentsErr) {
+            console.error('Failed while searching contents of files', contentsErr)
+            throw contentsErr;
+        }
+        if (namesErr) {
+            console.error('Failed while searching files by name', namesErr)
+            throw namesErr;
+        }
 
-        const results = contents.split('\n').filter(Boolean).map(result => {
-           const parts = result.split(':');
-           return {
-               path: parts[0],
-               lineNumber: parts[1],
-               text: parts[2]
-           }
-       })
 
        res.send({
            names: names.split('\n').filter(Boolean),
-           contents: results
+           contents: contents.split('\n').filter(Boolean).map(result => {
+               const parts = result.split(':');
+               return {
+                   path: parts[0],
+                   lineNumber: parts[1],
+                   text: parts[2]
+               }
+           })
        })
     });
 

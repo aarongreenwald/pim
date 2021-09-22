@@ -100,7 +100,10 @@ const Search = ({onDismiss}) => {
                        onSearch={() => searchNotes(debouncedValue).then(setSearchResults)}/>
             {
                 searchResults?.names.map(name =>
-                    <Link key={name} to={`/notes/?path=${name}`} onClick={onDismiss}>{name}</Link>
+                    <div key={name}>
+                        <Link to={`/notes/?path=${name}`} onClick={onDismiss}>{name}</Link>
+                    </div>
+
                 )
             }
             {
