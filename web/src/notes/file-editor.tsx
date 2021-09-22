@@ -1,5 +1,5 @@
 import {useCallback, useEffect, useRef, useState} from 'react';
-import {PrimaryButton, Spinner, Stack, Toggle} from '@fluentui/react';
+import {IconButton} from '@fluentui/react';
 import Editor from '@monaco-editor/react';
 import * as React from 'react';
 import AceEditor from 'react-ace';
@@ -32,7 +32,7 @@ export const FileEditor = ({content, onSaveContent, onExitEditor}) => {
         if (content !== draft) {
             setSaving(true)
             onSaveContent(draft).then(() => {
-                setIsEditorDirty(getEditorValue() === draft)
+                setIsEditorDirty(getEditorValue() !== draft)
                 setSaving(false);
             })
         }
@@ -65,16 +65,24 @@ export const FileEditor = ({content, onSaveContent, onExitEditor}) => {
 
     return (
         <>
-
-            <Stack horizontal>
-                <PrimaryButton onClick={onExit}>Exit</PrimaryButton>
-                <PrimaryButton onClick={saveContent}>Save</PrimaryButton>
-                <Toggle label="Wrap lines" checked={wordWrap} onChange={(_, val) => setWordWrap(val)} />
-                <Toggle label="Use Monaco" checked={editor === 'monaco'} onChange={(_, val) => setEditor(val ? 'monaco' : 'ace')} />
-            </Stack>
-            {
-                saving && <Spinner />
-            }
+            <IconButton title={'Save and close'}
+                        iconProps={{iconName: 'SaveAndClose'}}
+                        onClick={onExit}/>
+            <IconButton
+                disabled={!isEditorDirty || saving}
+                title={'Save'}
+                iconProps={{iconName: 'Save'}}
+                onClick={saveContent}/>
+            <IconButton title="Wrap lines"
+                        checked={wordWrap}
+                        toggle
+                        onClick={(_) => setWordWrap(val => !val)}
+                        iconProps={{iconName: 'LineStyle'}} />
+            <IconButton title="Toggle editor type"
+                        checked={editor === 'monaco'}
+                        toggle
+                        onClick={(_) => setEditor(val => val === 'ace' ? 'monaco' : 'ace')}
+                        iconProps={{iconName: 'LocationOutline'}}/>
             {
                 //this is for in-app navigation with react-router
                 //for browser navigation the onbeforeunload is setup in a hook

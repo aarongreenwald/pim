@@ -1,22 +1,29 @@
 import * as React from 'react';
-import {useState} from 'react';
+import {useMemo, useState} from 'react';
 import {FileSystemItemType} from '@pim/common';
 import {createItem} from '../services/server-api';
-import {DefaultButton, IconButton, PrimaryButton, Stack, TextField} from '@fluentui/react';
+import {Icon, IconButton, Stack, TextField} from '@fluentui/react';
 import {horizontalChoiceGroup, StyledChoiceGroup} from '../financials/styles';
 import {Link} from 'react-router-dom';
 
 
-export const Directory = ({path, contents, onCommit}) => {
+export const Directory = ({path, contents, onCommit, pendingCommit}) => {
+    const [showHidden, setShowHidden] = useState(false)
+    const filteredContents = useMemo(() => {
+        if (!showHidden) {
+            return contents.filter(i => i.name[0] !== '.')
+        }
+        return contents;
+    }, [contents, showHidden])
     return (
         <>
-            <DirectoryCommandBar currentDirectory={path} onCommit={onCommit}/>
-            <DirectoryContents directory={path} contents={contents}/>
+            <DirectoryCommandBar currentDirectory={path} onCommit={onCommit} pendingCommit={pendingCommit} showHidden={showHidden} setShowHidden={setShowHidden}/>
+            <DirectoryContents directory={path} contents={filteredContents}/>
         </>
     )
 }
 
-const DirectoryCommandBar = ({currentDirectory, onCommit}) => {
+const DirectoryCommandBar = ({currentDirectory, onCommit, pendingCommit, showHidden, setShowHidden}) => {
     const [showNewItemForm, setShowNewItemForm] = useState(false)
     const [newItemType, setNewItemType] = useState<FileSystemItemType>('F')
     const [name, setName] = useState('')
@@ -27,8 +34,11 @@ const DirectoryCommandBar = ({currentDirectory, onCommit}) => {
 
     return (
         <>
+            {
+                pendingCommit && <IconButton title="Commit" iconProps={{iconName: 'BranchCommit'}} onClick={onCommit}/>
+            }
+            <IconButton iconProps={{iconName: 'Hide3'}} toggle checked={showHidden} title="Show hidden folders" onClick={() => setShowHidden(val => !val)}/>
             <IconButton iconProps={{iconName: 'Add'}} onClick={() => setShowNewItemForm(true)}/>
-            <IconButton iconProps={{iconName: 'Save'}} onClick={onCommit}/>
             {
                 showNewItemForm &&
                 <Stack horizontal>
@@ -38,8 +48,8 @@ const DirectoryCommandBar = ({currentDirectory, onCommit}) => {
                         styles={horizontalChoiceGroup}
                         onChange={(_, val) => setNewItemType(val.key as FileSystemItemType)}
                         options={itemTypeRadioOptions}/>
-                    <PrimaryButton disabled={!name} onClick={saveFile}>Create</PrimaryButton>
-                    <DefaultButton onClick={() => setShowNewItemForm(false)}>Cancel</DefaultButton>
+                    <IconButton iconProps={{iconName: 'CheckMark'}} disabled={!name} onClick={saveFile} title="Create"/>
+                    <IconButton iconProps={{iconName: 'Cancel'}} onClick={() => setShowNewItemForm(false)} title="Cancel"/>
                 </Stack>
             }
         </>
@@ -51,7 +61,7 @@ const DirectoryContents = ({directory, contents}) => (
         <tbody>
         {contents.map((item) =>
             <tr key={item.name}>
-                <td>{item.isDirectory ? 'D' : 'F'}</td>
+                <td><Icon iconName={item.isDirectory ? 'FabricFolder' : 'TextDocument'}/></td>
                 <td>{item.pendingCommit ? '*' : ' '}</td>
                 {
                     item.isPlainText ?

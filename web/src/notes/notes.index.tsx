@@ -1,7 +1,7 @@
 import * as React from 'react';
 import {useCallback, useEffect, useState} from 'react';
 import {getNotes, saveFileContent, commitPath, gitPull, gitPush, getGitStatus} from '../services/server-api';
-import {DefaultButton, Spinner} from '@fluentui/react';
+import {IconButton, Spinner} from '@fluentui/react';
 import {useLocation} from 'react-router';
 import {Directory, File, GitStatus} from '@pim/common';
 import {FileContent} from './file';
@@ -50,17 +50,15 @@ export const Notes: React.FC = () => {
 
     return (
         <>
-            {
-                gitStatus?.behind ? <DefaultButton onClick={pullGit}>Pull</DefaultButton> : null
-            }
-
-            {
-                gitStatus?.ahead ? <DefaultButton onClick={pushGit}>Push</DefaultButton> : null
-            }
-
             <Breadcrumbs breadcrumbs={breadcrumbs} />
             {
-                type === 'D' && <DirectoryViewer path={path} contents={directoryContents} onCommit={onCommit} />
+                gitStatus?.behind? <IconButton iconProps={{iconName: 'Download'}} title="Git Pull" onClick={pullGit}/> : null
+            }
+            {
+                gitStatus?.ahead ? <IconButton iconProps={{iconName: 'Upload'}} title="Git Push" onClick={pushGit}/> : null
+            }
+            {
+                type === 'D' && <DirectoryViewer path={path} contents={directoryContents} onCommit={onCommit} pendingCommit={pendingCommit} />
             }
             {
                 type === 'F' && <FileContent content={fileContent} onSaveContent={onSaveContent} pendingCommit={pendingCommit} onCommit={onCommit}/>
