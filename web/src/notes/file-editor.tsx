@@ -19,6 +19,18 @@ export const FileEditor = ({content, onSaveContent, onExitEditor}) => {
 
     const onEditorMount = editor => editorRef.current = editor
 
+    //TODO this is unsafe, there's a potential scenario where the old content will be saved
+    //to a new path if the save interval triggers after the new onSaveContent prop arrives but
+    //before the content in the editor is updated. Fix this, perhaps by keeping track of
+    //the path the onSaveContent refers to as well as the editor draft, and if they don't match skip the save
+    useEffect(() => {
+        if (editor === 'monaco') {
+            return editorRef.current?.getModel().setValue(content)
+        } else {
+            return editorRef.current?.editor.getSession().setValue(content)
+        }
+    }, [content])
+
     const getEditorValue = useCallback(() => {
         if (editor === 'monaco') {
             return editorRef.current?.getValue()
@@ -61,7 +73,9 @@ export const FileEditor = ({content, onSaveContent, onExitEditor}) => {
     useEffect(() => {
         const interval = setInterval(() => saveContent(), 1000 * 30)
         return () => clearInterval(interval)
-    }, [content, saveContent])
+    }, [saveContent])
+
+
 
     return (
         <>
