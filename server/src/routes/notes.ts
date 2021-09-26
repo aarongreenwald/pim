@@ -178,14 +178,23 @@ export const setupNotesRoutes = (app: Express) => {
                         path: `${parts[0]}/${parts[1]}`
                     }
                 }),
-                contents: contents.split('\n').filter(Boolean).map(result => {
-                    const [path, lineNumber, ...text] = result.split(':');
-                    return {
-                        path,
-                        lineNumber,
-                        text: text.join(':')
-                    }
-                })
+                contents: Object.values(
+                    contents.split('\n').filter(Boolean).reduce((acc, result) => {
+                        const [path, lineNumber, ...text] = result.split(':');
+                        const item = {
+                            lineNumber,
+                            text: text.join(':')
+                        };
+                        if (acc[path]) {
+                            acc[path].items.push(item)
+                        } else {
+                            acc[path] = {
+                                path,
+                                items: [item]
+                            }
+                        }
+                        return acc;
+                    }, {}))
             })
         } catch (ex) {
             console.error(ex)

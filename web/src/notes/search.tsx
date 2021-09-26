@@ -40,9 +40,17 @@ export const Search = ({show, onDismiss}) => {
             }
             {
                 searchResults?.contents.map((result) =>
-                    <StyledSearchContentResult key={`${result.path}_${result.lineNumber}`}>
+                    <StyledSearchContentResult key={`${result.path}`}>
                         <Link to={`/notes/?path=${result.path}`} onClick={onDismiss}>{result.path}</Link>
-                        <ReactMarkdown>{result.text}</ReactMarkdown>
+                        {
+                            result.items.map((item, i) =>
+                                <div key={item.lineNumber}>
+                                    <ReactMarkdown>{item.text}</ReactMarkdown>
+                                    {
+                                        i !== result.items.length - 1 && <hr />
+                                    }
+                                </div>)
+                        }
                     </StyledSearchContentResult>
                 )
             }
@@ -68,10 +76,12 @@ const DirectoryItemSearchResult = ({item, onDismiss}) => {
 }
 
 const StyledSearchResult = styled.div`
-  border-top: 1px solid gray;
-  padding-top: 12px;
-  padding-bottom: 12px;
+  border: 1px solid gray;
+  margin-bottom: 6px;
   overflow-wrap: anywhere;
+  padding: 8px 6px;
+  box-shadow: lightgray 1px 1px;
+  border-radius: 3px;
 `;
 
 const StyledSearchContentResult = styled(StyledSearchResult)`
