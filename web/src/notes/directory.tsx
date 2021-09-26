@@ -65,7 +65,7 @@ const DirectoryContents = ({directory, contents}) => (
                 <td>{item.pendingCommit ? '*' : ' '}</td>
                 {
                     item.isPlainText ?
-                        <td><Link to={`/notes?path=${directory}/${item.name}`}>{item.name}</Link></td> :
+                        <td><Link to={`/notes?path=${encodeURIComponent(`${directory}/${item.name}`)}`}>{item.name}</Link></td> :
                         <td>{item.name}</td>
                 }
 

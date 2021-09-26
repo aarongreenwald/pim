@@ -248,7 +248,7 @@ export const getGitStatus: () => Promise<GitStatus> = () =>
         .then(res => res.json());
 
 export const searchNotes = (query: string, excludeHidden = true) : Promise<any> =>
-    fetch(`${config.apiServiceUrl}/notes/search?query=${query}&excludeHidden=${excludeHidden}`, {credentials: 'include'})
+    fetch(`${config.apiServiceUrl}/notes/search?query=${encodeURIComponent(query)}&excludeHidden=${excludeHidden}`, {credentials: 'include'})
         .then(handleResponse)
         .then(res => res.json());
 

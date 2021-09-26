@@ -41,7 +41,7 @@ export const Search = ({show, onDismiss}) => {
             }
             {
                 searchResults?.contents.map((result) =>
-                    <StyledSearchContentResult key={`${result.path}`} to={`/notes/?path=${result.path}`} onClick={onDismiss}>
+                    <StyledSearchContentResult key={`${result.path}`} to={`/notes/?path=${encodeURIComponent(result.path)}`} onClick={onDismiss}>
                         <div className="search-result-card">
                             <StyledSearchCardHeader>{result.path}</StyledSearchCardHeader>
                             <StyledSearchCardBody>
@@ -73,7 +73,7 @@ const headerStackStyles = {
 
 const DirectoryItemSearchResult = ({item, onDismiss}) => {
     return (
-        <StyledSearchResult to={`/notes/?path=${item.path}`} onClick={onDismiss}>
+        <StyledSearchResult to={`/notes/?path=${encodeURIComponent(item.path)}`} onClick={onDismiss}>
             <div className="search-result-card">
                 <Icon iconName={'TextDocument'}/> {item.fileName}
             </div>

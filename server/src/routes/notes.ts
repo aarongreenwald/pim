@@ -152,7 +152,8 @@ export const setupNotesRoutes = (app: Express) => {
             const {query, excludeHidden} = req.query;
 
             const results = await Promise.all([
-                execp(`cd ${CONTENT_DIRECTORY} && grep ${excludeHidden === 'true' ? '--exclude=\'.[^.]*\'' : ''} ${excludeHidden === 'true' ? '--exclude-dir=\'.[^.]*\'' : '--exclude-dir=.git'} -inr '${query}' .`),
+                //pipe to cat at the end so that if no results are found the exit code will be 0 and not 1
+                execp(`cd ${CONTENT_DIRECTORY} && grep ${excludeHidden === 'true' ? '--exclude=\'.[^.]*\'' : ''} ${excludeHidden === 'true' ? '--exclude-dir=\'.[^.]*\'' : '--exclude-dir=.git'} -inr '${query}' . | cat`),
                 //TODO I'd like to return directories as well (excluded by -xtype f) but not every file in the directory
                 execp(`cd ${CONTENT_DIRECTORY} && find . ${excludeHidden === 'true' ? '-not -path \'*/\\.*\'' : '-not -path \'./.git/*\''} -iname '*${query}*' -xtype f -printf "%h:%f\\n"`)
             ])
