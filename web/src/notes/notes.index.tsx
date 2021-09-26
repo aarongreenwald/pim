@@ -67,9 +67,7 @@ export const Notes: React.FC = () => {
             {
                 type === 'F' && <FileContent content={fileContent} onSaveContent={onSaveContent} pendingCommit={pendingCommit} onCommit={onCommit}/>
             }
-            <Panel isOpen={showSearch} onDismiss={() => setShowSearch(false)} isHiddenOnDismiss>
-                <Search onDismiss={() => setShowSearch(false)}/>
-            </Panel>
+            <Search show={showSearch} onDismiss={() => setShowSearch(false)}/>
         </>
     )
 };

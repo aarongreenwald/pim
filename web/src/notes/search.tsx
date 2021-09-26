@@ -2,12 +2,12 @@ import {useDebouncedInput} from '../common/debounced-input.hook';
 import * as React from 'react';
 import {useEffect, useState} from 'react';
 import {searchNotes} from '../services/server-api';
-import {Icon, SearchBox, Toggle} from '@fluentui/react';
+import {Icon, Stack, Panel, SearchBox, Toggle, FocusZone} from '@fluentui/react';
 import ReactMarkdown from 'react-markdown';
 import {Link} from 'react-router-dom'
 import styled from '@emotion/styled';
 
-export const Search = ({onDismiss}) => {
+export const Search = ({show, onDismiss}) => {
     const {inputVal, debouncedValue, updateValue} = useDebouncedInput('')
     const [excludeHidden, setExcludeHidden] = useState(true);
     const [searchResults, setSearchResults] = useState(null)
@@ -21,10 +21,20 @@ export const Search = ({onDismiss}) => {
     }, [debouncedValue, excludeHidden])
 
     return (
-        <>
-            <SearchBox value={inputVal}
-                       onChange={(_, val) => updateValue(val)}/>
-            <Toggle checked={!excludeHidden} onChange={(_, val) => setExcludeHidden(!val)} label={'Include hidden files'}/>
+        <Panel isOpen={show} 
+               onDismiss={onDismiss} 
+               isHiddenOnDismiss 
+               onRenderHeader={() =>
+                   (
+                       <Stack styles={headerStackStyles}>
+                           <SearchBox value={inputVal}
+                                      onChange={(_, val) => updateValue(val)}/>
+                           <Toggle checked={!excludeHidden}
+                                   onChange={(_, val) => setExcludeHidden(!val)}
+                                   label={'Include hidden'}/>
+                       </Stack>
+                   )}>
+            <FocusZone>
             {
                 searchResults?.names.map(item => <DirectoryItemSearchResult key={item.path} item={item} onDismiss={onDismiss}/>)
             }
@@ -36,9 +46,17 @@ export const Search = ({onDismiss}) => {
                     </StyledSearchContentResult>
                 )
             }
-        </>
+            </FocusZone>
+        </Panel>
     )
 }
+
+const headerStackStyles = {
+    root: {
+        flexGrow: 1,
+        marginLeft: 24 //hack - needs to match the panel content padding
+    }
+};
 
 const DirectoryItemSearchResult = ({item, onDismiss}) => {
     return (
