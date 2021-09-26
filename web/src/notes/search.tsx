@@ -6,6 +6,7 @@ import {Icon, Stack, Panel, SearchBox, Toggle, FocusZone} from '@fluentui/react'
 import ReactMarkdown from 'react-markdown';
 import {Link} from 'react-router-dom'
 import styled from '@emotion/styled';
+import { NeutralColors, CommunicationColors } from '@fluentui/theme';
 
 export const Search = ({show, onDismiss}) => {
     const {inputVal, debouncedValue, updateValue} = useDebouncedInput('')
@@ -36,21 +37,25 @@ export const Search = ({show, onDismiss}) => {
                    )}>
             <FocusZone>
             {
-                searchResults?.names.map(item => <DirectoryItemSearchResult key={item.path} item={item} onDismiss={onDismiss}/>)
+               searchResults?.names.map(item => <DirectoryItemSearchResult key={item.path} item={item} onDismiss={onDismiss}/>)
             }
             {
                 searchResults?.contents.map((result) =>
-                    <StyledSearchContentResult key={`${result.path}`}>
-                        <Link to={`/notes/?path=${result.path}`} onClick={onDismiss}>{result.path}</Link>
-                        {
-                            result.items.map((item, i) =>
-                                <div key={item.lineNumber}>
-                                    <ReactMarkdown>{item.text}</ReactMarkdown>
-                                    {
-                                        i !== result.items.length - 1 && <hr />
-                                    }
-                                </div>)
-                        }
+                    <StyledSearchContentResult key={`${result.path}`} to={`/notes/?path=${result.path}`} onClick={onDismiss}>
+                        <div className="search-result-card">
+                            <StyledSearchCardHeader>{result.path}</StyledSearchCardHeader>
+                            <StyledSearchCardBody>
+                            {
+                                result.items.map((item, i) =>
+                                    <div key={item.lineNumber}>
+                                        <ReactMarkdown>{item.text}</ReactMarkdown>
+                                        {
+                                            i !== result.items.length - 1 && <hr />
+                                        }
+                                    </div>)
+                            }
+                            </StyledSearchCardBody>
+                        </div>
                     </StyledSearchContentResult>
                 )
             }
@@ -68,22 +73,55 @@ const headerStackStyles = {
 
 const DirectoryItemSearchResult = ({item, onDismiss}) => {
     return (
-        <StyledSearchResult>
-            <Icon iconName={'TextDocument'}/>
-            <Link to={`/notes/?path=${item.path}`} onClick={onDismiss}>{item.fileName}</Link>
+        <StyledSearchResult to={`/notes/?path=${item.path}`} onClick={onDismiss}>
+            <div className="search-result-card">
+                <Icon iconName={'TextDocument'}/> {item.fileName}
+            </div>
         </StyledSearchResult>
     )
 }
 
-const StyledSearchResult = styled.div`
-  border: 1px solid gray;
-  margin-bottom: 6px;
-  overflow-wrap: anywhere;
-  padding: 8px 6px;
-  box-shadow: lightgray 1px 1px;
-  border-radius: 3px;
+const CARD_SPACING = '6px';
+const hoverBoxShadow = `8px 4px 6px -3px ${NeutralColors.gray120}`;
+
+const StyledSearchResult = styled(Link) `
+  text-decoration: none;
+
+  div.search-result-card {
+    border: 1px solid ${NeutralColors.gray120};
+    margin-bottom: ${CARD_SPACING};
+    overflow-wrap: anywhere;
+    box-shadow: 4px 2px 6px -3px ${NeutralColors.gray120};
+    border-radius: 4px;  
+    color: ${NeutralColors.black};
+    padding: ${CARD_SPACING};
+    
+    :hover {
+      box-shadow: ${hoverBoxShadow};
+      transform: scale(1.02);
+    }
+  }
+  
+  :focus > div.search-result-card {
+    box-shadow: ${hoverBoxShadow};
+    transform: scale(1.02);
+  }
 `;
+
+const StyledSearchCardHeader = styled.div`
+  padding: ${CARD_SPACING};
+  background: ${CommunicationColors.tint40};
+  border-bottom: 1px solid ${NeutralColors.gray120};
+`
+
+const StyledSearchCardBody = styled.div`
+  padding: ${CARD_SPACING};
+`
 
 const StyledSearchContentResult = styled(StyledSearchResult)`
   padding-bottom: 0;
+  
+  div.search-result-card {
+    padding: 0;
+  }
 `
