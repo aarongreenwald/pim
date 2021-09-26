@@ -148,44 +148,50 @@ export const setupNotesRoutes = (app: Express) => {
     })
 
     app.get('/notes/search', async (req, res) => {
-       const query = req.query.query;
+        try {
+            const {query, excludeHidden} = req.query;
 
-        const results = await Promise.all([
-            execp(`cd ${CONTENT_DIRECTORY} && grep -inr '${query}' .`),
-            //TODO I'd like to return directories as well (excluded by -xtype f) but not every file in the directory
-            execp(`cd ${CONTENT_DIRECTORY} && find . -iname '*${query}*' -xtype f -not -path ./.git -printf "%h:%f\\n"`)
-        ])
-        const {stdout: contents, stderr: contentsErr} = results[0];
-        const {stdout: names, stderr: namesErr} = results[1];
+            const results = await Promise.all([
+                execp(`cd ${CONTENT_DIRECTORY} && grep ${excludeHidden === 'true' ? '--exclude-dir=\'.[^.]*\'' : '--exclude-dir=.git'} -inr '${query}' .`),
+                //TODO I'd like to return directories as well (excluded by -xtype f) but not every file in the directory
+                execp(`cd ${CONTENT_DIRECTORY} && find . ${excludeHidden === 'true' ? '-not -path \'*/\\.*\'' : '-not -path \'./.git/*\''} -iname '*${query}*' -xtype f -printf "%h:%f\\n"`)
+            ])
+            const {stdout: contents, stderr: contentsErr} = results[0];
+            const {stdout: names, stderr: namesErr} = results[1];
 
-        if (contentsErr) {
-            console.error('Failed while searching contents of files', contentsErr)
-            throw contentsErr;
+            if (contentsErr) {
+                console.error('Failed while searching contents of files', contentsErr)
+                throw contentsErr;
+            }
+            if (namesErr) {
+                console.error('Failed while searching files by name', namesErr)
+                throw namesErr;
+            }
+
+
+            res.send({
+                names: names.split('\n').filter(Boolean).map(result => {
+                    const parts = result.split(':');
+                    return {
+                        directory: parts[0],
+                        fileName: parts[1],
+                        path: `${parts[0]}/${parts[1]}`
+                    }
+                }),
+                contents: contents.split('\n').filter(Boolean).map(result => {
+                    const [path, lineNumber, ...text] = result.split(':');
+                    return {
+                        path,
+                        lineNumber,
+                        text: text.join(':')
+                    }
+                })
+            })
+        } catch (ex) {
+            console.error(ex)
+            res.status(500).send(ex)
         }
-        if (namesErr) {
-            console.error('Failed while searching files by name', namesErr)
-            throw namesErr;
-        }
 
-
-       res.send({
-           names: names.split('\n').filter(Boolean).map(result => {
-               const parts = result.split(':');
-               return {
-                   directory: parts[0],
-                   fileName: parts[1],
-                   path: `${parts[0]}/${parts[1]}`
-               }
-           }),
-           contents: contents.split('\n').filter(Boolean).map(result => {
-               const parts = result.split(':');
-               return {
-                   path: parts[0],
-                   lineNumber: parts[1],
-                   text: parts[2]
-               }
-           })
-       })
     });
 
 }

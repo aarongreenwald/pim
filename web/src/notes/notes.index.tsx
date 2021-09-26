@@ -1,23 +1,13 @@
 import * as React from 'react';
 import {useCallback, useEffect, useState} from 'react';
-import {
-    getNotes,
-    saveFileContent,
-    commitPath,
-    gitPull,
-    gitPush,
-    getGitStatus,
-    searchNotes
-} from '../services/server-api';
-import {IconButton, Panel, SearchBox, Spinner} from '@fluentui/react';
-import {Link} from 'react-router-dom';
+import {commitPath, getGitStatus, getNotes, gitPull, gitPush, saveFileContent} from '../services/server-api';
+import {IconButton, Panel, Spinner} from '@fluentui/react';
 import {useLocation} from 'react-router';
 import {Directory, File, GitStatus} from '@pim/common';
 import {FileContent} from './file';
 import {Directory as DirectoryViewer} from './directory';
 import {Breadcrumbs} from './breadcrumbs';
-import {useDebouncedInput} from '../common/debounced-input.hook';
-import ReactMarkdown from 'react-markdown';
+import {Search} from './search';
 
 
 export const Notes: React.FC = () => {
@@ -83,53 +73,6 @@ export const Notes: React.FC = () => {
         </>
     )
 };
-
-const Search = ({onDismiss}) => {
-    const {inputVal, debouncedValue, updateValue} = useDebouncedInput('')
-    const [searchResults, setSearchResults] = useState(null)
-    useEffect(() => {
-        if (!debouncedValue) return;
-
-        searchNotes(debouncedValue).then(setSearchResults)
-    }, [debouncedValue])
-    
-    return (
-        <>
-            <SearchBox value={inputVal}
-                       onChange={(_, val) => updateValue(val)}
-                       onSearch={() => searchNotes(debouncedValue).then(setSearchResults)}/>
-            {
-                !!(searchResults?.names.length) &&
-                    <div>
-                        File Names
-                    </div>
-            }
-            {
-                searchResults?.names.map(name =>
-                    <div key={name.path}>
-                        <Link to={`/notes/?path=${name.path}`} onClick={onDismiss}>{name.fileName}</Link>
-                    </div>
-
-                )
-            }
-            {
-                !!(searchResults?.contents.length) &&
-                <div>
-                    File Contents
-                </div>
-            }
-            {
-                searchResults?.contents.map((result) =>
-                    <div key={`${result.path}_${result.lineNumber}`}>
-                        <Link to={`/notes/?path=${result.path}`} onClick={onDismiss}>{result.path}</Link>
-                        <ReactMarkdown>{result.text}</ReactMarkdown>
-                    </div>
-                )
-            }
-        </>
-        )
-    
-}
 
 function useFileSystemItem() {
     const [fileSystemItem, setFileSystemItem] = useState<File | Directory>(null)
