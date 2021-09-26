@@ -77,7 +77,7 @@ export const Notes: React.FC = () => {
             {
                 type === 'F' && <FileContent content={fileContent} onSaveContent={onSaveContent} pendingCommit={pendingCommit} onCommit={onCommit}/>
             }
-            <Panel isOpen={showSearch} onDismiss={() => setShowSearch(false)}>
+            <Panel isOpen={showSearch} onDismiss={() => setShowSearch(false)} isHiddenOnDismiss>
                 <Search onDismiss={() => setShowSearch(false)}/>
             </Panel>
         </>
@@ -99,12 +99,24 @@ const Search = ({onDismiss}) => {
                        onChange={(_, val) => updateValue(val)}
                        onSearch={() => searchNotes(debouncedValue).then(setSearchResults)}/>
             {
+                !!(searchResults?.names.length) &&
+                    <div>
+                        File Names
+                    </div>
+            }
+            {
                 searchResults?.names.map(name =>
-                    <div key={name}>
-                        <Link to={`/notes/?path=${name}`} onClick={onDismiss}>{name}</Link>
+                    <div key={name.path}>
+                        <Link to={`/notes/?path=${name.path}`} onClick={onDismiss}>{name.fileName}</Link>
                     </div>
 
                 )
+            }
+            {
+                !!(searchResults?.contents.length) &&
+                <div>
+                    File Contents
+                </div>
             }
             {
                 searchResults?.contents.map((result) =>

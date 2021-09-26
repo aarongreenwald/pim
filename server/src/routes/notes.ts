@@ -152,8 +152,8 @@ export const setupNotesRoutes = (app: Express) => {
 
         const results = await Promise.all([
             execp(`cd ${CONTENT_DIRECTORY} && grep -inr '${query}' .`),
-            //TODO I'd like to return directories as well (exclude by -xtype f) but not every file in the directory
-            execp(`cd ${CONTENT_DIRECTORY} && find . -iname '*${query}*' -xtype f -not -path ./.git`)
+            //TODO I'd like to return directories as well (excluded by -xtype f) but not every file in the directory
+            execp(`cd ${CONTENT_DIRECTORY} && find . -iname '*${query}*' -xtype f -not -path ./.git -printf "%h:%f\\n"`)
         ])
         const {stdout: contents, stderr: contentsErr} = results[0];
         const {stdout: names, stderr: namesErr} = results[1];
@@ -169,7 +169,14 @@ export const setupNotesRoutes = (app: Express) => {
 
 
        res.send({
-           names: names.split('\n').filter(Boolean),
+           names: names.split('\n').filter(Boolean).map(result => {
+               const parts = result.split(':');
+               return {
+                   directory: parts[0],
+                   fileName: parts[1],
+                   path: `${parts[0]}/${parts[1]}`
+               }
+           }),
            contents: contents.split('\n').filter(Boolean).map(result => {
                const parts = result.split(':');
                return {
