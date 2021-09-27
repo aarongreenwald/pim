@@ -2,13 +2,14 @@ import {Express} from 'express';
 import fs from 'fs';
 import {exec} from 'child_process';
 import {resolvePath} from '../utils/utils';
-import {FileSystemItem, DirectoryItem, Breadcrumb, FileSystemItemType, Directory, File, GitStatus} from "@pim/common";
+import {Breadcrumb, Directory, DirectoryItem, File, FileSystemItemType, GitStatus} from "@pim/common";
 import path from 'path';
 import bodyParser from 'body-parser';
-const uuid = require('uuid')
-const textParser = bodyParser.text();
 import simpleGit, {SimpleGit, StatusResult} from 'simple-git';
 import util from "util";
+
+const uuid = require('uuid')
+const textParser = bodyParser.text();
 const execp = util.promisify(exec);
 
 const NOTES_PATH = process.env.NOTES_PATH;
@@ -63,6 +64,7 @@ export const setupNotesRoutes = (app: Express) => {
         const fullPath = getFullPath(req.query.path as string);
 
         try {
+            uncommittedFiles.set(fullPath, new Date())
             await fs.promises.writeFile(fullPath, req.body);
             const result = await getPath(req.query.path as string)
             res.send(result)
@@ -79,6 +81,7 @@ export const setupNotesRoutes = (app: Express) => {
         const createdPath = path.join(fullPath, name);
         try {
             if (itemType === 'F') {
+                uncommittedFiles.set(fullPath, new Date())
                 await fs.promises.writeFile(createdPath, '', {flag: 'wx'})
             } else {
                 await fs.promises.mkdir(createdPath, {recursive: true})
@@ -206,6 +209,27 @@ export const setupNotesRoutes = (app: Express) => {
 
 }
 
+const uncommittedFiles = new Map<string, Date>()
+const AUTOCOMMIT_DELAY_MS = 20 * 1000 * 60 //20 minutes
+setInterval(async () => {
+    const entries = uncommittedFiles.entries()
+    for (let [path, lastChanged] of entries) {
+        if (lastChanged.getTime() + AUTOCOMMIT_DELAY_MS < new Date().getTime()) {
+            try {
+                console.log(`Attempting to autocommit ${path}`)
+                await git.add(path)
+                await git.commit('Autocommitted via pim webapp', path)
+                await git.push()
+                uncommittedFiles.delete(path)
+            } catch (ex) {
+                console.error(`Failed to autocommit ${path}`, ex)
+                //Try again at the next interval. Consider just deleting it to not clutter the logs.
+                uncommittedFiles.set(path, new Date())
+            }
+        }
+    }
+}, 1000 * 30)
+
 const execute = async (cmd: string) => {
     const {stdout, stderr} = await execp(cmd)
     if (stderr) {
@@ -227,12 +251,7 @@ const getGitChanges = async (path: string) => {
     //considering all kinds of changes. Renames are tricky so it's not worth it, handle it separately
 
     const {modified, not_added, created, staged, deleted} = await git.status([path])
-    const changed = [...modified, ...not_added, ...created, ...staged, ...deleted];
-    //git.status() uses --porcelain which always returns a status relative to the path root, even if I cwd to the path and call status on '.'
-    //attempt to relativize the paths
-    const pathRelativeToRepoRoot = getPathRelativeToRepoRoot(path)
-    console.log({path, pathRelativeToRepoRoot})
-    return changed
+    return [...modified, ...not_added, ...created, ...staged, ...deleted]
 }
 
 async function gitPullRebase() {
@@ -243,11 +262,12 @@ async function gitPullRebase() {
     }
 }
 
-const getPathRelativeToRepoRoot = (path: string) => {
-    const root = path.indexOf('./')
-    return root !== -1 ? path.substring(root) : path
-}
-
+//git.status() uses --porcelain which always returns a status relative to the path root, even if I cwd to the path and call status on '.'
+//attempt to relativize the paths
+// const getPathRelativeToRepoRoot = (path: string) => {
+//     const root = path.indexOf('./')
+//     return root !== -1 ? path.substring(root) : path
+// }
 
 const getPath: (relativePath: string) => Promise<Directory | File> = async (relativePath) => {
     const {path, fullPath, isDirectory, directoryPath} = await getPathDetails(relativePath);
