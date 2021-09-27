@@ -387,9 +387,9 @@ const zipAndReturn = (res, fullPath, path) => {
     const name = path.split('/').pop()
     const id = uuid()
     //TODO don't include the full path - cd to the directory first
-    exec(`tar -cf ~/temporary_files/${id}.tar.gz ${fullPath}`, (err, stdout, stderr) => {
+    exec(`tar -cf temporary_files/${id}.tar.gz ${fullPath}`, (err, stdout, stderr) => {
         res.setHeader("Content-Disposition",  `attachment; filename=${name}.tar.gz`)
-        fs.createReadStream(`~/temporary_files/${id}.tar.gz`).pipe(res);
+        fs.createReadStream(`temporary_files/${id}.tar.gz`).pipe(res);
     })
 }
 
@@ -418,4 +418,4 @@ const getStats = async (name, dir) => {
     }
 }
 
-fs.mkdir('~/temporary_files', err => {});
+fs.mkdir('temporary_files', err => {});
