@@ -1,7 +1,7 @@
 import * as React from 'react';
 import {useMemo, useState} from 'react';
 import {FileSystemItemType} from '@pim/common';
-import {createItem} from '../services/server-api';
+import {createItem, renameDirectoryItem} from '../services/server-api';
 import {Icon, IconButton, Stack, TextField} from '@fluentui/react';
 import {horizontalChoiceGroup, StyledChoiceGroup} from '../financials/styles';
 import {Link} from 'react-router-dom';
@@ -59,26 +59,64 @@ const DirectoryCommandBar = ({currentDirectory, onCommit, pendingCommit, showHid
 const DirectoryContents = ({directory, contents}) => (
     <table>
         <tbody>
-        {contents.map((item) =>
-            <tr key={item.name}>
-                <td><Icon iconName={item.isDirectory ? 'FabricFolder' : 'TextDocument'}/></td>
-                <td>{item.pendingCommit ? '*' : ' '}</td>
-                {
-                    item.isPlainText ?
-                        <td><Link to={`/notes?path=${encodeURIComponent(`${directory}/${item.name}`)}`}>{item.name}</Link></td> :
-                        <td>{item.name}</td>
-                }
-
-                <td><a href={`/api/notes/download?path=${directory}/${item.name}`} download={item.name}>&#8595;</a></td>
-                {
-                    item.openInBrowser &&
-                    <td><a href={`/api/notes/viewfile?path=${directory}/${item.name}`}>??</a></td>
-                }
-
-            </tr>
-        )}
+        {contents.map((item) => <DirectoryItem directory={directory} item={item} key={item.name} />)}
         </tbody>
     </table>
 );
+
+const DirectoryItem = ({directory, item}) => {
+    const [editMode, setEditMode] = useState(false)
+    const [itemNameDraft, setItemNameDraft] = useState(item.name)
+
+    const onSave = () => {
+        renameDirectoryItem(`${directory}/${item.name}`, `${directory}/${itemNameDraft}`)
+            .then(() => setEditMode(false)) //TODO refresh view
+    }
+
+    return (
+        <tr>
+            <td><Icon iconName={item.isDirectory ? 'FabricFolder' : 'TextDocument'}/></td>
+            <td>{item.pendingCommit ? '*' : ' '}</td>
+            {
+                editMode ?
+                    <td><TextField placeholder={item.name} value={itemNameDraft} onChange={(_, val) => setItemNameDraft(val)} /></td> :
+                    item.isPlainText ?
+                        <td><Link to={`/notes?path=${encodeURIComponent(`${directory}/${item.name}`)}`}>{item.name}</Link></td> :
+                        <td>{item.name}</td>
+            }
+
+            <td>
+                <a href={`/api/notes/download?path=${directory}/${item.name}`} download={item.name}>
+                    <Icon iconName="Download" styles={iconStyles}/>
+                </a>
+            </td>
+            <td>
+                {
+                    item.openInBrowser &&
+                    <a href={`/api/notes/viewfile?path=${directory}/${item.name}`}><Icon iconName="ArrowUpRight" styles={iconStyles}/></a>
+                }
+            </td>
+            <td>
+                {
+                    !editMode ?
+                        <IconButton iconProps={{iconName: 'Edit'}} styles={iconButtonStyles} onClick={() => setEditMode(true)} /> :
+                        <>
+                            <IconButton iconProps={{iconName: 'Save'}} styles={iconButtonStyles} onClick={onSave} />
+                            <IconButton iconProps={{iconName: 'Cancel'}} styles={iconButtonStyles} onClick={() => setEditMode(false)} />
+                        </>
+                }
+            </td>
+
+        </tr>
+    )
+}
+
+const iconStyles = {root: {fontSize: 16}};
+const iconButtonStyles = {
+    root: {
+        height: 16,
+        width: 16
+    }
+};
 
 const itemTypeRadioOptions = [{key: 'F', text: 'File'}, {key: 'D', text: 'Directory'}]

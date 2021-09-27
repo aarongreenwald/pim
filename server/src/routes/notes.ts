@@ -2,7 +2,15 @@ import {Express} from 'express';
 import fs from 'fs';
 import {exec} from 'child_process';
 import {resolvePath} from '../utils/utils';
-import {Breadcrumb, Directory, DirectoryItem, File, FileSystemItemType, GitStatus} from "@pim/common";
+import {
+    Breadcrumb,
+    Directory,
+    DirectoryItem,
+    File,
+    FileSystemItemType,
+    GitStatus,
+    NotesSearchResults
+} from "@pim/common";
 import path from 'path';
 import bodyParser from 'body-parser';
 import simpleGit, {SimpleGit, StatusResult} from 'simple-git';
@@ -162,7 +170,7 @@ export const setupNotesRoutes = (app: Express) => {
             ])
             const [contents, names] = results;
 
-            res.send({
+            const response: NotesSearchResults = {
                 names: names.split('\n').filter(Boolean).map(result => {
                     const parts = result.split(':');
                     return {
@@ -188,7 +196,8 @@ export const setupNotesRoutes = (app: Express) => {
                         }
                         return acc;
                     }, {}))
-            })
+            };
+            res.send(response)
         } catch (ex) {
             console.error(ex)
             res.status(500).send(ex)
@@ -201,6 +210,27 @@ export const setupNotesRoutes = (app: Express) => {
             const recentFilesScript = path.resolve(__dirname, '..', 'cli', 'recent-files.sh')
             const files = await execute(`cd ${CONTENT_DIRECTORY} && ${recentFilesScript} 10 10`)
             res.send(files.split('\n').filter(Boolean))
+        } catch (ex) {
+            console.error(ex)
+            res.status(500).send(ex)
+        }
+    })
+
+    app.post('/notes/move', async (req, res) => {
+        try {
+            const from = req.query.from as string;
+            const to = req.query.to as string;
+
+            await git.add(from) //in case it's a new file it needs to be added before committing
+            await git.commit(`Commit changes in ${from} before moving`, from)
+
+            await git.mv(from, to)
+            await git.commit(`Renamed ${from} to ${to} via pim webapp`, [from, to])
+
+            await git.push()
+            //TODO consider returning the $from directory so the UI can update easily
+            //but I might want to call this from other places, like breadcrumbs (in which case I need to return the $from)
+            res.send(200)
         } catch (ex) {
             console.error(ex)
             res.status(500).send(ex)
@@ -357,9 +387,9 @@ const zipAndReturn = (res, fullPath, path) => {
     const name = path.split('/').pop()
     const id = uuid()
     //TODO don't include the full path - cd to the directory first
-    exec(`tar -cf temporary_files/${id}.tar.gz ${fullPath}`, (err, stdout, stderr) => {
+    exec(`tar -cf ~/temporary_files/${id}.tar.gz ${fullPath}`, (err, stdout, stderr) => {
         res.setHeader("Content-Disposition",  `attachment; filename=${name}.tar.gz`)
-        fs.createReadStream(`temporary_files/${id}.tar.gz`).pipe(res);
+        fs.createReadStream(`~/temporary_files/${id}.tar.gz`).pipe(res);
     })
 }
 
@@ -388,4 +418,4 @@ const getStats = async (name, dir) => {
     }
 }
 
-fs.mkdir('./temporary_files', err => {});
+fs.mkdir('~/temporary_files', err => {});

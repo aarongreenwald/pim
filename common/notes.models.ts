@@ -69,13 +69,14 @@ export interface GitStatus {
 export interface NotesSearchResults {
     names: {
         path: string;
+        directory: string;
         fileName: string;
-    }[]
+    }[];
     contents: {
        path: string;
        items: {
            lineNumber: number;
            text: string;
-       }[]
-    }[]
+       }[];
+    }[];
 }

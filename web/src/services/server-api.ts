@@ -130,6 +130,9 @@ export const searchNotes = (query: string, excludeHidden = true): Promise<NotesS
 
 export const getRecentFiles = (): Promise<string[]> => get('notes/recent');
 
+export const renameDirectoryItem = (from: string, to: string): Promise<void> =>
+    post(`notes/move?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`)
+
 // const debugSleep = (ms) => (...args) => new Promise(resolve => setTimeout(resolve, ms, args))
 
 const get = <T>(path: string): Promise<T> =>
