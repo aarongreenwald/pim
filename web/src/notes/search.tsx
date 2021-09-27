@@ -8,6 +8,7 @@ import {Link} from 'react-router-dom'
 import styled from '@emotion/styled';
 import { NeutralColors, CommunicationColors } from '@fluentui/theme';
 import {NotesSearchResults} from '@pim/common';
+import {fileIconName} from './icons';
 
 export const Search = ({show, onDismiss}) => {
     const {inputVal, debouncedValue, updateValue} = useDebouncedInput('')
@@ -76,7 +77,7 @@ const DirectoryItemSearchResult = ({item, onDismiss}) => {
     return (
         <StyledSearchResult to={`/notes/?path=${encodeURIComponent(item.path)}`} onClick={onDismiss}>
             <div className="search-result-card">
-                <Icon iconName={'TextDocument'}/> {item.fileName}
+                <Icon iconName={fileIconName}/> {item.fileName}
             </div>
         </StyledSearchResult>
     )

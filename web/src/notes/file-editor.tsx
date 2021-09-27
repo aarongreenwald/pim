@@ -4,6 +4,7 @@ import Editor from '@monaco-editor/react';
 import * as React from 'react';
 import AceEditor from 'react-ace';
 import {Prompt} from 'react-router';
+import {saveAndCloseIcon, saveIcon, toggleEditorIcon, wrapLinesIcon} from './icons';
 require('ace-builds/src-noconflict/mode-markdown');
 require('ace-builds/src-noconflict/theme-tomorrow_night_eighties');
 //see more themes here: https://ace.c9.io/build/kitchen-sink.html
@@ -75,28 +76,26 @@ export const FileEditor = ({content, onSaveContent, onExitEditor}) => {
         return () => clearInterval(interval)
     }, [saveContent])
 
-
-
     return (
         <>
             <IconButton title={'Save and close'}
-                        iconProps={{iconName: 'SaveAndClose'}}
+                        iconProps={saveAndCloseIcon}
                         onClick={onExit}/>
             <IconButton
                 disabled={!isEditorDirty || saving}
                 title={'Save'}
-                iconProps={{iconName: 'Save'}}
+                iconProps={saveIcon}
                 onClick={saveContent}/>
             <IconButton title="Wrap lines"
                         checked={wordWrap}
                         toggle
                         onClick={(_) => setWordWrap(val => !val)}
-                        iconProps={{iconName: 'LineStyle'}} />
+                        iconProps={wrapLinesIcon} />
             <IconButton title="Toggle editor type"
                         checked={editor === 'monaco'}
                         toggle
                         onClick={(_) => setEditor(val => val === 'ace' ? 'monaco' : 'ace')}
-                        iconProps={{iconName: 'LocationOutline'}}/>
+                        iconProps={toggleEditorIcon}/>
             {
                 //this is for in-app navigation with react-router
                 //for browser navigation the onbeforeunload is setup in a hook

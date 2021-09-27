@@ -16,6 +16,7 @@ import {FileContent} from './file';
 import {Directory as DirectoryViewer} from './directory';
 import {Breadcrumbs} from './breadcrumbs';
 import {Search} from './search';
+import {downloadIcon, searchIcon, uploadIcon} from './icons';
 
 
 export const Notes: React.FC = () => {
@@ -67,12 +68,12 @@ export const Notes: React.FC = () => {
     return (
         <>
             <Breadcrumbs breadcrumbs={breadcrumbs} />
-            <IconButton iconProps={{iconName: 'Search'}} title="Search" onClick={() => setShowSearch(true)} />
+            <IconButton iconProps={searchIcon} title="Search" onClick={() => setShowSearch(true)} />
             {
-                gitStatus?.behind? <IconButton iconProps={{iconName: 'Download'}} title="Git Pull" onClick={pullGit}/> : null
+                gitStatus?.behind? <IconButton iconProps={downloadIcon} title="Git Pull" onClick={pullGit}/> : null
             }
             {
-                gitStatus?.ahead ? <IconButton iconProps={{iconName: 'Upload'}} title="Git Push" onClick={pushGit}/> : null
+                gitStatus?.ahead ? <IconButton iconProps={uploadIcon} title="Git Push" onClick={pushGit}/> : null
             }
             {
                 type === 'D' && <DirectoryViewer path={path} contents={directoryContents} onCommit={onCommit} pendingCommit={pendingCommit} />

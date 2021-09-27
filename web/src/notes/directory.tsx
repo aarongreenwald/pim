@@ -5,6 +5,17 @@ import {createItem, renameDirectoryItem} from '../services/server-api';
 import {Icon, IconButton, Stack, TextField} from '@fluentui/react';
 import {horizontalChoiceGroup, StyledChoiceGroup} from '../financials/styles';
 import {Link} from 'react-router-dom';
+import {
+    addIcon,
+    cancelIcon,
+    checkIcon,
+    commitIcon, downloadIconName,
+    editIcon, externalIconName,
+    fileIconName,
+    folderIconName,
+    hideIcon,
+    saveIcon
+} from './icons';
 
 
 export const Directory = ({path, contents, onCommit, pendingCommit}) => {
@@ -35,10 +46,10 @@ const DirectoryCommandBar = ({currentDirectory, onCommit, pendingCommit, showHid
     return (
         <>
             {
-                pendingCommit && <IconButton title="Commit" iconProps={{iconName: 'BranchCommit'}} onClick={onCommit}/>
+                pendingCommit && <IconButton title="Commit" iconProps={commitIcon} onClick={onCommit}/>
             }
-            <IconButton iconProps={{iconName: 'Hide3'}} toggle checked={showHidden} title="Show hidden folders" onClick={() => setShowHidden(val => !val)}/>
-            <IconButton iconProps={{iconName: 'Add'}} onClick={() => setShowNewItemForm(true)}/>
+            <IconButton iconProps={hideIcon} toggle checked={showHidden} title="Show hidden folders" onClick={() => setShowHidden(val => !val)}/>
+            <IconButton iconProps={addIcon} onClick={() => setShowNewItemForm(true)}/>
             {
                 showNewItemForm &&
                 <Stack horizontal>
@@ -48,8 +59,8 @@ const DirectoryCommandBar = ({currentDirectory, onCommit, pendingCommit, showHid
                         styles={horizontalChoiceGroup}
                         onChange={(_, val) => setNewItemType(val.key as FileSystemItemType)}
                         options={itemTypeRadioOptions}/>
-                    <IconButton iconProps={{iconName: 'CheckMark'}} disabled={!name} onClick={saveFile} title="Create"/>
-                    <IconButton iconProps={{iconName: 'Cancel'}} onClick={() => setShowNewItemForm(false)} title="Cancel"/>
+                    <IconButton iconProps={checkIcon} disabled={!name} onClick={saveFile} title="Create"/>
+                    <IconButton iconProps={cancelIcon} onClick={() => setShowNewItemForm(false)} title="Cancel"/>
                 </Stack>
             }
         </>
@@ -75,7 +86,7 @@ const DirectoryItem = ({directory, item}) => {
 
     return (
         <tr>
-            <td><Icon iconName={item.isDirectory ? 'FabricFolder' : 'TextDocument'}/></td>
+            <td><Icon iconName={item.isDirectory ? folderIconName : fileIconName}/></td>
             <td>{item.pendingCommit ? '*' : ' '}</td>
             {
                 editMode ?
@@ -87,22 +98,22 @@ const DirectoryItem = ({directory, item}) => {
 
             <td>
                 <a href={`/api/notes/download?path=${directory}/${item.name}`} download={item.name}>
-                    <Icon iconName="Download" styles={iconStyles}/>
+                    <Icon iconName={downloadIconName} styles={iconStyles}/>
                 </a>
             </td>
             <td>
                 {
                     item.openInBrowser &&
-                    <a href={`/api/notes/viewfile?path=${directory}/${item.name}`}><Icon iconName="ArrowUpRight" styles={iconStyles}/></a>
+                    <a href={`/api/notes/viewfile?path=${directory}/${item.name}`}><Icon iconName={externalIconName} styles={iconStyles}/></a>
                 }
             </td>
             <td>
                 {
                     !editMode ?
-                        <IconButton iconProps={{iconName: 'Edit'}} styles={iconButtonStyles} onClick={() => setEditMode(true)} /> :
+                        <IconButton iconProps={editIcon} styles={iconButtonStyles} onClick={() => setEditMode(true)} /> :
                         <>
-                            <IconButton iconProps={{iconName: 'Save'}} styles={iconButtonStyles} onClick={onSave} />
-                            <IconButton iconProps={{iconName: 'Cancel'}} styles={iconButtonStyles} onClick={() => setEditMode(false)} />
+                            <IconButton iconProps={saveIcon} styles={iconButtonStyles} onClick={onSave} />
+                            <IconButton iconProps={cancelIcon} styles={iconButtonStyles} onClick={() => setEditMode(false)} />
                         </>
                 }
             </td>

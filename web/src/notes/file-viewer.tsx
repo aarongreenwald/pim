@@ -3,14 +3,15 @@ import ReactMarkdown from 'react-markdown';
 import * as React from 'react';
 import remarkGfm from 'remark-gfm';
 import styled from '@emotion/styled';
+import {commitIcon, editIcon} from './icons';
 
 export const FileViewer = ({content, onEdit, pendingCommit, onCommit}) => {
     return (
         <>
             {
-               pendingCommit && <IconButton iconProps={{iconName: 'BranchCommit'}} onClick={onCommit} title="Commit"/>
+               pendingCommit && <IconButton iconProps={commitIcon} onClick={onCommit} title="Commit"/>
             }
-            <IconButton iconProps={{iconName: 'Edit'}} onClick={onEdit} title="Edit"/>
+            <IconButton iconProps={editIcon} onClick={onEdit} title="Edit"/>
 
             <StyledReactMarkdown remarkPlugins={[remarkGfm]}>{content}</StyledReactMarkdown>
         </>
