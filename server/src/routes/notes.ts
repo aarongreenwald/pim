@@ -153,22 +153,11 @@ export const setupNotesRoutes = (app: Express) => {
 
             const results = await Promise.all([
                 //pipe to cat at the end so that if no results are found the exit code will be 0 and not 1
-                execp(`cd ${CONTENT_DIRECTORY} && grep ${excludeHidden === 'true' ? '--exclude=\'.[^.]*\'' : ''} ${excludeHidden === 'true' ? '--exclude-dir=\'.[^.]*\'' : '--exclude-dir=.git'} -inr '${query}' . | cat`),
+                execute(`cd ${CONTENT_DIRECTORY} && grep ${excludeHidden === 'true' ? '--exclude=\'.[^.]*\'' : ''} ${excludeHidden === 'true' ? '--exclude-dir=\'.[^.]*\'' : '--exclude-dir=.git'} -inr '${query}' . | cat`),
                 //TODO I'd like to return directories as well (excluded by -xtype f) but not every file in the directory
-                execp(`cd ${CONTENT_DIRECTORY} && find . ${excludeHidden === 'true' ? '-not -path \'*/\\.*\'' : '-not -path \'./.git/*\''} -iname '*${query}*' -xtype f -printf "%h:%f\\n"`)
+                execute(`cd ${CONTENT_DIRECTORY} && find . ${excludeHidden === 'true' ? '-not -path \'*/\\.*\'' : '-not -path \'./.git/*\''} -iname '*${query}*' -xtype f -printf "%h:%f\\n"`)
             ])
-            const {stdout: contents, stderr: contentsErr} = results[0];
-            const {stdout: names, stderr: namesErr} = results[1];
-
-            if (contentsErr) {
-                console.error('Failed while searching contents of files', contentsErr)
-                throw contentsErr;
-            }
-            if (namesErr) {
-                console.error('Failed while searching files by name', namesErr)
-                throw namesErr;
-            }
-
+            const [contents, names] = results;
 
             res.send({
                 names: names.split('\n').filter(Boolean).map(result => {
@@ -207,18 +196,23 @@ export const setupNotesRoutes = (app: Express) => {
     app.get('/notes/recent', async (req, res) => {
         try {
             const recentFilesScript = path.resolve(__dirname, '..', 'cli', 'recent-files.sh')
-            const {stdout: files, stderr} = await execp(`cd ${CONTENT_DIRECTORY} && ${recentFilesScript} 10 10`)
-            if (stderr) {
-                console.error(`Failed while running ${recentFilesScript}`, stderr)
-                throw stderr;
-            }
-            res.send(files)
+            const files = await execute(`cd ${CONTENT_DIRECTORY} && ${recentFilesScript} 10 10`)
+            res.send(files.split('\n').filter(Boolean))
         } catch (ex) {
             console.error(ex)
             res.status(500).send(ex)
         }
     })
 
+}
+
+const execute = async (cmd: string) => {
+    const {stdout, stderr} = await execp(cmd)
+    if (stderr) {
+        console.error(`Failed to execute: ${cmd}`, stderr)
+        throw stderr
+    }
+    return stdout
 }
 
 const toGitStatus = (status: StatusResult) => ({
