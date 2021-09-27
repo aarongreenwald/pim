@@ -7,11 +7,12 @@ import ReactMarkdown from 'react-markdown';
 import {Link} from 'react-router-dom'
 import styled from '@emotion/styled';
 import { NeutralColors, CommunicationColors } from '@fluentui/theme';
+import {NotesSearchResults} from '@pim/common';
 
 export const Search = ({show, onDismiss}) => {
     const {inputVal, debouncedValue, updateValue} = useDebouncedInput('')
     const [excludeHidden, setExcludeHidden] = useState(true);
-    const [searchResults, setSearchResults] = useState(null)
+    const [searchResults, setSearchResults] = useState<NotesSearchResults>(null)
     useEffect(() => {
         if (debouncedValue?.length < 3) {
             setSearchResults(null)

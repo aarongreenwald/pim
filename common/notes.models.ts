@@ -65,3 +65,17 @@ export interface GitStatus {
      */
     isClean: boolean;
 }
+
+export interface NotesSearchResults {
+    names: {
+        path: string;
+        fileName: string;
+    }[]
+    contents: {
+       path: string;
+       items: {
+           lineNumber: number;
+           text: string;
+       }[]
+    }[]
+}

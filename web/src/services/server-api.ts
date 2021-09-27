@@ -19,7 +19,7 @@ import {
     vPayment,
     FileSystemItemType,
     File,
-    Directory, GitStatus
+    Directory, GitStatus, NotesSearchResults
 } from '@pim/common';
 
 const handleResponse = (res) => {
@@ -50,210 +50,126 @@ export const login = (password: string) : Promise<boolean> => {
         .then(() => true)
 }
 
-export const getLoggedIn = (): Promise<boolean> => {
-    return fetch(`${config.apiServiceUrl}/login`, {
-            credentials: 'include',
-        })
-        .then(handleResponse)
-        .then(res => res.json())
-        .catch(() => false)
-}
+export const getLoggedIn = (): Promise<boolean> => get<boolean>('login').catch(() => false)
 
-export const getPayment: (paymentId: PaymentId) => Promise<Payment> = (paymentId) =>
-    fetch(`${config.apiServiceUrl}/payments/${paymentId}`, {
-        credentials: 'include',
-    })
-        .then(handleResponse)
-        .then(res => res.json());
+export const getPayment: (paymentId: PaymentId) => Promise<Payment> = (paymentId) => get(`payments/${paymentId}`);
 
-export const getPayments: () => Promise<vPayment[]> = () =>
-    fetch(`${config.apiServiceUrl}/payments`, {
-            credentials: 'include',
-        })
-        .then(handleResponse)
-        .then(res => res.json());
+export const getPayments: () => Promise<vPayment[]> = () => get('payments');
 
-export const getCarSummary: () => Promise<CarSummary[]> = () =>
-    fetch(`${config.apiServiceUrl}/car/summary`, {
-        credentials: 'include',
-    })
-        .then(handleResponse)
-        .then(res => res.json());
+export const getCarSummary: () => Promise<CarSummary[]> = () => get('car/summary');
 
-export const getActiveCashAccounts: () => Promise<CashAccount[]> = () =>
-    fetch(`${config.apiServiceUrl}/car/accounts`, {
-        credentials: 'include',
-    })
-        .then(handleResponse)
-        .then(res => res.json());
+export const getActiveCashAccounts: () => Promise<CashAccount[]> = () => get('car/accounts');
 
 export const saveCashRecords = (recordDate: string | number | Date, accountBalances: CashAssetRecord[]): Promise<void> =>
-    fetch(`${config.apiServiceUrl}/car/records`, {
-        method: 'PUT',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        credentials: 'include',
-        body: JSON.stringify({
-            recordDate,
-            accountBalances
-        })
-    }).then(handleResponse)
-
-export const getCashRecords = (recordDate: string | number | Date): Promise<CashAssetRecord[]> =>
-    fetch(`${config.apiServiceUrl}/car/records?recordDate=${recordDate}`, {
-        credentials: 'include',
+    put('car/records', {
+        recordDate,
+        accountBalances
     })
-        .then(handleResponse)
-        .then(res => res.json())
+
+export const getCashRecords = (recordDate: string | number | Date): Promise<CashAssetRecord[]> => get(`car/records?recordDate=${recordDate}`)
 
 export const getCashAllocations = (): Promise<CashAllocationsDto> =>
-    fetch(`${config.apiServiceUrl}/cash-allocations`, {
-        credentials: 'include',
-    })
-        .then(handleResponse)
-        .then(res => res.json())
+    get('cash-allocations')
 
 export const getUnreportedSpending = (): Promise<UnreportedSpending[]> =>
-    fetch(`${config.apiServiceUrl}/unreported-spending`, {
-        credentials: 'include',
-    })
-        .then(handleResponse)
-        .then(res => res.json())
+    get('unreported-spending')
 
 export const getAllIncome: () => Promise<Income[]> = () =>
-    fetch(`${config.apiServiceUrl}/income`, {
-        credentials: 'include',
-    })
-        .then(handleResponse)
-        .then(res => res.json());
+    get('income');
 
 export const getIncome: (incomeId: IncomeId) => Promise<Income> = (incomeId) =>
-    fetch(`${config.apiServiceUrl}/income/${incomeId}`, {
-        credentials: 'include',
-    })
-        .then(handleResponse)
-        .then(res => res.json());
+    get(`income/${incomeId}`);
 
 export const saveIncome: (income: Income) => Promise<Income> = (income) =>
-    fetch(`${config.apiServiceUrl}/income`, {
-        method: income.id === -1 ? 'POST' : 'PUT',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        credentials: 'include',
-        body: JSON.stringify(income)
-    }).then(handleResponse)
+    income.id === -1 ? post('income', income) : put('income', income)
 
 export const getAllCategories = (): Promise<Category[]> =>
-  fetch(`${config.apiServiceUrl}/categories`, {
-      credentials: 'include',
-  })
-    .then(handleResponse)
-    .then(res => res.json())
+  get('categories', )
 
 export const savePayment = (payment: Payment): Promise<Payment[]> =>
-    fetch(`${config.apiServiceUrl}/payments`, {
-        method: payment.id === -1 ? 'POST' : 'PUT',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        credentials: 'include',
-        body: JSON.stringify(payment)
-    }).then(handleResponse)
+    payment.id === -1 ? post('payments', payment) : put('payments', payment)
 
 export const saveAllocationRecord = (allocation: CashAssetAllocationRecord): Promise<void> =>
-    fetch(`${config.apiServiceUrl}/cash-allocations`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        credentials: 'include',
-        body: JSON.stringify(allocation)
-    }).then(handleResponse)
+    post('cash-allocations', allocation)
 
 export function getSpendingByCategory(rootCategoryId: CategoryId): Promise<SpendingByCategory[]> {
-    return fetch(`${config.apiServiceUrl}/analysis/spending-by-category?rootCategoryId=${rootCategoryId}`, {
-        credentials: 'include'
-    }).then(handleResponse)
-        .then(res => res.json())
+    return get(`analysis/spending-by-category?rootCategoryId=${rootCategoryId}`)
 }
 
 export const getFuelLog: () => Promise<{ fuelLog: FuelLog[]; summary: FuelLogSummary }> = () =>
-    fetch(`${config.apiServiceUrl}/fuel-log`, {
-        credentials: 'include',
-    })
-        .then(handleResponse)
-        .then(res => res.json());
+    get('fuel-log');
 
 
 export const saveFuelLog = (fuelLog: NewFuelLogDto): Promise<void> =>
-    fetch(`${config.apiServiceUrl}/fuel-log`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        credentials: 'include',
-        body: JSON.stringify(fuelLog)
-    }).then(handleResponse)
+    post('fuel-log', fuelLog)
 
 export const getNotes: (path: string) => Promise<File | Directory> = (path: string) => {
-    return fetch(`${config.apiServiceUrl}/notes/path?path=${path}`, {credentials: 'include'})
-        .then(handleResponse)
-        .then(res => res.json());
+    return get(`notes/path?path=${path}`);
 }
 
 export const createItem = (path: string, name: string, type: FileSystemItemType): Promise<void> =>
-    fetch(`${config.apiServiceUrl}/notes/path?type=${type}&path=${path}&name=${name}`, {
-        method: 'POST',
-        credentials: 'include'
-    }).then(handleResponse)
+    post(`notes/path?type=${type}&path=${path}&name=${name}`)
 
 export const saveFileContent = (path: string, content: string): Promise<File | Directory> =>
-    fetch(`${config.apiServiceUrl}/notes/files?&path=${path}`, {
-        method: 'PUT',
-        body: content,
-        credentials: 'include'
-    }).then(handleResponse)
-      .then(res => res.json());
+    put(`notes/files?&path=${path}`, content, false);
 
 export const commitPath = (path: string): Promise<File | Directory> =>
-    fetch(`${config.apiServiceUrl}/notes/commit?&path=${path}`, {
-        method: 'PUT',
-        credentials: 'include'
-    })
-        .then(handleResponse)
-        .then(res => res.json());
+    put(`notes/commit?&path=${path}`);
 
 export const gitPull: () => Promise<GitStatus> = () =>
-    fetch(`${config.apiServiceUrl}/notes/pull`, {
-        method: 'PUT',
-        credentials: 'include'
-    })
-        .then(handleResponse)
-        .then(res => res.json());
+    put('notes/pull');
 
 
 export const gitPush: () => Promise<GitStatus> = () =>
-    fetch(`${config.apiServiceUrl}/notes/push`, {
-        method: 'PUT',
-        credentials: 'include'
-    })
-        .then(handleResponse)
-        .then(res => res.json());
+    put('notes/push');
 
-export const getGitStatus: () => Promise<GitStatus> = () =>
-    fetch(`${config.apiServiceUrl}/notes/status`, {credentials: 'include'})
-        .then(handleResponse)
-        .then(res => res.json());
+export const getGitStatus = (): Promise<GitStatus> => get('notes/status');
 
-export const searchNotes = (query: string, excludeHidden = true) : Promise<any> =>
-    fetch(`${config.apiServiceUrl}/notes/search?query=${encodeURIComponent(query)}&excludeHidden=${excludeHidden}`, {credentials: 'include'})
-        .then(handleResponse)
-        .then(res => res.json());
+export const searchNotes = (query: string, excludeHidden = true): Promise<NotesSearchResults> =>
+    get(`notes/search?query=${encodeURIComponent(query)}&excludeHidden=${excludeHidden}`);
 
-export const getRecentFiles: () => Promise<string[]> = () =>
-    fetch(`${config.apiServiceUrl}/notes/recent`, {credentials: 'include'})
-        .then(handleResponse)
-        .then(res => res.json());
+export const getRecentFiles = (): Promise<string[]> => get('notes/recent');
+
 // const debugSleep = (ms) => (...args) => new Promise(resolve => setTimeout(resolve, ms, args))
+
+const get = <T>(path: string): Promise<T> =>
+    fetch(`${config.apiServiceUrl}/${path}`, {credentials: 'include'})
+        .then(handleResponse)
+        .then(res => res.json())
+
+
+const put = <T>(path: string, body?: any, json = true): Promise<T> => fetch(`${config.apiServiceUrl}/${path}`, {
+    method: 'PUT',
+    headers: json && body ? {
+        'Content-Type': 'application/json'
+    } : undefined,
+    credentials: 'include',
+    body: body && json ? JSON.stringify(body) : body
+})
+    .then(handleResponse)
+    .then(async res => {
+        const text = await res.text()
+        try {
+            return JSON.parse(text)
+        } catch {
+            return text
+        }
+    })
+
+const post = <T>(path: string, body?: any): Promise<T> => fetch(`${config.apiServiceUrl}/${path}`, {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json'
+    },
+    credentials: 'include',
+    body: body ? JSON.stringify(body) : null
+})
+    .then(handleResponse)
+    .then(async res => {
+        const text = await res.text()
+        try {
+            return JSON.parse(text)
+        } catch {
+            return text
+        }
+    })
