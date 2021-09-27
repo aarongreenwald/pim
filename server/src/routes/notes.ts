@@ -204,6 +204,21 @@ export const setupNotesRoutes = (app: Express) => {
 
     });
 
+    app.get('/notes/recent', async (req, res) => {
+        try {
+            const recentFilesScript = path.resolve(__dirname, '..', 'cli', 'recent-files.sh')
+            const {stdout: files, stderr} = await execp(`cd ${CONTENT_DIRECTORY} && ${recentFilesScript} 10 10`)
+            if (stderr) {
+                console.error(`Failed while running ${recentFilesScript}`, stderr)
+                throw stderr;
+            }
+            res.send(files)
+        } catch (ex) {
+            console.error(ex)
+            res.status(500).send(ex)
+        }
+    })
+
 }
 
 const toGitStatus = (status: StatusResult) => ({

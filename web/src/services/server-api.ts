@@ -252,5 +252,8 @@ export const searchNotes = (query: string, excludeHidden = true) : Promise<any> 
         .then(handleResponse)
         .then(res => res.json());
 
-
+export const getRecentFiles: () => Promise<string[]> = () =>
+    fetch(`${config.apiServiceUrl}/notes/recent`, {credentials: 'include'})
+        .then(handleResponse)
+        .then(res => res.json());
 // const debugSleep = (ms) => (...args) => new Promise(resolve => setTimeout(resolve, ms, args))

@@ -1,7 +1,15 @@
 import * as React from 'react';
 import {useCallback, useEffect, useState} from 'react';
-import {commitPath, getGitStatus, getNotes, gitPull, gitPush, saveFileContent} from '../services/server-api';
-import {IconButton, Panel, Spinner} from '@fluentui/react';
+import {
+    commitPath,
+    getGitStatus,
+    getNotes,
+    getRecentFiles,
+    gitPull,
+    gitPush,
+    saveFileContent
+} from '../services/server-api';
+import {IconButton, Spinner} from '@fluentui/react';
 import {useLocation} from 'react-router';
 import {Directory, File, GitStatus} from '@pim/common';
 import {FileContent} from './file';
@@ -11,6 +19,11 @@ import {Search} from './search';
 
 
 export const Notes: React.FC = () => {
+
+    useEffect(() => {
+        getRecentFiles();
+    }, [])
+
     const {fileSystemItem, setFileSystemItem, refresh} = useFileSystemItem();
     const [showSearch, setShowSearch] = useState(false)
 
