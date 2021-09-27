@@ -79,7 +79,7 @@ export const Notes: React.FC = () => {
                 type === 'D' && <DirectoryViewer path={path} contents={directoryContents} onCommit={onCommit} pendingCommit={pendingCommit} />
             }
             {
-                type === 'F' && <FileContent content={fileContent} onSaveContent={onSaveContent} pendingCommit={pendingCommit} onCommit={onCommit}/>
+                type === 'F' && <FileContent content={fileContent} onSaveContent={onSaveContent} pendingCommit={pendingCommit} onCommit={onCommit} path={path}/>
             }
             <Search show={showSearch} onDismiss={() => setShowSearch(false)}/>
         </>

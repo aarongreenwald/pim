@@ -5,7 +5,7 @@ import remarkGfm from 'remark-gfm';
 import styled from '@emotion/styled';
 import {commitIcon, editIcon} from './icons';
 
-export const FileViewer = ({content, onEdit, pendingCommit, onCommit}) => {
+export const FileViewer = ({content, onEdit, pendingCommit, onCommit, path}) => {
     return (
         <>
             {
@@ -13,7 +13,11 @@ export const FileViewer = ({content, onEdit, pendingCommit, onCommit}) => {
             }
             <IconButton iconProps={editIcon} onClick={onEdit} title="Edit"/>
 
-            <StyledReactMarkdown remarkPlugins={[remarkGfm]}>{content}</StyledReactMarkdown>
+            <StyledReactMarkdown
+                remarkPlugins={[remarkGfm]}
+                transformLinkUri={customUriHandler(path)}>
+                {content}
+            </StyledReactMarkdown>
         </>
     )
 }
@@ -27,3 +31,14 @@ const StyledReactMarkdown = styled(ReactMarkdown)`
     }
   }
 `
+
+const customUriHandler = (path: string) => (uri: string) => {
+    if (uri.indexOf('./') === 0) {
+        //this whole thing is pretty hacky. works in the common case of a relative link to a file in the same directory
+        //anything else doesn't
+        path = `./${path}`;
+        const directory = path.substr(0, path.lastIndexOf('/'))
+        return `#/notes?path=${directory.substring(2)}/${uri.substring(2)}`
+    }
+    return uri
+}
