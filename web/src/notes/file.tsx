@@ -7,6 +7,6 @@ export const FileContent = ({content, onSaveContent, onCommit, pendingCommit, pa
     const [editMode, setEditMode] = useState(false);
 
     return editMode ?
-        <FileEditor content={content} onSaveContent={onSaveContent} onExitEditor={() => setEditMode(false)}/> :
+        <FileEditor content={content} onSaveContent={onSaveContent} onExitEditor={() => setEditMode(false)} path={path}/> :
         <FileViewer content={content} onEdit={() => setEditMode(true)} onCommit={onCommit} pendingCommit={pendingCommit} path={path}/>;
 }

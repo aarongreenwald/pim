@@ -10,7 +10,13 @@ require('ace-builds/src-noconflict/theme-tomorrow_night_eighties');
 //see more themes here: https://ace.c9.io/build/kitchen-sink.html
 //more options here: https://ace.c9.io/build/kitchen-sink.html //TODO - search
 
-export const FileEditor = ({content, onSaveContent, onExitEditor}) => {
+/***
+ * Represents the content saved on the server per path.
+ * TODO - LRU this cache. In can grow to the size of the notes repo, which currently isn't that big so this isn't urgent
+ */
+const savedContents = new Map<string, string>()
+
+export const FileEditor = ({content, onSaveContent, onExitEditor, path}) => {
     const [saving, setSaving] = useState(false)
     const [wordWrap, setWordWrap] = useState(true)
     //TODO automatically use ace on mobile, or configure ace to be as nice as monaco somehow
@@ -20,17 +26,29 @@ export const FileEditor = ({content, onSaveContent, onExitEditor}) => {
 
     const onEditorMount = editor => editorRef.current = editor
 
-    //TODO this is unsafe, there's a potential scenario where the old content will be saved
-    //to a new path if the save interval triggers after the new onSaveContent prop arrives but
-    //before the content in the editor is updated. Fix this, perhaps by keeping track of
-    //the path the onSaveContent refers to as well as the editor draft, and if they don't match skip the save
+    //TODO this whole thing is a mess of race conditions. If I introduce a state management system
+    //this could be simplified and then the bugs can be eliminated.
+    //One risk is that onSaveContent refers to a specific path, and if the editor content is not in sync with the path the onSaveContent
+    //will save to, and a save is triggered - data will be lost.
+
     useEffect(() => {
+        //after saving the contents the content updates, after switching paths the path updates
+        //regardless, keep track of what content the server has for each path
+        savedContents.set(path, content)
+    }, [path, content])
+
+    useEffect(() => {
+        //if the path changes (user switched files while the editor is open), retrieve the value of the contents so that the editor can be updated
+        //from the map set in the previous useEffect. This assumes the previous one will happen first, which is a bad assumption
+        //the alternative is to take the content from the props, assuming they both arrive at the same time (I'm not sure about that)
+        //but content CANNOT be a dependency of this effect or the saved contents will be inserted into the editor whenever the content is saved,
+        //causing the cursor to jump in middle of typing and potentially losing the content entered during the time the save was being executed
         if (editor === 'monaco') {
-            return editorRef.current?.getModel().setValue(content)
+            return editorRef.current?.getModel().setValue(savedContents.get(path))
         } else {
-            return editorRef.current?.editor.getSession().setValue(content)
+            return editorRef.current?.editor.getSession().setValue(savedContents.get(path))
         }
-    }, [content])
+    }, [path])
 
     const getEditorValue = useCallback(() => {
         if (editor === 'monaco') {
@@ -42,9 +60,11 @@ export const FileEditor = ({content, onSaveContent, onExitEditor}) => {
 
     const saveContent = useCallback(() => {
         const draft = getEditorValue();
-        if (content !== draft) {
+        if (content !== draft) { //perhaps the comparison should be to the saved content map and not the prop?
             setSaving(true)
             onSaveContent(draft).then(() => {
+                //if the user is typing, an onchange will recalculate this anyway. But if not,
+                //it's necessary to compare the current value to what was saved. draft is definitely the most reliable value
                 setIsEditorDirty(getEditorValue() !== draft)
                 setSaving(false);
             })
@@ -111,7 +131,7 @@ export const FileEditor = ({content, onSaveContent, onExitEditor}) => {
                         defaultLanguage="markdown"
                         height='80vh'
                         defaultValue={content}
-                        onChange={val => setIsEditorDirty(val !== content)}
+                        onChange={val => setIsEditorDirty(val !== content)} // compare to savedContents? probably doesn't matter
                         onMount={onEditorMount}
                     /> :
                     <AceEditor
@@ -128,7 +148,7 @@ export const FileEditor = ({content, onSaveContent, onExitEditor}) => {
                         showPrintMargin={false}
                         name="file-editor"
                         defaultValue={content}
-                        onChange={val => setIsEditorDirty(val !== content)}
+                        onChange={val => setIsEditorDirty(val !== content)} // compare to savedContents? probably doesn't matter
                         editorProps={{ $blockScrolling: true }}
                     />
             }
