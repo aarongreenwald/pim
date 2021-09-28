@@ -25,4 +25,5 @@ git log --numstat --format= -n "$1" |
   ' |
   sort -rnk2 |
   head -$2 |
-  awk -F '\t' '{print $1}'
+  awk -F '\t' '{print $1}' |
+  xargs -d '\n' ls -1df 2>/dev/null #only files that still exist

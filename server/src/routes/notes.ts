@@ -208,7 +208,7 @@ export const setupNotesRoutes = (app: Express) => {
     app.get('/notes/recent', async (req, res) => {
         try {
             const recentFilesScript = path.resolve(__dirname, '..', 'cli', 'recent-files.sh')
-            const files = await execute(`cd ${CONTENT_DIRECTORY} && ${recentFilesScript} 10 10`)
+            const files = await execute(`cd ${CONTENT_DIRECTORY} && ${recentFilesScript} 20 10`)
             res.send(files.split('\n').filter(Boolean))
         } catch (ex) {
             console.error(ex)
