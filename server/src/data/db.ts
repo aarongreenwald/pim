@@ -33,7 +33,7 @@ export const getAllPayments: () => Promise<vPayment[]> = async () => {
            category_name categoryName, 
            note, 
            category_id categoryId
-    from v_payment order by paid_date desc`)
+    from v_payment order by paid_date desc, payment_id desc`)
 }
 
 export const getPayment: (id: PaymentId) => Promise<Payment> = async id => {
