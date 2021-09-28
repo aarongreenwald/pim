@@ -8,7 +8,8 @@
 # First argument is number of commits to include in calculation
 # second argument is number of files to return
 
-# TODO remove deleted files, figure out how to track renames
+# TODO remove deleted files, figure out how to track renames correctly
+# (both in terms of follow and the way the data is outputted)
 # Consider alternate ways to count frequency. Is it possible to count bytes changed?
 # Perhaps the lookback needs to be changed, or somehow consider date?
 

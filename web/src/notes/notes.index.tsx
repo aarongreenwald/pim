@@ -85,7 +85,7 @@ export const Notes: React.FC = () => {
                     {
                         recentFiles?.map(path =>
                             <div key={path}>
-                                <Link to={path}>{path}</Link>
+                                <Link to={`/notes/?path=${encodeURIComponent(path)}`}>{path}</Link>
                             </div>
                         )
                     }

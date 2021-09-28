@@ -275,7 +275,7 @@ const toGitStatus = (status: StatusResult) => ({
     isClean: status.isClean(),
 } as unknown as GitStatus)
 
-const getGitChanges = async (path: string) => {
+const getGitChanges = async (path: string): Promise<string[]> => {
     //ideally nothing should ever be anything but modified - delete/create should commit immediately,
     //and there's no reason to  add without committing. But just in case the status gets screwed up, it's worth
     //considering all kinds of changes. Renames are tricky so it's not worth it, handle it separately
@@ -306,10 +306,13 @@ const getPath: (relativePath: string) => Promise<Directory | File> = async (rela
     const gitChanges = await getGitChanges(fullPath)
 
     gitChanges.forEach(changedPath => {
+        //paths with spaces are surrounded by quotes. strip the quotes
         const sanitized = changedPath.includes(' ') ? changedPath.substring(1, changedPath.length - 1) : changedPath;
         const split = sanitized.split('/');
         let index = -1
         let section = 0
+        //TODO this logic might be wrong because it doesn't compare the whole path, and
+        //similar file names in different parts of the tree could conflict. I need unit tests here
         while (index === -1 && section < split.length) {
             index = directoryInfo.findIndex(d => d.name === split[section])
             section++
