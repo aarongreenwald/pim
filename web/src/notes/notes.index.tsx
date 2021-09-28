@@ -9,7 +9,7 @@ import {
     gitPush,
     saveFileContent
 } from '../services/server-api';
-import {IconButton, Spinner} from '@fluentui/react';
+import {IconButton, Label, Spinner} from '@fluentui/react';
 import {useLocation} from 'react-router';
 import {Directory, File, GitStatus} from '@pim/common';
 import {FileContent} from './file';
@@ -17,12 +17,13 @@ import {Directory as DirectoryViewer} from './directory';
 import {Breadcrumbs} from './breadcrumbs';
 import {Search} from './search';
 import {downloadIcon, searchIcon, uploadIcon} from './icons';
-
+import {Link} from 'react-router-dom';
 
 export const Notes: React.FC = () => {
 
+    const [recentFiles, setRecentFiles] = useState<string[]>(null)
     useEffect(() => {
-        getRecentFiles();
+        getRecentFiles().then(setRecentFiles);
     }, [])
 
     const {fileSystemItem, setFileSystemItem, refresh} = useFileSystemItem();
@@ -76,7 +77,19 @@ export const Notes: React.FC = () => {
                 gitStatus?.ahead ? <IconButton iconProps={uploadIcon} title="Git Push" onClick={pushGit}/> : null
             }
             {
-                type === 'D' && <DirectoryViewer path={path} contents={directoryContents} onCommit={onCommit} pendingCommit={pendingCommit} />
+                type === 'D' &&
+                <>
+                    <DirectoryViewer path={path} contents={directoryContents} onCommit={onCommit} pendingCommit={pendingCommit} />
+                    <hr />
+                    <Label>Recent Files</Label>
+                    {
+                        recentFiles?.map(path =>
+                            <div key={path}>
+                                <Link to={path}>{path}</Link>
+                            </div>
+                        )
+                    }
+                </>
             }
             {
                 type === 'F' && <FileContent content={fileContent} onSaveContent={onSaveContent} pendingCommit={pendingCommit} onCommit={onCommit} path={path}/>
