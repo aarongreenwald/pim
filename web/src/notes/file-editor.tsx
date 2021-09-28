@@ -7,6 +7,8 @@ import {Prompt} from 'react-router';
 import {saveAndCloseIcon, saveIcon, toggleEditorIcon, wrapLinesIcon} from './icons';
 require('ace-builds/src-noconflict/mode-markdown');
 require('ace-builds/src-noconflict/theme-tomorrow_night_eighties');
+import 'ace-builds/src-min-noconflict/ext-searchbox';
+
 //see more themes here: https://ace.c9.io/build/kitchen-sink.html
 //more options here: https://ace.c9.io/build/kitchen-sink.html //TODO - search
 
@@ -124,6 +126,7 @@ export const FileEditor = ({content, onSaveContent, onExitEditor, path}) => {
                     message='You have unsaved changes, are you sure you want to leave?'
                 />
             }
+            <span onKeyPress={onKeyPress}>
             {
                 editor === 'monaco' ?
                     <Editor
@@ -150,8 +153,21 @@ export const FileEditor = ({content, onSaveContent, onExitEditor, path}) => {
                         defaultValue={content}
                         onChange={val => setIsEditorDirty(val !== content)} // compare to savedContents? probably doesn't matter
                         editorProps={{ $blockScrolling: true }}
+                        commands={[
+                            {
+                                name: 'save',
+                                bindKey: {win: 'Ctrl-s', mac: 'Command-s'},
+                                exec: saveContent
+                            },
+                            {
+                                name: 'saveandclose',
+                                bindKey: {win: 'Ctrl-Enter', mac: 'Command-Enter'},
+                                exec: onExit
+                            },
+                        ]}
                     />
             }
+            </span>
         </>
     )
 }
