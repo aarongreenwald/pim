@@ -5,7 +5,7 @@ import {
     DefaultButton,
     DetailsList,
     DetailsListLayoutMode,
-    IColumn,
+    IColumn, IconButton,
     Label,
     SearchBox,
     SelectionMode,
@@ -18,6 +18,8 @@ import {useDebouncedInput} from '../common/debounced-input.hook';
 import {formatDay} from '../common/date.utils';
 import {Currency, Money} from '@pim/common';
 import {CurrencyInput} from './currency-input';
+import {stackTokens} from './styles';
+import {cancelIcon, hideIcon} from '../notes/icons';
 
 interface ListProps<T = unknown> {
     data: T[];
@@ -174,7 +176,7 @@ export function List<T = unknown>({data,
     )
 }
 
-const CurrencyFilterMenu: React.FC<FilterMenuProps> = ({column, columnFilters, setColumnFilters, setFilterMenuColumn}) => {
+const CurrencyFilterMenu: React.FC<FilterMenuProps> = ({column, columnFilters, setColumnFilters}) => {
     const filter = columnFilters[column.key] as CurrencyColumnFilters;
     const {inputVal: minInputVal, debouncedValue: debouncedMinValue, updateValue: updateMinValue} = useDebouncedInput<number>(filter?.min);
     useEffect(() => {
@@ -198,25 +200,22 @@ const CurrencyFilterMenu: React.FC<FilterMenuProps> = ({column, columnFilters, s
         }))
     }, [debouncedMaxValue, column, setColumnFilters])
 
-    return <Stack styles={{root: {maxWidth: 200}}}>
-        <Label>{column.name}</Label>
-        <CurrencyInput
-            label="Minimum"
-            amount={minInputVal}
-            currency={column.key as Currency}
-            onChange={(_, value) => updateMinValue(value)}
-        />
-        <CurrencyInput
-            label="Maximum"
-            amount={maxInputVal}
-            currency={column.key as Currency}
-            onChange={(_, value) => updateMaxValue(value)}
-        />
-        <DefaultButton onClick={() => {
-            setColumnFilters(prev => {const curr = {...prev}; delete curr[column.key]; return curr;})
-            setFilterMenuColumn(null)
-        }}>Clear</DefaultButton>
-    </Stack>
+    return (
+        <>
+            <CurrencyInput
+                label="Minimum"
+                amount={minInputVal}
+                currency={column.key as Currency}
+                onChange={(_, value) => updateMinValue(value)}
+            />
+            <CurrencyInput
+                label="Maximum"
+                amount={maxInputVal}
+                currency={column.key as Currency}
+                onChange={(_, value) => updateMaxValue(value)}
+            />
+        </>
+    )
 }
 
 type SetStateFunc<T> = (value: (((prevState: T) => T) | T)) => void
@@ -231,46 +230,56 @@ interface FilterMenuProps {
 const FilterMenu: React.FC<FilterMenuProps> = (props) => {
     const {column, columnFilters, setColumnFilters, setFilterMenuColumn} = props;
 
+    let filterInputs;
     if (isDateColumn(column.key)) {
         const filter = columnFilters[column.key] as DateColumnFilters;
-        return <Stack styles={{root: {maxWidth: 400}}}>
-            <Label>{column.name}</Label>
-            <TextField label="Start"
-                       type='Date'
-                       value={filter?.start ? formatDay(filter?.start) : undefined}
-                       onChange={(_, value) => {
-                           setColumnFilters(prev => ({
-                               ...prev,
-                               [column.key]: {
-                                   ...prev[column.key],
-                                   start: new Date(value)
-                               }
-                           }))
-                       }} />
-            <TextField label="End"
-                       type='Date'
-                       value={filter?.end ? formatDay(filter?.end) : undefined}
-                       onChange={(_, value) => {
-                           setColumnFilters(prev => ({
-                               ...prev,
-                               [column.key]: {
-                                   ...prev[column.key],
-                                   end: new Date(value)
-                               }
-                           }))
-                       }} />
-            <DefaultButton onClick={() => {
-                setColumnFilters(prev => {const curr = {...prev}; delete curr[column.key]; return curr;})
-                setFilterMenuColumn(null)
-            }}>Clear</DefaultButton>
+        filterInputs = (
+            <>
+                <TextField label="Start"
+                           type='Date'
+                           value={filter?.start ? formatDay(filter?.start) : undefined}
+                           onChange={(_, value) => {
+                               setColumnFilters(prev => ({
+                                   ...prev,
+                                   [column.key]: {
+                                       ...prev[column.key],
+                                       start: new Date(value)
+                                   }
+                               }))
+                           }} />
+                <TextField label="End"
+                           type='Date'
+                           value={filter?.end ? formatDay(filter?.end) : undefined}
+                           onChange={(_, value) => {
+                               setColumnFilters(prev => ({
+                                   ...prev,
+                                   [column.key]: {
+                                       ...prev[column.key],
+                                       end: new Date(value)
+                                   }
+                               }))
+                           }} />
+            </>
+        )
+    } else if (currencyFields.includes(column.key)) {
+        filterInputs = <CurrencyFilterMenu {...props} />
+    }
+
+    return filterInputs ? (
+        <Stack styles={{root: {paddingTop: 10, width: 'fit-content'}}}>
+            <Stack horizontal tokens={stackTokens}>
+                <Label styles={{root: {flexGrow: 1}}}>{column.name}</Label>
+                <IconButton iconProps={hideIcon} onClick={() => setFilterMenuColumn(null)}/>
+                <IconButton iconProps={cancelIcon} onClick={() => {
+                    setColumnFilters(prev => { const curr = {...prev}; delete curr[column.key]; return curr; })
+                    setFilterMenuColumn(null)
+                }}/>
+            </Stack>
+            <Stack horizontal tokens={stackTokens}>
+                {filterInputs}
+            </Stack>
         </Stack>
-    }
-
-    if (currencyFields.includes(column.key)) {
-        return <CurrencyFilterMenu {...props} />
-    }
-
-    return null;
+    ) : null;
 }
 
 function filterRows<T>(data: T[], filterText: string, textFields: string[], filters: ColumnFilters) {
