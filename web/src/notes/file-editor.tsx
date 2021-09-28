@@ -50,7 +50,7 @@ export const FileEditor = ({content, onSaveContent, onExitEditor, path}) => {
         } else {
             return editorRef.current?.editor.getSession().setValue(savedContents.get(path))
         }
-    }, [path])
+    }, [path, editor])
 
     const getEditorValue = useCallback(() => {
         if (editor === 'monaco') {
@@ -111,12 +111,12 @@ export const FileEditor = ({content, onSaveContent, onExitEditor, path}) => {
             <IconButton title="Wrap lines"
                         checked={wordWrap}
                         toggle
-                        onClick={(_) => setWordWrap(val => !val)}
+                        onClick={() => setWordWrap(val => !val)}
                         iconProps={wrapLinesIcon} />
             <IconButton title="Toggle editor type"
                         checked={editor === 'monaco'}
                         toggle
-                        onClick={(_) => setEditor(val => val === 'ace' ? 'monaco' : 'ace')}
+                        onClick={() => setEditor(val => val === 'ace' ? 'monaco' : 'ace')}
                         iconProps={toggleEditorIcon}/>
             {
                 //this is for in-app navigation with react-router
@@ -126,7 +126,6 @@ export const FileEditor = ({content, onSaveContent, onExitEditor, path}) => {
                     message='You have unsaved changes, are you sure you want to leave?'
                 />
             }
-            <span onKeyPress={onKeyPress}>
             {
                 editor === 'monaco' ?
                     <Editor
@@ -167,7 +166,6 @@ export const FileEditor = ({content, onSaveContent, onExitEditor, path}) => {
                         ]}
                     />
             }
-            </span>
         </>
     )
 }
