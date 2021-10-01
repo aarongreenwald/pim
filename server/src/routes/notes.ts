@@ -14,7 +14,7 @@ import {
 import path from 'path';
 import bodyParser from 'body-parser';
 import simpleGit, {SimpleGit, StatusResult} from 'simple-git';
-import util from "util";
+import util from 'util';
 
 const uuid = require('uuid')
 const textParser = bodyParser.text();
@@ -362,7 +362,7 @@ const getDirectoryInfo: (path: string) => Promise<DirectoryItem[]> = async (path
 }
 
 async function getPathDetails<P, ResBody, ReqBody, ReqQuery>(path: string) {
-    const fullPath = `${CONTENT_DIRECTORY}/${replaceSpaces(`./${path}`)}`
+    const fullPath = getFullPath(path)
     const data = await fs.promises.stat(fullPath);
     const isRoot = !data
     const isDirectory = isRoot || data.isDirectory();
@@ -370,7 +370,10 @@ async function getPathDetails<P, ResBody, ReqBody, ReqQuery>(path: string) {
     return {path, fullPath, isDirectory, directoryPath};
 }
 
-const getFullPath = (path: string) => `${CONTENT_DIRECTORY}/${replaceSpaces(`./${path}`)}`
+const getFullPath = (path: string) => {
+    console.log(CONTENT_DIRECTORY, path)
+    return require('path').join(CONTENT_DIRECTORY, path);
+}
 
 
 const isBinary = (path: string) => mimeType(path) !== 'text/plain';
@@ -422,7 +425,7 @@ const buildBreadcrumbs: (path: string) => Breadcrumb[] = path => {
         return acc
     }, [{
         name: 'root',
-        path: '.'
+        path: ''
     }] as Breadcrumb[])
 }
 
