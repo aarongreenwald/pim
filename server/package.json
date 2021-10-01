@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "DOTENV=./.env.dev nodemon -r tsconfig-paths/register src/index.ts ./",
-    "build": "tsc && cp ./tsconfig.json ./build/server/tsconfig.json && cp -r ./src/cli ./build/server/src/cli",
+    "build": "tsc && cp ./tsconfig.json ./build/server/tsconfig.json && cp -r ./src/cli/ ./build/server/src/cli",
     "prod": "cd build/server && node -r tsconfig-paths/register src/index.js"
   },
   "private": true,
