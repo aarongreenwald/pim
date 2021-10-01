@@ -29,7 +29,7 @@ const git: SimpleGit = simpleGit(CONTENT_DIRECTORY);
 
 export const setupNotesRoutes = (app: Express) => {
 
-    app.get('/notes/path', async (req, res) => {
+    app.get('/notes/path', decodeQueryParams(), async (req, res) => {
         try {
             const response = await getPath(req.query.path as string);
             res.send(response)
@@ -44,7 +44,7 @@ export const setupNotesRoutes = (app: Express) => {
 
     })
 
-    app.get('/notes/download', async (req, res) => {
+    app.get('/notes/download', decodeQueryParams(), async (req, res) => {
         const {path, fullPath, isDirectory} = await getPathDetails(req.query.path as string);
 
         if (isDirectory) {
@@ -55,7 +55,7 @@ export const setupNotesRoutes = (app: Express) => {
         }
     })
 
-    app.get('/notes/viewfile', async (req, res) => {
+    app.get('/notes/viewfile', decodeQueryParams(), async (req, res) => {
         const {path, fullPath, isDirectory} = await getPathDetails(req.query.path as string);
 
         if (isDirectory) {
@@ -68,7 +68,7 @@ export const setupNotesRoutes = (app: Express) => {
         }
     })
 
-    app.put('/notes/files', textParser, async (req, res) => {
+    app.put('/notes/files', decodeQueryParams(), textParser, async (req, res) => {
         const fullPath = getFullPath(req.query.path as string);
 
         try {
@@ -82,7 +82,7 @@ export const setupNotesRoutes = (app: Express) => {
         }
     })
 
-    app.post('/notes/path', async (req, res) => {
+    app.post('/notes/path', decodeQueryParams(), async (req, res) => {
         const fullPath = getFullPath(req.query.path as string);
         const itemType = req.query.type as FileSystemItemType;
         const name = req.query.name as string;
@@ -134,7 +134,7 @@ export const setupNotesRoutes = (app: Express) => {
         }
     })
 
-    app.put('/notes/commit', async (req, res) => {
+    app.put('/notes/commit', decodeQueryParams(), async (req, res) => {
         const fullPath = getFullPath(req.query.path as string);
         const message = req.query.message as string;
 
@@ -158,7 +158,7 @@ export const setupNotesRoutes = (app: Express) => {
         res.send(toGitStatus(status))
     })
 
-    app.get('/notes/search', async (req, res) => {
+    app.get('/notes/search', decodeQueryParams('query'), async (req, res) => {
         try {
             const {query, excludeHidden} = req.query;
 
@@ -208,7 +208,7 @@ export const setupNotesRoutes = (app: Express) => {
     app.get('/notes/recent', async (req, res) => {
         try {
             const recentFilesScript = path.resolve(__dirname, '..', 'cli', 'recent-files.sh')
-            const files = await execute(`cd ${CONTENT_DIRECTORY} && ${recentFilesScript} 20 10`)
+            const files = await execute(`cd ${CONTENT_DIRECTORY} && ${recentFilesScript} 40 40`)
             res.send(files.split('\n').filter(Boolean))
         } catch (ex) {
             console.error(ex)
@@ -216,7 +216,7 @@ export const setupNotesRoutes = (app: Express) => {
         }
     })
 
-    app.post('/notes/move', async (req, res) => {
+    app.post('/notes/move', decodeQueryParams(), async (req, res) => {
         try {
             const from = req.query.from as string;
             const to = req.query.to as string;
@@ -237,6 +237,21 @@ export const setupNotesRoutes = (app: Express) => {
         }
     })
 
+}
+
+const decodeQueryParams = (...paramNames) => {
+    return (req, res, next) => {
+        if (!paramNames.length) {
+            paramNames = Object.keys(req.query)
+        }
+
+        paramNames.forEach(name => {
+            if (req.query[name]) {
+                req.query[name] = decodeURIComponent(req.query[name])
+            }
+        })
+        next()
+    }
 }
 
 const uncommittedFiles = new Map<string, Date>()

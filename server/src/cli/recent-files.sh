@@ -27,3 +27,7 @@ git log --numstat --format= -n "$1" |
   head -$2 |
   awk -F '\t' '{print $1}' |
   xargs -d '\n' ls -1df 2>/dev/null #only files that still exist
+
+if [[ "$?" = "123" ]]; then
+  exit 0 #no results from the xargs is a valid response, don't fail
+fi

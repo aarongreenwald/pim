@@ -104,17 +104,17 @@ export const saveFuelLog = (fuelLog: NewFuelLogDto): Promise<void> =>
     post('fuel-log', fuelLog)
 
 export const getNotes: (path: string) => Promise<File | Directory> = (path: string) => {
-    return get(`notes/path?path=${path}`);
+    return get(`notes/path?path=${encodeURIComponent(path)}`);
 }
 
 export const createItem = (path: string, name: string, type: FileSystemItemType): Promise<void> =>
-    post(`notes/path?type=${type}&path=${path}&name=${name}`)
+    post(`notes/path?type=${type}&path=${encodeURIComponent(path)}&name=${name}`)
 
 export const saveFileContent = (path: string, content: string): Promise<File | Directory> =>
-    put(`notes/files?&path=${path}`, content, false);
+    put(`notes/files?&path=${encodeURIComponent(path)}`, content, false);
 
 export const commitPath = (path: string): Promise<File | Directory> =>
-    put(`notes/commit?&path=${path}`);
+    put(`notes/commit?&path=${encodeURIComponent(path)}`);
 
 export const gitPull: () => Promise<GitStatus> = () =>
     put('notes/pull');
