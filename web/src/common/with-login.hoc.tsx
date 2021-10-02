@@ -1,7 +1,7 @@
 import {useCallback, useEffect, useState} from 'react';
 import {getLoggedIn, login, logout} from '../services/server-api';
 import styled from '@emotion/styled';
-import {ActionButton, Spinner} from '@fluentui/react';
+import {ActionButton, DefaultButton, Spinner, TextField} from '@fluentui/react';
 import * as React from 'react';
 
 function LoginForm({onLoggedIn}: {onLoggedIn: (success: boolean) => void}) {
@@ -13,8 +13,8 @@ function LoginForm({onLoggedIn}: {onLoggedIn: (success: boolean) => void}) {
     const onInputChange = useCallback((event) => setPassword(event.target.value), [])
     return (
         <StyledForm>
-            <input value={password} onChange={onInputChange} type="password" onSubmit={onSubmit}/>
-            <button onClick={onSubmit}>Login</button>
+            <TextField value={password} onChange={onInputChange} type="password" onSubmit={onSubmit}/>
+            <DefaultButton onClick={onSubmit}>Login</DefaultButton>
         </StyledForm>
     )
 }
@@ -24,6 +24,17 @@ const StyledForm = styled.form`
     justify-content: center;
     height: 100vh;
     align-items: center;
+    flex-direction: column;
+    
+    > *:not(:last-child) {
+      margin-bottom: 8px;
+    }
+  
+    > * {
+      height: 32px;
+      width: 100%;
+      max-width: 400px;
+    }
 `
 
 function useLoginState() {
