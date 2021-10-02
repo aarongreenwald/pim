@@ -18,7 +18,13 @@ import 'ace-builds/src-min-noconflict/ext-searchbox';
  */
 const savedContents = new Map<string, string>()
 
-export const FileEditor = ({content, onSaveContent, onExitEditor, path}) => {
+interface FileEditorProps {
+    content: string;
+    onSaveContent: (content: string) => Promise<void>;
+    onExitEditor: () => void;
+    path: string;
+}
+export const FileEditor: React.FC<FileEditorProps> = ({content, onSaveContent, onExitEditor, path}) => {
     const [saving, setSaving] = useState(false)
     const [wordWrap, setWordWrap] = useState(true)
     //TODO automatically use ace on mobile, or configure ace to be as nice as monaco somehow

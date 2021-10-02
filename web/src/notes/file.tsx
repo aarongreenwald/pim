@@ -3,7 +3,14 @@ import {useState} from 'react';
 import {FileEditor} from './file-editor';
 import {FileViewer} from './file-viewer';
 
-export const FileContent = ({content, onSaveContent, onCommit, pendingCommit, path}) => {
+interface FileContentProps {
+    content: string;
+    onSaveContent: (content: string) => Promise<void>;
+    onCommit: () => void;
+    pendingCommit: boolean;
+    path: string;
+}
+export const FileContent: React.FC<FileContentProps> = ({content, onSaveContent, onCommit, pendingCommit, path}) => {
     const [editMode, setEditMode] = useState(false);
 
     return editMode ?

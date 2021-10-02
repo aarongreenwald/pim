@@ -17,8 +17,16 @@ import {
     saveIcon
 } from './icons';
 
+interface DirectoryProps {
+    path: string;
+    contents: {
+        name: string;
+    }[];
+    onCommit: () => void;
+    pendingCommit: boolean;
+}
 
-export const Directory = ({path, contents, onCommit, pendingCommit}) => {
+export const Directory: React.FC<DirectoryProps> = ({path, contents, onCommit, pendingCommit}) => {
     const [showHidden, setShowHidden] = useState(false)
     const filteredContents = useMemo(() => {
         if (!showHidden) {

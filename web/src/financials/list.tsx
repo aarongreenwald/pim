@@ -2,7 +2,6 @@ import * as React from 'react';
 import {PropsWithChildren, useCallback, useEffect, useMemo, useState} from 'react';
 import {
     CheckboxVisibility,
-    DefaultButton,
     DetailsList,
     DetailsListLayoutMode,
     IColumn, IconButton,

@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {CommandBarButton, DefaultButton, Stack, IconButton, Panel} from '@fluentui/react';
+import {DefaultButton, Stack, Panel, Label} from '@fluentui/react';
 import {RecentNotes} from '../notes/recent-notes';
 import {PaymentForm} from '../financials/payment-form';
 import {useBoolean} from '@uifabric/react-hooks';
@@ -8,7 +8,7 @@ import {useCallback, useEffect, useState} from 'react';
 import {getFuelLog} from '../services/server-api';
 import {FuelLogDto} from '@pim/common';
 import {Search} from '../notes/search';
-import {fileIcon, searchIcon} from '../notes/icons';
+import {searchIcon} from '../notes/icons';
 import {useHistory} from 'react-router-dom'
 import styled from '@emotion/styled';
 
@@ -22,22 +22,20 @@ export const Home: React.FC = () => {
     const reloadFuelLog = useCallback(() => {
         getFuelLog(1).then(setFuelLog)
     }, [setFuelLog])
-    useEffect(reloadFuelLog, [])
+    useEffect(reloadFuelLog, [reloadFuelLog])
 
     return (
         <div>
             <StyledButtons>
                 <DefaultButton onClick={showAddPayment}>Add Payment</DefaultButton>
                 <DefaultButton onClick={showAddFuelLog}>Add Fuel Log</DefaultButton>
-            </StyledButtons>
-            <div>
-                <Stack horizontal styles={commandBarStackStyles}>
-                    <CommandBarButton onClick={() => history.push('/notes')} iconProps={fileIcon}>View Notes</CommandBarButton>
-                    <IconButton iconProps={searchIcon} onClick={showSearchNotes} title="Search Notes" />
+                <Stack horizontal>
+                    <DefaultButton onClick={() => history.push('/notes')}>View Notes</DefaultButton>
+                    <DefaultButton iconProps={searchIcon} onClick={showSearchNotes}/>
                 </Stack>
-                <RecentNotes />
-            </div>
-
+            </StyledButtons>
+            <Label>Recent Notes</Label>
+            <RecentNotes />
 
             <Panel
                 isOpen={addPayment}
@@ -66,13 +64,21 @@ const StyledButtons = styled.div`
   @media (max-width: 600px) {
     flex-direction: column;
     
-    > button {
+    > button, div {
       width: 100%;
       height: 100px;
     }
     
-    > button :last-child {
+    > button:last-child,div:last-child {
       margin-bottom: ${SPACING}px;
+    }
+    
+    > div > button {
+      height: 100%;
+    }
+
+    > div > button:first-child {
+      flex: 1;
     }
   }
   
@@ -89,9 +95,7 @@ const StyledButtons = styled.div`
     }
   }
   
-  > button {
+  > button, div {
     margin-top: ${SPACING}px;  
   }
 `
-
-const commandBarStackStyles = {root: {marginLeft: -SPACING, marginRight: -SPACING}};

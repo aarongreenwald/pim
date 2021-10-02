@@ -5,7 +5,14 @@ import remarkGfm from 'remark-gfm';
 import styled from '@emotion/styled';
 import {commitIcon, editIcon} from './icons';
 
-export const FileViewer = ({content, onEdit, pendingCommit, onCommit, path}) => {
+interface FileViewerProps {
+    content: string;
+    onEdit: () => void;
+    pendingCommit: boolean;
+    onCommit: () => void;
+    path: string;
+}
+export const FileViewer: React.FC<FileViewerProps> = ({content, onEdit, pendingCommit, onCommit, path}) => {
     return (
         <>
             {
