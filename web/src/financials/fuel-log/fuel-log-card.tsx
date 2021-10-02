@@ -1,9 +1,9 @@
-import {currencySymbols} from './currencies';
+import {currencySymbols} from '../currencies';
 import * as React from 'react';
 import {FuelLog, PaymentId} from '@pim/common';
 import {FontIcon, Link} from '@fluentui/react'
 import styled from '@emotion/styled';
-import {formatDay, formatTime, isMidnight} from '../common/date.utils';
+import {formatDay, formatTime, isMidnight} from '../../common/date.utils';
 
 //TODO finish extracting the inline styles to styled component,s reuse the margin/spacing sizes and colors
 export const FuelLogCard: React.FC<FuelLogCardProps> = ({fuelLog, onViewPayment}) => {

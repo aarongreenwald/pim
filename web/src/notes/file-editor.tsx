@@ -16,7 +16,7 @@ import 'ace-builds/src-min-noconflict/ext-searchbox';
  * Represents the content saved on the server per path.
  * TODO - LRU this cache. In can grow to the size of the notes repo, which currently isn't that big so this isn't urgent
  */
-const savedContents = new Map<string, string>()
+const savedContents = new Map<string, string>();
 
 interface FileEditorProps {
     content: string;
@@ -24,6 +24,7 @@ interface FileEditorProps {
     onExitEditor: () => void;
     path: string;
 }
+
 export const FileEditor: React.FC<FileEditorProps> = ({content, onSaveContent, onExitEditor, path}) => {
     const [saving, setSaving] = useState(false)
     const [wordWrap, setWordWrap] = useState(true)
@@ -174,4 +175,4 @@ export const FileEditor: React.FC<FileEditorProps> = ({content, onSaveContent, o
             }
         </>
     )
-}
+};

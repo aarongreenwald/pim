@@ -1,12 +1,12 @@
-import {PanelProps} from '../common/panel.types';
+import {PanelProps} from '../../common/panel.types';
 import {Checkbox, DefaultButton, PrimaryButton, Stack, TextField} from '@fluentui/react';
-import {stackTokens} from './styles';
+import {stackTokens} from '../styles';
 import * as React from 'react';
 import {useCallback, useEffect, useState} from 'react';
 import {CashAccount} from '@pim/common';
-import {getActiveCashAccounts, getCashRecords, saveCashRecords} from '../services/server-api';
-import {formatDay} from '../common/date.utils';
-import {CurrencyInput} from './currency-input';
+import {getActiveCashAccounts, getCashRecords, saveCashRecords} from '../../services/server-api';
+import {formatDay} from '../../common/date.utils';
+import {CurrencyInput} from '../currency-input';
 
 export const AddCashRecord: React.FC<PanelProps<string>> = ({onClose, id}) => {
     const {draft, accounts, updateDate, updateAccount, submitForm} = useCashRecordsForm(onClose, id);

@@ -1,11 +1,11 @@
 import * as React from 'react';
 import {useCallback, useEffect, useMemo, useState} from 'react';
 import {PaymentId, vPayment} from '@pim/common';
-import {getPayments} from '../services/server-api';
+import {getPayments} from '../../services/server-api';
 import {CommandBar, ICommandBarItemProps, Panel} from '@fluentui/react';
-import {List, SortConfig, SortDirection} from './list';
+import {List, SortConfig, SortDirection} from '../list';
 import {PaymentForm} from './payment-form';
-import {commandBarStyles} from './styles';
+import {commandBarStyles} from '../styles';
 import {useBoolean} from '@uifabric/react-hooks';
 
 export const Payments: React.FC = () => {

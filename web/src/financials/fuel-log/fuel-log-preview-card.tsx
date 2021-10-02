@@ -1,4 +1,4 @@
-import {currencySymbols, defaultCurrency} from './currencies';
+import {currencySymbols, defaultCurrency} from '../currencies';
 import * as React from 'react';
 
 //TODO reuse styles/code from the FuelLogCard

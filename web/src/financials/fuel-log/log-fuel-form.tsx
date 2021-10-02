@@ -1,11 +1,11 @@
-import {PanelProps} from '../common/panel.types';
+import {PanelProps} from '../../common/panel.types';
 import {DefaultButton, Label, PrimaryButton, Stack, TextField} from '@fluentui/react';
-import {stackTokens} from './styles';
+import {stackTokens} from '../styles';
 import * as React from 'react';
 import {useCallback, useState} from 'react';
 import {FuelLog, NewFuelLogDto} from '@pim/common';
-import {saveFuelLog} from '../services/server-api';
-import {CurrencyInput} from './currency-input';
+import {saveFuelLog} from '../../services/server-api';
+import {CurrencyInput} from '../currency-input';
 import {FuelLogPreviewCard} from './fuel-log-preview-card';
 
 export const LogFuelForm: React.FC<PanelProps<number, FuelLog>> = ({onClose, onSave, data}) => {

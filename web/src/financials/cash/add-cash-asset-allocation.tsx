@@ -2,13 +2,13 @@ import {useCallback, useState} from 'react';
 import * as React from 'react';
 import {CashAssetAllocationRecord, PaymentId} from '@pim/common';
 import {format} from 'date-fns';
-import {saveAllocationRecord} from '../services/server-api';
+import {saveAllocationRecord} from '../../services/server-api';
 import {PrimaryButton, DefaultButton, Stack, TextField} from '@fluentui/react'
-import {PanelProps} from '../common/panel.types';
-import {currencyRadioOptions, defaultCurrency} from './currencies';
-import {horizontalChoiceGroup, stackTokens, StyledChoiceGroup} from './styles';
-import {formatDay} from '../common/date.utils';
-import {CurrencyInput} from './currency-input';
+import {PanelProps} from '../../common/panel.types';
+import {currencyRadioOptions, defaultCurrency} from '../currencies';
+import {horizontalChoiceGroup, stackTokens, StyledChoiceGroup} from '../styles';
+import {formatDay} from '../../common/date.utils';
+import {CurrencyInput} from '../currency-input';
 
 export const AddCashAssetAllocation: React.FC<PanelProps<PaymentId>> = ({onClose}) => {
     const {allocation, updateRecord, updateCurrency, submitForm} = useCaaForm();

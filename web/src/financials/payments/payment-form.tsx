@@ -1,14 +1,14 @@
 import {useCallback, useEffect, useRef, useState} from 'react';
 import * as React from 'react';
 import {Payment, PaymentId} from '@pim/common';
-import {getPayment, savePayment} from '../services/server-api';
+import {getPayment, savePayment} from '../../services/server-api';
 import {PrimaryButton, DefaultButton, Stack, TextField, Toggle, Spinner, ITextField} from '@fluentui/react'
-import {PanelProps} from '../common/panel.types';
+import {PanelProps} from '../../common/panel.types';
 import {CategoryDropdown} from './category-dropdown';
-import {currencyRadioOptions, defaultCurrency} from './currencies';
-import {horizontalChoiceGroup, stackTokens, StyledChoiceGroup} from './styles';
-import {CurrencyInput} from './currency-input';
-import {formatDay} from '../common/date.utils';
+import {currencyRadioOptions, defaultCurrency} from '../currencies';
+import {horizontalChoiceGroup, stackTokens, StyledChoiceGroup} from '../styles';
+import {CurrencyInput} from '../currency-input';
+import {formatDay} from '../../common/date.utils';
 
 export const PaymentForm: React.FC<PanelProps<PaymentId>> = ({onClose, id}) => {
     const {

@@ -1,13 +1,13 @@
 import * as React from 'react';
 import {useCallback, useEffect, useMemo, useState} from 'react';
 import {FuelLogDto, PaymentId} from '@pim/common';
-import {getFuelLog} from '../services/server-api';
+import {getFuelLog} from '../../services/server-api';
 import {CommandBar, ICommandBarItemProps, Panel, List as FluentList, Text} from '@fluentui/react';
-import {commandBarStyles} from './styles';
+import {commandBarStyles} from '../styles';
 import {useBoolean} from '@uifabric/react-hooks';
 import {LogFuelForm} from './log-fuel-form';
 import {FuelLogCard} from './fuel-log-card';
-import {PaymentForm} from './payment-form';
+import {PaymentForm} from '../payments/payment-form';
 
 export const FuelHistory: React.FC = () => {
     const [fuelLog, setFuelLog] = useState<FuelLogDto>()

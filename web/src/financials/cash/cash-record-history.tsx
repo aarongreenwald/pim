@@ -1,13 +1,13 @@
 import {useCallback, useEffect, useMemo, useState} from 'react';
-import {getCarSummary, getCashAllocations, getUnreportedSpending} from '../services/server-api';
-import {List} from './list';
+import {getCarSummary, getCashAllocations, getUnreportedSpending} from '../../services/server-api';
+import {List} from '../list';
 import * as React from 'react';
 import {CarSummary, CashAssetAllocation, UnreportedSpending} from '@pim/common';
 import {useBoolean} from '@uifabric/react-hooks';
 import {CommandBar, ICommandBarItemProps, Panel, Stack} from '@fluentui/react';
-import {commandBarStyles} from './styles';
+import {commandBarStyles} from '../styles';
 import {AddCashRecord} from './add-cash-record';
-import {formatDay} from '../common/date.utils';
+import {formatDay} from '../../common/date.utils';
 import {AddCashAssetAllocation} from './add-cash-asset-allocation';
 
 export const CashRecordHistory: React.FC = () => {

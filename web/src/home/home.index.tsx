@@ -1,9 +1,7 @@
 import * as React from 'react';
 import {DefaultButton, Stack, Panel, Label} from '@fluentui/react';
 import {RecentNotes} from '../notes/recent-notes';
-import {PaymentForm} from '../financials/payment-form';
 import {useBoolean} from '@uifabric/react-hooks';
-import {LogFuelForm} from '../financials/log-fuel-form';
 import {useCallback, useEffect, useState} from 'react';
 import {getFuelLog} from '../services/server-api';
 import {FuelLogDto} from '@pim/common';
@@ -11,6 +9,8 @@ import {Search} from '../notes/search';
 import {searchIcon} from '../notes/icons';
 import {useHistory} from 'react-router-dom'
 import styled from '@emotion/styled';
+import {LogFuelForm} from '../financials/fuel-log/log-fuel-form';
+import {PaymentForm} from '../financials/payments/payment-form';
 
 export const Home: React.FC = () => {
     const [addPayment, {setTrue: showAddPayment, setFalse: hideAddPayment}] = useBoolean(false)

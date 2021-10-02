@@ -1,13 +1,13 @@
 import {useCallback, useEffect, useState} from 'react';
 import * as React from 'react';
 import {Income, IncomeId} from '@pim/common';
-import {getIncome, saveIncome} from '../services/server-api';
+import {getIncome, saveIncome} from '../../services/server-api';
 import {PrimaryButton, DefaultButton, Stack, TextField} from '@fluentui/react'
-import {PanelProps} from '../common/panel.types';
-import {horizontalChoiceGroup, stackTokens, StyledChoiceGroup} from './styles';
-import {currencyRadioOptions, defaultCurrency} from './currencies';
-import {formatDay} from '../common/date.utils';
-import {CurrencyInput} from './currency-input';
+import {PanelProps} from '../../common/panel.types';
+import {horizontalChoiceGroup, stackTokens, StyledChoiceGroup} from '../styles';
+import {currencyRadioOptions, defaultCurrency} from '../currencies';
+import {formatDay} from '../../common/date.utils';
+import {CurrencyInput} from '../currency-input';
 
 export const IncomeForm: React.FC<PanelProps<IncomeId>> = ({onClose, id}) => {
     const {income, updateIncome, updateCurrency, submitForm} = useIncomeForm(onClose, id);
