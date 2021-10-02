@@ -96,8 +96,8 @@ export function getSpendingByCategory(rootCategoryId: CategoryId): Promise<Spend
     return get(`analysis/spending-by-category?rootCategoryId=${rootCategoryId}`)
 }
 
-export const getFuelLog: () => Promise<{ fuelLog: FuelLog[]; summary: FuelLogSummary }> = () =>
-    get('fuel-log');
+export const getFuelLog: (pageSize?: number) => Promise<{ fuelLog: FuelLog[]; summary: FuelLogSummary }> = (pageSize) =>
+    get(`fuel-log${pageSize ? `?pageSize=${pageSize}` : ''}`);
 
 
 export const saveFuelLog = (fuelLog: NewFuelLogDto): Promise<void> =>
@@ -141,7 +141,7 @@ const get = <T>(path: string): Promise<T> =>
         .then(res => res.json())
 
 
-const put = <T>(path: string, body?: any, json = true): Promise<T> => fetch(`${config.apiServiceUrl}/${path}`, {
+const put = <T>(path: string, body?, json = true): Promise<T> => fetch(`${config.apiServiceUrl}/${path}`, {
     method: 'PUT',
     headers: json && body ? {
         'Content-Type': 'application/json'
@@ -159,7 +159,7 @@ const put = <T>(path: string, body?: any, json = true): Promise<T> => fetch(`${c
         }
     })
 
-const post = <T>(path: string, body?: any): Promise<T> => fetch(`${config.apiServiceUrl}/${path}`, {
+const post = <T>(path: string, body?): Promise<T> => fetch(`${config.apiServiceUrl}/${path}`, {
     method: 'POST',
     headers: {
         'Content-Type': 'application/json'

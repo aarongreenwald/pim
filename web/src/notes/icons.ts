@@ -11,6 +11,7 @@ export const addIcon = {iconName: 'Add'};
 export const hideIcon = {iconName: 'Hide3'};
 export const commitIcon = {iconName: 'BranchCommit'};
 export const saveAndCloseIcon = {iconName: 'SaveAndClose'};
+export const fileIcon = {iconName: fileIconName};
 export const wrapLinesIcon = {iconName: 'LineStyle'};
 export const toggleEditorIcon = {iconName: 'LocationOutline'};
 export const searchIcon = {iconName: 'Search'};

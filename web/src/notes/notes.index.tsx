@@ -4,7 +4,6 @@ import {
     commitPath,
     getGitStatus,
     getNotes,
-    getRecentFiles,
     gitPull,
     gitPush,
     saveFileContent
@@ -17,14 +16,9 @@ import {Directory as DirectoryViewer} from './directory';
 import {Breadcrumbs} from './breadcrumbs';
 import {Search} from './search';
 import {downloadIcon, searchIcon, uploadIcon} from './icons';
-import {Link} from 'react-router-dom';
+import {RecentNotes} from './recent-notes';
 
 export const Notes: React.FC = () => {
-
-    const [recentFiles, setRecentFiles] = useState<string[]>(null)
-    useEffect(() => {
-        getRecentFiles().then(setRecentFiles);
-    }, [])
 
     const {fileSystemItem, setFileSystemItem, refresh} = useFileSystemItem();
     const [showSearch, setShowSearch] = useState(false)
@@ -53,7 +47,7 @@ export const Notes: React.FC = () => {
     const onCommit = useCallback(() => {
         //todo add support for specifying a commit message
         commitPath(fileSystemItem.path).then(setFileSystemItem)
-    }, [fileSystemItem?.path])
+    }, [fileSystemItem?.path, setFileSystemItem])
 
     if (!fileSystemItem) return <Spinner />;
 
@@ -82,13 +76,7 @@ export const Notes: React.FC = () => {
                     <DirectoryViewer path={path} contents={directoryContents} onCommit={onCommit} pendingCommit={pendingCommit} />
                     <hr />
                     <Label>Recent Files</Label>
-                    {
-                        recentFiles?.map(path =>
-                            <div key={path}>
-                                <Link to={`/notes/?path=${encodeURIComponent(path)}`}>{path}</Link>
-                            </div>
-                        )
-                    }
+                    <RecentNotes />
                 </>
             }
             {

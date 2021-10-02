@@ -111,7 +111,8 @@ export const setupFinancialsRoutes = (app: Express) => {
 
     app.route('/fuel-log')
         .get((req, res) => {
-            Promise.all([db.getFuelLog(), db.getFuelLogSummary()])
+            const pageSize = parseInt(req.query.pageSize as string);
+            Promise.all([db.getFuelLog(pageSize), db.getFuelLogSummary()])
                 .then(([fuelLog, summary]) => res.send(JSON.stringify({fuelLog, summary})))
                 .catch(ex => {
                     console.error(ex)

@@ -10,7 +10,12 @@ import { NeutralColors, CommunicationColors } from '@fluentui/theme';
 import {NotesSearchResults} from '@pim/common';
 import {fileIconName} from './icons';
 
-export const Search = ({show, onDismiss}) => {
+interface SearchProps {
+    show: boolean;
+    onDismiss: () => void;
+}
+
+export const Search: React.FC<SearchProps> = ({show, onDismiss}) => {
     const {inputVal, debouncedValue, updateValue} = useDebouncedInput('')
     const [excludeHidden, setExcludeHidden] = useState(true);
     const [searchResults, setSearchResults] = useState<NotesSearchResults>(null)
@@ -26,7 +31,8 @@ export const Search = ({show, onDismiss}) => {
     return (
         <Panel isOpen={show} 
                onDismiss={onDismiss} 
-               isHiddenOnDismiss 
+               isHiddenOnDismiss
+               isBlocking={false}
                onRenderHeader={() =>
                    (
                        <Stack styles={headerStackStyles}>

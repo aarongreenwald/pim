@@ -323,13 +323,14 @@ export const insertCashAssetAllocationRecord = async (allocationRecord: CashAsse
     return lastId
 }
 
-export const getFuelLog: () => Promise<FuelLog[]> = async () => {
+export const getFuelLog: (pageSize?: number) => Promise<FuelLog[]> = async (pageSize) => {
     const db = await getDb();
     const sql = `
         select fuel_log_id id, timestamp, km_per_liter kilometersPerLiter, odometer, liters, kilometers, note, is_full isFull, payment_id paymentId
             , amount totalCost
             , currency
         from v_fuel_log
+        ${pageSize ? `limit ${pageSize}` : ''}
     `;
     return all<FuelLog>(db, sql)
 }

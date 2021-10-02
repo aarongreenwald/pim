@@ -14,21 +14,32 @@ import {
     HashRouter as Router,
     Switch,
     Route,
+    useHistory
 } from 'react-router-dom';
-import {Redirect} from 'react-router';
+import {Home} from './home/home.index';
 
 initializeIcons();
 
+const Header = ({showNav, onLogout}) => {
+    const history = useHistory()
+    return (
+        <StyledAppHeader>
+                    <span>
+                        <ActionButton iconProps={{iconName: 'CollapseMenu'}} onClick={showNav}/>
+                        <ActionButton iconProps={{iconName: 'Home'}} onClick={() => history.push('/')}/>
+                    </span>
+            <ActionButton iconProps={{iconName: 'SignOut'}} text={'Logout'} onClick={onLogout}/>
+        </StyledAppHeader>
+    )
+}
+
 const App = ({onLogout}) => {
     const [shouldShowNav, {setTrue: showNav, setFalse: hideNav}] = useBoolean(false)
-
     return (
         <>
-            <StyledAppHeader>
-                <ActionButton iconProps={{iconName: 'CollapseMenu'}} onClick={showNav}/>
-                <ActionButton iconProps={{iconName: 'SignOut'}} text={'Logout'} onClick={onLogout}/>
-            </StyledAppHeader>
             <Router>
+                <Header showNav={showNav} onLogout={onLogout}/>
+
                 <SwipeableDrawer onClose={hideNav} onOpen={showNav} open={shouldShowNav}>
                     <Nav groups={navGroups}
                          onLinkClick={hideNav}
@@ -44,11 +55,8 @@ const App = ({onLogout}) => {
                     <Route path="/spending">
                         <FinancialsHome />
                     </Route>
-                    <Route path="/notes" component={Notes}>
-                    </Route>
-                    <Route path="/">
-                        <Redirect to="/spending" />
-                    </Route>
+                    <Route path="/notes" component={Notes}/>
+                    <Route path="/" component={Home}/>
                 </Switch>
             </Router>
         </>
@@ -60,7 +68,22 @@ render(<AppWithLogin />, document.getElementById('app'))
 
 const navGroups = [
     {
-        // name: 'History',
+        name: '',
+        links: [
+            {
+                key: 'home',
+                name: 'Home',
+                url: '#/'
+            },
+            {
+                key: 'notes',
+                name: 'Notes',
+                url: '#/notes'
+            }
+        ]
+    },
+    {
+        name: 'Financials',
         links: [
             {
                 key: 'spending',
@@ -76,11 +99,6 @@ const navGroups = [
                 key: 'fuel',
                 name: 'Fuel Log',
                 url: '#/fuel'
-            },
-            {
-                key: 'notes',
-                name: 'Notes',
-                url: '#/notes'
             }
         ]
     }
@@ -99,4 +117,7 @@ const navStyles = {
     root: {
         minWidth: 300
     },
+    groupContent: {
+        marginBottom: 0
+    }
 };
