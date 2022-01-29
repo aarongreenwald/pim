@@ -128,12 +128,41 @@ export const setupFinancialsRoutes = (app: Express) => {
                 })
         })
 
-    app.get('/stock-holdings', (req, res) => {
-        db.getStockHoldings()
+    app.get('/stock-holdings-summary', (req, res) => {
+        db.getStockHoldingsSummary()
             .then(data => res.send(JSON.stringify(data)))
             .catch(ex => {
                 console.error(ex)
                 res.status(500).send(ex)
             })
     })
+
+    app.route('/stock-transactions')
+        .get((req, res) =>
+            db.getStockTransactions().then(data => res.send(JSON.stringify(data)))
+        )
+        .post(jsonParser, (req, res) => {
+            db.insertStockTransaction(req.body)
+                .then(data => res.send(JSON.stringify(data)))
+                .catch(ex => {
+                    console.error(ex)
+                    res.status(500).send(ex)
+                })
+        })
+        .put(jsonParser, (req, res) => {
+            db.updateStockTransaction(req.body)
+                .then(() => res.status(200).send())
+                .catch(ex => {
+                    console.error(ex)
+                    res.status(500).send(ex)
+                })
+        })
+
+    app.get('/stock-transactions/:id', (req, res) =>
+        db.getStockTransaction((req.params as any).id).then(data => res.send(JSON.stringify(data)))
+    )
+
+    app.get('/stock-accounts', (req, res) =>
+        db.getStockAccounts().then(data => res.send(JSON.stringify(data)))
+    )
 }

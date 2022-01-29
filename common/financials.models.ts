@@ -2,7 +2,10 @@ export type Money = number;
 export type CategoryId = number;
 export type PaymentId = number;
 export type IncomeId = number;
+export type StockTransactionId = number;
+export type StockAccountId = number;
 export type Currency = 'ILS' | 'USD';
+export type TaxCategory = 'Taxable' | 'Exempt' | 'Deferred';
 
 export interface Payment {
   id: PaymentId;
@@ -138,9 +141,26 @@ export interface NewFuelLogDto {
   isFull: boolean;
 }
 
-export interface StockHoldingDto {
+export interface StockAccountDto {
+  id: StockAccountId;
+  name: string;
+  taxCategory: TaxCategory
+}
+
+export interface StockTransactionDto {
+  id: StockTransactionId;
+  accountId: StockTransactionId;
+  tickerSymbol: string;
+  //transfer a string in the form '2022-01-29 21:34:23.000'
+  //so that timezone information is stripped out
+  transactionDate: string;
+  quantity: number;
+  costBasis: number;
+}
+
+export interface StockHoldingSummaryDto {
   accountName: string;
-  taxCategory: 'Taxable' | 'Exempt' | 'Deferred';
+  taxCategory: TaxCategory;
   tickerSymbol: string;
   quantity: number;
   costBasis: number;

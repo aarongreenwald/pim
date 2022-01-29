@@ -16,7 +16,10 @@ import {
     SpendingByCategory,
     UnreportedSpending,
     vPayment,
-    StockHoldingDto
+    StockTransactionDto,
+    StockHoldingSummaryDto,
+    StockTransactionId,
+    StockAccountDto
 } from '@pim/common';
 import {all, beginTransaction, commitTransaction, get, getDb, rollbackTransaction, run} from './db.helpers';
 
@@ -382,11 +385,96 @@ export const insertFuelLog = async (fuelLogDto: NewFuelLogDto) => {
 }
 
 
-export const getStockHoldings = async () => {
+export const getStockHoldingsSummary = async () => {
     const db = await getDb();
     const sql = `
         select name accountName, tax_category taxCategory, ticker_symbol tickerSymbol, quantity, cost_basis costBasis
         from v_stock_holdings
     `;
-    return all<StockHoldingDto>(db, sql)
+    return all<StockHoldingSummaryDto>(db, sql)
+}
+
+export const getStockTransactions = async () => {
+    const db = await getDb();
+    const sql = `
+        select stock_transaction_id id, 
+               ticker_symbol tickerSymbol,
+               datetime(transaction_date / 1000, 'unixepoch') transactionDate, 
+               quantity, 
+               unit_price costBasis
+        from stock_transaction
+    `;
+    return all<StockTransactionDto>(db, sql)
+}
+
+export const getStockTransaction = async (transactionId: StockTransactionId) => {
+    const db = await getDb();
+    const sql = `
+        select stock_transaction_id id,
+               account_id accountId,
+               ticker_symbol tickerSymbol,
+               datetime(transaction_date / 1000, 'unixepoch') transactionDate,
+               quantity, 
+               unit_price costBasis
+        from stock_transaction
+        where stock_transaction_id = ?
+    `;
+    return get<StockTransactionDto>(db, sql, transactionId)
+}
+
+export const getStockAccounts = async () => {
+    const db = await getDb();
+    const sql = `
+        select stock_account_id id, name, tax_category taxCategory 
+        from stock_account
+    `;
+    return all<StockAccountDto>(db, sql)
+}
+
+export const insertStockTransaction = async (transaction: StockTransactionDto) => {
+    const sql = `
+    insert into main.stock_transaction
+        (transaction_date, account_id, ticker_symbol, unit_price, quantity)
+    values (?,?,?,?,?)
+  `
+    //TODO: validations - the fallback to null done here forces the db to reject
+    //bad data but there should probably be a validation and sanitization step prior to getting here
+    const params = [
+        new Date(transaction.transactionDate).getTime(),
+        transaction.accountId || null,
+        transaction.tickerSymbol || null,
+        transaction.costBasis || null,
+        transaction.quantity || null,
+    ]
+    const db = await getDb(false);
+
+    const {lastId} = await run(db, sql, params)
+    //if the get() rejects but the run() resolved, the server will return 500 which is not good
+    //client will be tempted to retry, but the post was successful
+    return get<StockTransactionDto>(db, `select *from main.stock_transaction where stock_transaction_id = ?`, lastId)
+}
+
+export const updateStockTransaction = async (transaction: StockTransactionDto) => {
+    const sql = `
+        update main.stock_transaction
+        set transaction_date = ?,
+            account_id = ?,
+            ticker_symbol = ?,
+            unit_price = ?,
+            quantity = ?                    
+        where main.stock_transaction.stock_transaction_id = ?        
+  `
+    //TODO: validations - the fallback to null done here forces the db to reject
+    //bad data but there should probably be a validation and sanitization step prior to getting here
+    const params = [
+        new Date(transaction.transactionDate).getTime(),
+        transaction.accountId || null,
+        transaction.tickerSymbol || null,
+        transaction.costBasis || null,
+        transaction.quantity || null,
+        transaction.id
+    ]
+    const db = await getDb(false);
+
+    await run(db, sql, params)
 }

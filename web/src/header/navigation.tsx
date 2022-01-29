@@ -9,6 +9,7 @@ import {Notes} from '../notes/notes.index';
 import {Home} from '../home/home.index';
 import {Income} from '../financials/income/income';
 import {Payments} from '../financials/payments/payments';
+import {Stocks} from '../financials/stocks/stocks';
 
 interface NavigationProps {
     hideNav: () => void;
@@ -26,6 +27,7 @@ export const Navigation: React.FC<NavigationProps> = ({hideNav, showNav, shouldS
             <Switch>
                 <Route path="/spending" component={Payments}/>
                 <Route path="/income" component={Income}/>
+                <Route path="/stocks" component={Stocks}/>
                 <Route path="/cash" component={CashRecordHistory}/>
                 <Route path="/fuel" component={FuelHistory}/>
                 <Route path="/analysis" component={HistoryAnalysis}/>
@@ -64,6 +66,11 @@ const navGroups = [
                 key: 'income',
                 name: 'Income',
                 url: '#/income'
+            },
+            {
+                key: 'stocks',
+                name: 'Stocks',
+                url: '#/stocks'
             },
             {
                 key: 'cash',

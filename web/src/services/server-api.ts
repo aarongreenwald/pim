@@ -19,7 +19,12 @@ import {
     vPayment,
     FileSystemItemType,
     File,
-    Directory, GitStatus, NotesSearchResults
+    Directory,
+    GitStatus,
+    NotesSearchResults,
+    StockTransactionDto,
+    StockTransactionId,
+    StockAccountDto
 } from '@pim/common';
 
 const handleResponse = (res) => {
@@ -82,6 +87,18 @@ export const getIncome: (incomeId: IncomeId) => Promise<Income> = (incomeId) =>
 
 export const saveIncome: (income: Income) => Promise<Income> = (income) =>
     income.id === -1 ? post('income', income) : put('income', income)
+
+export const getAllStocks: () => Promise<StockTransactionDto[]> = () =>
+    get('stock-transactions');
+
+export const getStockTransaction: (transactionId: StockTransactionId) => Promise<StockTransactionDto> = (transactionId) =>
+    get(`stock-transactions/${transactionId}`);
+
+export const saveStockTransaction: (stockTransaction: StockTransactionDto) => Promise<StockTransactionDto> = (stockTransaction) =>
+    stockTransaction.id === -1 ? post('stock-transactions', stockTransaction) : put('stock-transactions', stockTransaction)
+
+export const getStockAccounts: () => Promise<StockAccountDto[]> = () =>
+    get('/stock-accounts')
 
 export const getAllCategories = (): Promise<Category[]> =>
   get('categories', )
