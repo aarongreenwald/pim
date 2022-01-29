@@ -2,12 +2,13 @@ import {useCallback, useEffect, useState} from 'react';
 import * as React from 'react';
 import {StockAccountId, StockTransactionDto, StockTransactionId} from '@pim/common';
 import {getStockTransaction, saveStockTransaction} from '../../services/server-api';
-import {PrimaryButton, DefaultButton, Stack, TextField} from '@fluentui/react'
+import {PrimaryButton, DefaultButton, Stack, TextField, Label} from '@fluentui/react'
 import {PanelProps} from '../../common/panel.types';
 import {stackTokens} from '../styles';
 import {CurrencyInput} from '../currency-input';
 import {StockAccountDropdown} from './stock-account-dropdown';
 import {formatDay, formatTimeInput} from '../../common/date.utils';
+import { currencySymbols } from '../currencies';
 
 export const StocksForm: React.FC<PanelProps<StockTransactionId>> = ({onClose, id}) => {
     const {stockTransaction, updateTransaction, updateAccount, submitForm} = useStockTransactionForm(onClose, id);
@@ -29,9 +30,12 @@ export const StocksForm: React.FC<PanelProps<StockTransactionId>> = ({onClose, i
             <TextField
                 label={'Time'}
                 type="time"
+                step="0.001"
                 onChange={updateTransaction}
                 value={stockTransaction.transactionTime}
                 name="transactionTime"/>
+
+            <StockAccountDropdown value={stockTransaction.accountId} onChange={updateAccount}/>
 
             <TextField
                 label="Ticker"
@@ -40,25 +44,38 @@ export const StocksForm: React.FC<PanelProps<StockTransactionId>> = ({onClose, i
                 onChange={updateTransaction}
             />
 
-            <TextField
-                label="Quantity"
-                name="quantity"
-                type="number"
-                value={ stockTransaction.quantity || stockTransaction.quantity === 0 ? stockTransaction.quantity.toString() : ''}
-                onChange={updateTransaction}
-            />
+            <Stack horizontal tokens={stackTokens}>
+                <Stack.Item grow>
+                    <TextField
+                        label="Quantity"
+                        name="quantity"
+                        type="number"
+                        value={ stockTransaction.quantity || stockTransaction.quantity === 0 ? stockTransaction.quantity.toString() : ''}
+                        onChange={updateTransaction}
+                    />
+                </Stack.Item>
 
-            <StockAccountDropdown value={stockTransaction.accountId}
-                                  onChange={updateAccount}>
+                <Stack.Item grow={5}>
+                    <CurrencyInput
+                        amount={stockTransaction.costBasis}
+                        currency={'USD'}
+                        name="costBasis"
+                        onChange={updateTransaction}
+                    />
+                </Stack.Item>
 
-            </StockAccountDropdown>
+                <Stack.Item grow>
+                    <Label>Total</Label>
+                    <TextField
+                        borderless
+                        underlined
+                        readOnly
+                        value={currencySymbols.usd + (stockTransaction.costBasis * stockTransaction.quantity).toFixed(2)}
+                    />
 
-            <CurrencyInput
-                amount={stockTransaction.costBasis}
-                currency={'USD'}
-                name="costBasis"
-                onChange={updateTransaction}
-            />
+                </Stack.Item>
+
+            </Stack>
 
             <Stack horizontal tokens={stackTokens}>
                 <PrimaryButton onClick={submitForm}>Save</PrimaryButton>
@@ -100,11 +117,7 @@ function useStockTransactionForm(onClose: () => void, stockTransactionId?: Stock
     }, [stockTransaction]);
 
     const submitForm = useCallback(async () => {
-        const transaction: StockTransactionDto = {
-            ...stockTransaction,
-            transactionDate: stockTransaction.transactionDate + 'T' + stockTransaction.transactionTime + 'Z'
-        }
-        await saveStockTransaction(transaction)
+        await saveStockTransaction(convertToTransactionDto(stockTransaction))
         if (stockTransaction.id === -1) {
             setStockTransaction(initializeTransaction())
         } else {
@@ -120,19 +133,21 @@ function initializeTransaction(): StockTransaction {
         id: -1,
         accountId: null,
         transactionDate: today,
-        transactionTime: '09:30:01.001',
+        transactionTime: '',
         costBasis: null,
         tickerSymbol: '',
         quantity: null
     };
 }
 
-interface StockTransaction {
-    id: StockTransactionId;
-    accountId: StockTransactionId;
-    tickerSymbol: string;
+function convertToTransactionDto(transaction: StockTransaction): StockTransactionDto {
+    return {
+        ...transaction,
+        transactionDate: `${transaction.transactionDate}T${transaction.transactionTime || '00:00:00'}Z`
+    }
+}
+
+interface StockTransaction extends Omit<StockTransactionDto, 'transactionDate'> {
     transactionDate: string;
     transactionTime: string;
-    quantity: number;
-    costBasis: number;
 }
