@@ -137,3 +137,11 @@ export interface NewFuelLogDto {
   note?: string;
   isFull: boolean;
 }
+
+export interface StockHoldingDto {
+  accountName: string;
+  taxCategory: 'Taxable' | 'Exempt' | 'Deferred';
+  tickerSymbol: string;
+  quantity: number;
+  costBasis: number;
+}

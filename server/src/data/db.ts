@@ -15,7 +15,8 @@ import {
     PaymentId,
     SpendingByCategory,
     UnreportedSpending,
-    vPayment
+    vPayment,
+    StockHoldingDto
 } from '@pim/common';
 import {all, beginTransaction, commitTransaction, get, getDb, rollbackTransaction, run} from './db.helpers';
 
@@ -378,4 +379,14 @@ export const insertFuelLog = async (fuelLogDto: NewFuelLogDto) => {
     const db = await getDb(false);
     const {lastId} = await run(db, sql, params)
     return {paymentId, fuelLogId: lastId}
+}
+
+
+export const getStockHoldings = async () => {
+    const db = await getDb();
+    const sql = `
+        select name accountName, tax_category taxCategory, ticker_symbol tickerSymbol, quantity, cost_basis costBasis
+        from v_stock_holdings
+    `;
+    return all<StockHoldingDto>(db, sql)
 }

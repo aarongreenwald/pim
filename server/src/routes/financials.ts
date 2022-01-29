@@ -128,4 +128,12 @@ export const setupFinancialsRoutes = (app: Express) => {
                 })
         })
 
+    app.get('/stock-holdings', (req, res) => {
+        db.getStockHoldings()
+            .then(data => res.send(JSON.stringify(data)))
+            .catch(ex => {
+                console.error(ex)
+                res.status(500).send(ex)
+            })
+    })
 }

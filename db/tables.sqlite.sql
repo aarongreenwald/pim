@@ -38,12 +38,21 @@ CREATE TABLE cash_assets_record(cash_assets_record_id integer primary key not nu
     ,unique(record_date, cash_account_id)
 );
 
+CREATE TABLE stock_account(stock_account_id integer primary key not null
+    ,name varchar(50) NOT NULL unique
+    ,tax_category char(10) NOT NULL check ( tax_category in ('deferred', 'exempt', 'taxable') ));
+
 CREATE TABLE stock_transaction (stock_transaction_id integer primary key not null
-    ,transaction_date date NOT NULL
+    /*
+        Consider changing this to a date, with timezone. As it stands, it is a timestamp but without timezone,
+        and represents the time in New York. Some of the historical data I have (automatic reinvestment of dividends)
+        seems to have been exported in Jerusalem time, which needs to be fixed.
+    */
+    ,transaction_date timestamp NOT NULL
+    ,account_id int NOT NULL REFERENCES stock_account
     ,ticker_symbol varchar(20) NOT NULL
     ,unit_price decimal(19,4) NOT NULL
     ,quantity decimal(12,4) NOT NULL
-    ,is_purchase boolean NOT NULL
 );
 
 create table cash_assets_allocation(cash_assets_allocation_id integer primary key not null

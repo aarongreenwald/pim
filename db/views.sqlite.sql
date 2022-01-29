@@ -245,3 +245,15 @@ having p.start_date > 0;
            sum(amount) ils,
            sum(kilometers) * 1.0 / sum(liters) kilometers_per_liter
     from v_fuel_log
+
+;drop view if exists v_stock_holdings
+;create view v_stock_holdings as
+    select
+        name,
+        tax_category,
+        ticker_symbol,
+        sum(quantity) quantity,
+        sum(unit_price * stock_transaction.quantity) / sum(quantity) cost_basis
+    from stock_transaction
+        inner join stock_account sa on sa.stock_account_id = stock_transaction.account_id
+    group by sa.name, ticker_symbol, tax_category
