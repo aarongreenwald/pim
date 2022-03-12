@@ -404,7 +404,7 @@ export const getStockTransactions = async () => {
                datetime(transaction_date / 1000, 'unixepoch') transactionDate, 
                quantity, 
                unit_price costBasis
-        from v_stock_transactions st inner join stock_account sa on st.account_id = sa.name
+        from v_stock_transactions st inner join stock_account sa on st.account_id = sa.stock_account_id
     `;
     return all<StockTransactionDto>(db, sql)
 }
