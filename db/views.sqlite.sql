@@ -258,14 +258,14 @@ with recursive split_multiples as (
     )
     select split_number,
            ticker_symbol,
-           coalesce((select split_date from ordered_split_history where split_number = 2), 0) from_date,
+           coalesce((select split_date from ordered_split_history i where o.ticker_symbol = i.ticker_symbol and i.split_number = o.split_number + 1), 0) from_date,
            split_date to_date,
            1.0 * new_share_qty / previous_share_qty multiplier
-    from ordered_split_history where split_number = 1
+    from ordered_split_history o where split_number = 1
     union all
     select osh.split_number,
            sm.ticker_symbol,
-           coalesce((select split_date from ordered_split_history where split_number = osh.split_number + 1), 0) from_date,
+           coalesce((select split_date from ordered_split_history i where osh.ticker_symbol = i.ticker_symbol and i.split_number = osh.split_number + 1), 0) from_date,
            sm.from_date to_date,
            1.0 * new_share_qty / previous_share_qty * multiplier
     from ordered_split_history osh
