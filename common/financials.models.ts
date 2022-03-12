@@ -150,6 +150,7 @@ export interface StockAccountDto {
 export interface StockTransactionDto {
   id: StockTransactionId;
   accountId: StockTransactionId;
+  accountName: string;
   tickerSymbol: string;
   //transfer a string in the form '2022-01-29 21:34:23.000'
   //so that timezone information is stripped out

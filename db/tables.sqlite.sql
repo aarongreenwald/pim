@@ -55,6 +55,13 @@ CREATE TABLE stock_transaction (stock_transaction_id integer primary key not nul
     ,quantity decimal(12,4) NOT NULL
 );
 
+create table stock_split(
+      split_date date NOT NULL
+    , ticker_symbol varchar(20) NOT NULL
+    , previous_share_qty int NOT NULL
+    , new_share_qty int NOT NULL
+);
+
 create table cash_assets_allocation(cash_assets_allocation_id integer primary key not null
     --consider a better name than record_date, since it's not a snapshot but a transaction
     ,record_date date NOT NULL

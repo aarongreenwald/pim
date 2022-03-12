@@ -246,14 +246,59 @@ having p.start_date > 0;
            sum(kilometers) * 1.0 / sum(liters) kilometers_per_liter
     from v_fuel_log
 
+;drop view if exists v_stock_split_multipliers
+;create view v_stock_split_multipliers as
+with recursive split_multiples as (
+    with ordered_split_history as (
+        -- order and number the splits per ticker
+        select
+            row_number() over (partition by ticker_symbol order by split_date desc) split_number
+             , *
+        from stock_split
+    )
+    select split_number,
+           ticker_symbol,
+           coalesce((select split_date from ordered_split_history where split_number = 2), 0) from_date,
+           split_date to_date,
+           1.0 * new_share_qty / previous_share_qty multiplier
+    from ordered_split_history where split_number = 1
+    union all
+    select osh.split_number,
+           sm.ticker_symbol,
+           coalesce((select split_date from ordered_split_history where split_number = osh.split_number + 1), 0) from_date,
+           sm.from_date to_date,
+           1.0 * new_share_qty / previous_share_qty * multiplier
+    from ordered_split_history osh
+             inner join split_multiples sm
+                        on osh.split_number = sm.split_number + 1
+                            and osh.ticker_symbol = sm.ticker_symbol
+
+)select * from split_multiples;
+
+drop view if exists v_stock_transactions;
+create view v_stock_transactions as
+select
+    stock_transaction_id
+     , transaction_date
+     , account_id
+     , stock_transaction.ticker_symbol
+     , 1.0 * unit_price / coalesce(multiplier, 1) unit_price
+     , quantity * coalesce(multiplier, 1) quantity
+from stock_transaction
+         left join v_stock_split_multipliers ss
+                   on stock_transaction.ticker_symbol = ss.ticker_symbol
+                       and transaction_date >= ss.from_date
+                       and transaction_date < ss.to_date;
+
+
 ;drop view if exists v_stock_holdings
 ;create view v_stock_holdings as
-    select
-        name,
-        tax_category,
-        ticker_symbol,
-        sum(quantity) quantity,
-        sum(unit_price * stock_transaction.quantity) / sum(quantity) cost_basis
-    from stock_transaction
-        inner join stock_account sa on sa.stock_account_id = stock_transaction.account_id
-    group by sa.name, ticker_symbol, tax_category
+select
+    name,
+    tax_category,
+    ticker_symbol,
+    sum(quantity) quantity,
+    sum(unit_price * st.quantity) / sum(quantity) cost_basis
+from v_stock_transactions st
+         inner join stock_account sa on sa.stock_account_id = st.account_id
+group by sa.name, ticker_symbol, tax_category

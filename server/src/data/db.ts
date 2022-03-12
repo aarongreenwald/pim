@@ -398,11 +398,13 @@ export const getStockTransactions = async () => {
     const db = await getDb();
     const sql = `
         select stock_transaction_id id, 
+               sa.stock_account_id accountId,
+               sa.name accountName,
                ticker_symbol tickerSymbol,
                datetime(transaction_date / 1000, 'unixepoch') transactionDate, 
                quantity, 
                unit_price costBasis
-        from stock_transaction
+        from v_stock_transactions st inner join stock_account sa on st.account_id = sa.name
     `;
     return all<StockTransactionDto>(db, sql)
 }
@@ -416,7 +418,7 @@ export const getStockTransaction = async (transactionId: StockTransactionId) => 
                datetime(transaction_date / 1000, 'unixepoch') transactionDate,
                quantity, 
                unit_price costBasis
-        from stock_transaction
+        from v_stock_transactions
         where stock_transaction_id = ?
     `;
     return get<StockTransactionDto>(db, sql, transactionId)
