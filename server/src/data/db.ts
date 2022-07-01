@@ -281,7 +281,13 @@ export const getUnallocatedCashSnapshot = async () => {
 
 export const getUnreportedSpending = async () => {
     const db = await getDb();
-    return all<UnreportedSpending>(db, 'select start_date startDate, end_date endDate, ils, usd from v_unreported_spending')
+    return all<UnreportedSpending>(db, 
+        `
+            select start_date startDate, end_date endDate, ils, usd 
+            from v_unreported_spending
+            order by end_date desc
+        `
+    )
 }
 
 
@@ -404,7 +410,9 @@ export const getStockTransactions = async () => {
                datetime(transaction_date / 1000, 'unixepoch') transactionDate, 
                quantity, 
                unit_price costBasis
-        from v_stock_transactions st inner join stock_account sa on st.account_id = sa.stock_account_id
+        from v_stock_transactions st 
+            inner join stock_account sa on st.account_id = sa.stock_account_id
+        order by transaction_date desc
     `;
     return all<StockTransactionDto>(db, sql)
 }
