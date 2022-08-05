@@ -4,7 +4,7 @@ import {FileSystemItemType} from '@pim/common';
 import {createItem, renameDirectoryItem} from '../services/server-api';
 import {Icon, IconButton, Stack, TextField} from '@fluentui/react';
 import {horizontalChoiceGroup, StyledChoiceGroup} from '../financials/styles';
-import {Link} from 'react-router-dom';
+import {Link, useHistory} from 'react-router-dom';
 import {
     addIcon,
     cancelIcon,
@@ -28,11 +28,15 @@ interface DirectoryProps {
 
 export const Directory: React.FC<DirectoryProps> = ({path, contents, onCommit, pendingCommit}) => {
     const [showHidden, setShowHidden] = useState(false)
-    const filteredContents = useMemo(() => {
+    const filteredContents = useMemo(() => { 
+        //HACK - this should be optional, but when it matters, more often than not reversed is more useful than the order on disk
+        let results = contents.reverse();
+
         if (!showHidden) {
-            return contents.filter(i => i.name[0] !== '.')
-        }
-        return contents;
+            return results.filter(i => i.name[0] !== '.')
+        }        
+
+        return results;
     }, [contents, showHidden])
     return (
         <>
@@ -46,9 +50,11 @@ const DirectoryCommandBar = ({currentDirectory, onCommit, pendingCommit, showHid
     const [showNewItemForm, setShowNewItemForm] = useState(false)
     const [newItemType, setNewItemType] = useState<FileSystemItemType>('F')
     const [name, setName] = useState('')
+    const history = useHistory();
     const saveFile = () => {
-        //TODO after creating navigate to the newly recreated path
-        createItem(currentDirectory, name, newItemType).then(() => setShowNewItemForm(false))
+        createItem(currentDirectory, name, newItemType)
+            .then(() => setShowNewItemForm(false))
+            .then(() => history.push(`/notes?path=${encodeURIComponent(`${currentDirectory}/${name}`)}`))
     }
 
     return (
