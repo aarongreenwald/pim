@@ -30,7 +30,7 @@ export const Directory: React.FC<DirectoryProps> = ({path, contents, onCommit, p
     const [showHidden, setShowHidden] = useState(false)
     const filteredContents = useMemo(() => { 
         //HACK - this should be optional, but when it matters, more often than not reversed is more useful than the order on disk
-        let results = contents.reverse();
+        const results = contents.reverse();
 
         if (!showHidden) {
             return results.filter(i => i.name[0] !== '.')
