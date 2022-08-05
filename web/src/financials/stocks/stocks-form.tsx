@@ -132,6 +132,7 @@ function initializeTransaction(): StockTransaction {
     return {
         id: -1,
         accountId: null,
+        accountName: null, //appease TS
         transactionDate: today,
         transactionTime: '',
         costBasis: null,
