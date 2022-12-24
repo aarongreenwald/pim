@@ -1,4 +1,4 @@
-find -type b,c,p,f,l,s  #everything except directories
+find  $1 -type b,c,p,f,l,s #everything except directories
 
 #todo honor .ignore files or some glob
 
