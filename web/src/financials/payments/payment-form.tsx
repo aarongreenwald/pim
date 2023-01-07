@@ -87,7 +87,7 @@ export const PaymentForm: React.FC<PanelProps<PaymentId>> = ({onClose, id}) => {
             {
                 showIncurredDates &&
                 <CurrencyInput
-		    label="Incurred Amount"
+                    label="Incurred Amount"
                     amount={payment.incurredAmount}
                     currency={payment.currency}
                     name="incurredAmount"
