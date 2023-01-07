@@ -12,9 +12,11 @@ CREATE TABLE payment(payment_id  integer primary key not null
     ,incurred_end_date date null --if empty assume the incurred_begin_date
     ,recipient varchar(50) not null
     ,amount decimal(19,4) not null
+    ,incurred_amount decimal(19,4) not null
     ,currency char(3) not null default 'ILS'
     ,category_id int not null references category
     ,note text null
+    --,cost decimal(19,4) null --only meaningful in the context of "items" table that should hang off this table
 );
 
 CREATE TABLE income(income_id integer primary key not null
