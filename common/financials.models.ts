@@ -13,6 +13,7 @@ export interface Payment {
   incurredBeginDate?: string;
   incurredEndDate?: string;
   amount: Money;
+  incurredAmount: Money | null;
   currency: Currency;
   counterparty: string;
   note?: string;

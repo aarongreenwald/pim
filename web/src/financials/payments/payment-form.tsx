@@ -84,6 +84,17 @@ export const PaymentForm: React.FC<PanelProps<PaymentId>> = ({onClose, id}) => {
                 onChange={updatePayment}
             />
 
+            {
+                showIncurredDates &&
+                <CurrencyInput
+		    label="Incurred Amount"
+                    amount={payment.incurredAmount}
+                    currency={payment.currency}
+                    name="incurredAmount"
+                    onChange={updatePayment}
+                />
+            }
+
             <CategoryDropdown
                 showLabel
                 value={payment.categoryId}
@@ -121,7 +132,7 @@ function usePaymentForm(onClose: () => void, paymentId?: PaymentId, ) {
         if (paymentId) {
             getPayment(paymentId)
                 .then(payment => {
-                    if (payment.incurredBeginDate || payment.incurredEndDate) {
+                    if (payment.incurredBeginDate || payment.incurredEndDate || payment.incurredAmount !== null) {
                         setShowIncurredDates(true);
                     }
                     return payment;
@@ -198,6 +209,7 @@ function initializePayment(paidDate = formatDay(new Date())): Payment {
     incurredEndDate: paidDate,
     categoryId: -1,
     amount: null,
+    incurredAmount: null,
     counterparty: '',
     currency: defaultCurrency,
     note: ''
