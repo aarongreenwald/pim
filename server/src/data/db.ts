@@ -63,7 +63,7 @@ export const insertPayment = async (payment: Payment) => {
     const sql = `
     insert into payment
         (paid_date, incurred_begin_date, incurred_end_date, counterparty, amount, incurred_amount, currency, category_id, note)
-    values (?,?,?,?,?,?,?,?)
+    values (?,?,?,?,?,?,?,?,?)
   `
     //TODO: validations - the fallback to null done here forces the db to reject
     //bad data but there should probably be a validation and sanitization step prior to getting here
