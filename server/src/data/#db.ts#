@@ -51,7 +51,6 @@ export const getPayment: (id: PaymentId) => Promise<Payment> = async id => {
                incurred_end_date incurredEndDate, 
                counterparty, 
                amount, 
-               incurred_amount incurredAmount,
                category_id categoryId, 
                note, 
                currency
@@ -62,7 +61,7 @@ export const getPayment: (id: PaymentId) => Promise<Payment> = async id => {
 export const insertPayment = async (payment: Payment) => {
     const sql = `
     insert into payment
-        (paid_date, incurred_begin_date, incurred_end_date, counterparty, amount, incurred_amount, currency, category_id, note)
+        (paid_date, incurred_begin_date, incurred_end_date, counterparty, amount, currency, category_id, note)
     values (?,?,?,?,?,?,?,?)
   `
     //TODO: validations - the fallback to null done here forces the db to reject
@@ -74,8 +73,7 @@ export const insertPayment = async (payment: Payment) => {
         payment.incurredBeginDate ? new Date(payment.incurredBeginDate) : null,
         payment.incurredEndDate ? new Date(payment.incurredEndDate) : null,
         payment.counterparty || null,
-        payment.amount || null, // 0 and null are the functionally same thing here
-        payment.incurredAmount, // 0 is a valid amount and not the same as null, which is coalesced to the paid amount
+        payment.amount || null,
         payment.currency || null,
         payment.categoryId,
         payment.note || null
@@ -94,7 +92,6 @@ export const updatePayment = async (payment: Payment) => {
             incurred_end_date = ?,
             counterparty = ?,
             amount = ?,
-            incurred_amount = ?,
             currency = ?,
             category_id = ?,
             note = ?
@@ -109,8 +106,7 @@ export const updatePayment = async (payment: Payment) => {
         payment.incurredBeginDate ? new Date(payment.incurredBeginDate) : null,
         payment.incurredEndDate ? new Date(payment.incurredEndDate) : null,
         payment.counterparty || null,
-        payment.amount || null, // 0 and null are the functionally same thing here
-        payment.incurredAmount, // 0 is a valid amount and not the same as null, which is coalesced to the paid amount
+        payment.amount || null,
         payment.currency || null,
         payment.categoryId,
         payment.note || null,
@@ -370,7 +366,6 @@ export const insertFuelLog = async (fuelLogDto: NewFuelLogDto) => {
         categoryId: 14,
         currency: 'ILS',
         amount: Math.round(fuelLogDto.price * fuelLogDto.liters * 100) / 100,
-	incurredAmount: null, //TODO this is a temporary condition
         note: fuelLogDto.note
     })
 
