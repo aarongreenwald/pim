@@ -3,6 +3,7 @@ if (process.env.DOTENV) {
 }
 import {setupNotesRoutes} from './routes/notes';
 import {setupFinancialsRoutes} from './routes/financials';
+import {setupQueriesRoutes} from './routes/queries';
 import express from 'express';
 import {setupAuth} from './auth/auth';
 const app = express()
@@ -18,6 +19,7 @@ setupAuth(app);
 
 setupFinancialsRoutes(app);
 setupNotesRoutes(app);
+setupQueriesRoutes(app);
 
 express()
     .use('/api', app)
