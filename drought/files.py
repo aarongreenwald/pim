@@ -4,10 +4,11 @@ import os
 import mimetypes
 import sqlite3
 from operator import itemgetter
-import boto3  # REQUIRED! - Details here: https://pypi.org/project/boto3/
+import boto3  # https://pypi.org/project/boto3/
 from botocore.exceptions import ClientError
 from botocore.config import Config
-from dotenv import load_dotenv  # Project Must install Python Package:  python-dotenv
+from dotenv import load_dotenv
+from b2sdk.v2 import *
 import os
 import sys
 
@@ -18,9 +19,7 @@ uploaded_files = 0
 
 BUF_SIZE = 65536  # 64kb chunks
 
-
 load_dotenv()
-
 endpoint = os.getenv("ENDPOINT")
 key_id = os.getenv("KEY_ID")
 application_key = os.getenv("APPLICATION_KEY")
@@ -30,8 +29,19 @@ db_path = os.getenv("DB_PATH")
 con = sqlite3.connect(db_path, isolation_level=None) # isolation_level might not be necessary
 con.execute('pragma journal_mode=wal') #impact is questionable, doesn't seem to affect benchmarks
 
+def get_b2_sdk_client():    
+    info = InMemoryAccountInfo()
+    b2_api = B2Api(info)
+    b2_api.authorize_account("production", key_id, application_key)
+    return b2_api
+
+
 def get_b2_client(endpoint, keyID, applicationKey):
-    return boto3.client(service_name='s3', endpoint_url=endpoint, aws_access_key_id=keyID, aws_secret_access_key=applicationKey)
+    return boto3.client(
+        service_name='s3',
+        endpoint_url=endpoint,
+        aws_access_key_id=keyID,
+        aws_secret_access_key=applicationKey)
 
 def get_b2_resource(endpoint, keyID, applicationKey):
     return boto3.resource(service_name='s3',
@@ -43,21 +53,66 @@ def get_b2_resource(endpoint, keyID, applicationKey):
 
 b2 = get_b2_resource(endpoint, key_id, application_key)
 b2_client = get_b2_client(endpoint, key_id, application_key)
+bucket = get_b2_sdk_client().get_bucket_by_name(bucket_name)
 
 def upload_file(sha256, file_path, mime_type):
-    #todo upload the file_path in fileinfo, and verify the sha1
-    #might need to switch away from s3 API to do this
+    #TODO does sha1 verification happen automatically?
+    #Consider uploading more metadata
     global uploaded_files
     try:
-        print("Beginning upload of ", sha256, file_path)
-        response = b2.Bucket(bucket_name).upload_file(file_path, sha256, ExtraArgs={'ContentType': mime_type, 'Metadata': {'sampleFilePath': file_path}}) #metadata isn't working?
+        print("Beginning upload of ", sha256, file_path)               
+        response = b2.Bucket(bucket_name).upload_file(
+            file_path,
+            sha256,
+            ExtraArgs={
+                'ContentType': mime_type,
+                'Metadata': {'sample_filename': file_path},
+                'ChecksumAlgorithm': 'SHA1'
+            }) 
         print("Uploaded file", response)
         cur = con.cursor()
         cur.execute("""update file set storage_account_1 = 1 where sha256 = ?""", [sha256])
         con.commit()
         uploaded_files+=1
     except Exception as ce:
-        print('Upload failed', sha256, file_path, ce, file=sys.stderr)
+        print('Error: Upload failed', sha256, file_path, ce, file=sys.stderr)
+        raise ce
+
+def upload_b2(sha256, sha1, file_path, mime_type, size, md5):
+    """
+    Upload file with the b2 sdk - it allows passing a precomputed sha1 as well as verifying the size afterwards,
+    both of which are apparently not possible with boto. 
+    """
+    global uploaded_files
+    try:
+        print("Beginning upload of ", sha256, file_path, mime_type, size)
+        response = bucket.upload_local_file(
+            file_path,
+            sha256,
+            mime_type,
+            file_infos = {            
+                'sample_filename': file_path
+            },
+            sha1_sum=sha1
+            # progress_listener=
+        )
+
+        if (response.size != size):
+            raise Exception("File size expected was " + str(size) + " but upload response contains size=" + str(response.size))
+
+        # for some reason the only hash they give me back is the md5, may as well check it,
+        # it's redundant if I trust that they are actually verifying the sha1 I send them but why trust if you don't have to? 
+        if (response.content_md5 != md5):
+            raise Exception("File md5 was " + md5 + " but upload response contains md5=" + response.content_md5)
+        
+        print("Uploaded file successfully")
+        cur = con.cursor()
+        cur.execute("""update file set storage_account_1 = 1 where sha256 = ?""", [sha256])
+        con.commit()
+        print("Updated db")
+        uploaded_files+=1
+    except Exception as ce:
+        print('Error: Upload failed', sha256, sha1, file_path, ce, file=sys.stderr)
         raise ce
 
 def hash_file(file):
@@ -99,7 +154,7 @@ def add_reference(filename, md5, sha1, sha256, accesed, modified, created, mimet
         con.commit()
         added_filenames+=1
     elif (sha256 not in set(map(lambda x: x[0], existing_files))):
-        print("Filename already exists with a different hash, filename=", filename, ", new_hash=", sha256, file=sys.stderr)
+        print("Warning: Filename already exists with a different hash, filename=", filename, ", new_hash=", sha256, file=sys.stderr)
         cur.execute("""insert into filename(name, created, sha256,  accessed) 
             values (?, ?, ?, ?)""", [filename, created, sha256, accessed])
         con.commit()
@@ -137,17 +192,21 @@ for line in sys.stdin:
 
         if (upload_required):
             #todo make this not block!
-            upload_file(sha256, filename, mimetype)
-
+            # upload_file(sha256, filename, mimetype)
+            upload_b2(sha256, sha1, filename, mimetype, size, md5)
+            
         counter+=1
     except Exception as ex:
-        print("Failed to process filename=", line, file=sys.stderr)
-        print(ex, file=sys.stderr)        
+        print("Error: Failed to process filename=", line, file=sys.stderr)
+        print(ex, file=sys.stderr)
+        print("\n-----------------\n", file=sys.stderr)
+    finally:
+        print("\n-----------------\n")
 
 
-print("Files: ", counter, file=sys.stderr)
-print("Added files: ", added_files, file=sys.stderr)
-print("Uploaded: ", uploaded_files, file=sys.stderr)
-print("Added filenames: ", added_filenames, file=sys.stderr)
+print("Files: ", counter, file=sys.stdout)
+print("Added files: ", added_files, file=sys.stdout)
+print("Uploaded: ", uploaded_files, file=sys.stdout)
+print("Added filenames: ", added_filenames, file=sys.stdout)
 print("Updated filenames: ", updated_filenames, file=sys.stderr)
 
