@@ -1,18 +1,31 @@
-repos=$(find . -name .git -type d | xargs dirname )
+gitrepos=$(find . -name .git -type d | xargs dirname )
+svnrepos=$(find . -name trunk -type d | xargs dirname )
 
 exclusions=""
-for r in $repos
+for r in $gitrepos
 do
     exclusions="$exclusions -not -path \"$r/*\""
 done
 
+for r in $svnrepos
+do
+    exclusions="$exclusions -not -path \"$r/*\""
+done
 
 cmd="find $1 -type b,c,p,f,l,s $exclusions"
 
 eval $cmd
 
-echo "Ran: $cmd" >> findfiles.log
-echo "Skipped repos: $repos" >> findfiles.log
+echo """
+========================
+$(date)
+========================
+Ran: $cmd
+
+Skipped repos:
+$svnrepos
+$gitrepos
+""" >> ../findfiles.log
 
 #everything except directories
 

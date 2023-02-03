@@ -1,6 +1,6 @@
 From directory you want to process:
 
-`sh ~/data/code/drought/findfiles.sh | /usr/bin/time python3 ~/data/code/drought/files.py 2&1 > err.log`
+`sh ~/data/code/drought/findfiles.sh | /usr/bin/time -v python3 ~/data/code/drought/files.py 1> ../files.log 2> ../files.err`
 
 
 .env:
