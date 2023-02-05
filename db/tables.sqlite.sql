@@ -88,3 +88,23 @@ create table fuel_log(
     ,note text NULL
     ,payment_id integer NOT NULL REFERENCES payment
 );
+
+create table file(
+    -- md5?
+    sha256 text primary key not null,
+    sha1 text not null, --todo check that this is 1:1 on the pk
+    bytes integer not null,
+    accessed timestamp null,
+    created timestamp null,
+    mimetype text null,
+    storage_account_1 boolean not null default false,
+    storage_account_2 boolean not null default false
+);
+
+create table filename(
+    name text not null,
+    created timestamp null, --this can also be thought of as the modified date on the file
+    sha256 not null references file,
+    accessed timestamp null,
+    unique(name, created) --primary key - this is a "file version"
+)
