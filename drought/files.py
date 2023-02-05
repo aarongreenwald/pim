@@ -88,12 +88,13 @@ def upload_b2(sha256, sha1, file_path, mime_type, size, md5):
         print("Beginning upload of ", sha256, file_path, mime_type, size)
         response = bucket.upload_local_file(
             file_path,
-            sha256,
-            mime_type,
+            file_name = sha256,
+            content_type = mime_type,
             file_infos = {            
                 'sample_filename': file_path
             },
-            sha1_sum=sha1
+            sha1_sum=sha1,
+            upload_mode = UploadMode.INCREMENTAL
             # progress_listener=
         )
 
@@ -101,7 +102,7 @@ def upload_b2(sha256, sha1, file_path, mime_type, size, md5):
             raise Exception("File size expected was " + str(size) + " but upload response contains size=" + str(response.size))
 
         # for some reason the only hash they give me back is the md5, may as well check it,
-        # it's redundant if I trust that they are actually verifying the sha1 I send them but why trust if you don't have to? 
+        # it's redundant if I trust that they are actually verifying the sha1 I send them but why trust if you don't have to?
         if (response.content_md5 != md5):
             raise Exception("File md5 was " + md5 + " but upload response contains md5=" + response.content_md5)
         
@@ -127,7 +128,7 @@ def hash_file(file):
             md5.update(data)
             sha1.update(data)
             sha256.update(data)
-            return md5.hexdigest(), sha1.hexdigest(), sha256.hexdigest()
+        return md5.hexdigest(), sha1.hexdigest(), sha256.hexdigest()
 
 
 def add_reference(filename, md5, sha1, sha256, accesed, modified, created, mimetype, size):
@@ -184,7 +185,7 @@ for line in sys.stdin:
         mimetype = mime_type(filename)
         
         if (size == 0):
-            continue
+            raise Exception("File size is 0")
         md5, sha1, sha256 = hash_file(filename)
 
         print("Adding reference", filename, sha1, sha256, size, accessed, created, mimetype)
@@ -195,18 +196,18 @@ for line in sys.stdin:
             # upload_file(sha256, filename, mimetype)
             upload_b2(sha256, sha1, filename, mimetype, size, md5)
             
-        counter+=1
     except Exception as ex:
         print("Error: Failed to process filename=", line, file=sys.stderr)
         print(ex, file=sys.stderr)
         print("\n-----------------\n", file=sys.stderr)
     finally:
+        counter+=1
         print("\n-----------------\n")
 
 
-print("Files: ", counter, file=sys.stdout)
+print("Files processed: ", counter, file=sys.stdout)
 print("Added files: ", added_files, file=sys.stdout)
 print("Uploaded: ", uploaded_files, file=sys.stdout)
 print("Added filenames: ", added_filenames, file=sys.stdout)
-print("Updated filenames: ", updated_filenames, file=sys.stderr)
+print("Updated filenames: ", updated_filenames, file=sys.stdout)
 
