@@ -139,29 +139,34 @@ def add_reference(filename, md5, sha1, sha256, accesed, modified, created, mimet
     cur.execute("select storage_account_1 from file where sha256 = ?", [sha256])
     file = cur.fetchone()
     if (file is None):
+        print("Adding file to db")
         cur.execute("""insert into file(sha1, sha256, bytes, accessed, created, mimetype) 
             values (?, ?, ?, ?, ?, ?)""", [sha1, sha256, size, accessed, created, mimetype])
         con.commit()
         added_files+=1
-    else:
+    else:        
         upload_required = not file[0]
+        print("File already in db, upload_required=", upload_required)
 
     cur.execute("select sha256 from filename where name = ?", [filename])
     existing_files = cur.fetchall()
 
     if (not existing_files):
+        print("Adding filename to db")
         cur.execute("""insert into filename(name, created, sha256,  accessed) 
             values (?, ?, ?, ?)""", [filename, created, sha256, accessed])
         con.commit()
         added_filenames+=1
     elif (sha256 not in set(map(lambda x: x[0], existing_files))):
         print("Warning: Filename already exists with a different hash, filename=", filename, ", new_hash=", sha256, file=sys.stderr)
+        print("Adding filename to db (new version of already existing filename)")
         cur.execute("""insert into filename(name, created, sha256,  accessed) 
             values (?, ?, ?, ?)""", [filename, created, sha256, accessed])
         con.commit()
         added_filenames+=1
     else: #sha256/filename already exists.
         # when the table is large, I think this costs more than the inserts
+        print("Updating existing filename reference")
         cur.execute("""update filename set created = min(created, ?), accessed = max(accessed, ?) where sha256 = ? and name = ?""", [created, accessed, sha256, filename])
         con.commit()
         updated_filenames+=1
@@ -188,7 +193,7 @@ for line in sys.stdin:
             raise Exception("File size is 0")
         md5, sha1, sha256 = hash_file(filename)
 
-        print("Adding reference", filename, sha1, sha256, size, accessed, created, mimetype)
+        print("Processing file: ", filename, sha1, sha256, size, accessed, created, mimetype)
         upload_required = add_reference(filename, md5, sha1, sha256, accessed, modified, created, mimetype, size)
 
         if (upload_required):
