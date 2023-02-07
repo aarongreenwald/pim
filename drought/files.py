@@ -16,8 +16,33 @@ added_files = 0
 added_filenames = 0
 updated_filenames = 0
 uploaded_files = 0
+uploaded_bytes = 0
+empty_files = 0
 
 BUF_SIZE = 65536  # 64kb chunks
+
+"""
+
+TODO
+
+* Consider adding 0 byte files, some of them are important, particularly in repos
+ * Decide how to handle git/svn repos. 
+    * Log the zipped repos, document structure
+ * How to handle modified dates when they give context?
+ * Deduping repos
+* Improved logging, perhaps writing errors to the db? Or just splitting the logs to multiple files and saving them per timestamped-run
+  * Timestamps on each file processed as well
+* How much is the logging costing in perf? 
+* Performance for subsequent runs - try loading the entire db into memory and skipping files with no changes without hitting the disk 
+* What is the impact of "INCREMENTAL" uploads to b2, and why do very large uploads consistently fail? Can the uploads be faster? 
+* mimetypes might be able to be improved. 
+* Dry run mode - document required updates and exit. 
+
+Notes
+
+* Small files have a sha1 in backblaze, large files don't but they have a large_file_sha1 field in the fileinfo dict
+
+"""
 
 load_dotenv()
 endpoint = os.getenv("ENDPOINT")
@@ -55,35 +80,35 @@ b2 = get_b2_resource(endpoint, key_id, application_key)
 b2_client = get_b2_client(endpoint, key_id, application_key)
 bucket = get_b2_sdk_client().get_bucket_by_name(bucket_name)
 
-def upload_file(sha256, file_path, mime_type):
-    #TODO does sha1 verification happen automatically?
-    #Consider uploading more metadata
-    global uploaded_files
-    try:
-        print("Beginning upload of ", sha256, file_path)               
-        response = b2.Bucket(bucket_name).upload_file(
-            file_path,
-            sha256,
-            ExtraArgs={
-                'ContentType': mime_type,
-                'Metadata': {'sample_filename': file_path},
-                'ChecksumAlgorithm': 'SHA1'
-            }) 
-        print("Uploaded file", response)
-        cur = con.cursor()
-        cur.execute("""update file set storage_account_1 = 1 where sha256 = ?""", [sha256])
-        con.commit()
-        uploaded_files+=1
-    except Exception as ce:
-        print('Error: Upload failed', sha256, file_path, ce, file=sys.stderr)
-        raise ce
+# def upload_file(sha256, file_path, mime_type):
+#     #TODO does sha1 verification happen automatically?
+#     #Consider uploading more metadata
+#     global uploaded_files
+#     try:
+#         print("Beginning upload of ", sha256, file_path)               
+#         response = b2.Bucket(bucket_name).upload_file(
+#             file_path,
+#             sha256,
+#             ExtraArgs={
+#                 'ContentType': mime_type,
+#                 'Metadata': {'sample_filename': file_path},
+#                 'ChecksumAlgorithm': 'SHA1'
+#             }) 
+#         print("Uploaded file", response)
+#         cur = con.cursor()
+#         cur.execute("""update file set storage_account_1 = 1 where sha256 = ?""", [sha256])
+#         con.commit()
+#         uploaded_files+=1
+#     except Exception as ce:
+#         print('Error: Upload failed', sha256, file_path, ce, file=sys.stderr)
+#         raise ce
 
 def upload_b2(sha256, sha1, file_path, mime_type, size, md5):
     """
     Upload file with the b2 sdk - it allows passing a precomputed sha1 as well as verifying the size afterwards,
     both of which are apparently not possible with boto. 
     """
-    global uploaded_files
+    global uploaded_files, uploaded_bytes
     try:
         print("Beginning upload of ", sha256, file_path, mime_type, size)
         response = bucket.upload_local_file(
@@ -95,7 +120,7 @@ def upload_b2(sha256, sha1, file_path, mime_type, size, md5):
             },
             sha1_sum=sha1,
             upload_mode = UploadMode.INCREMENTAL
-            # progress_listener=
+            # progress_listener=SimpleProgressListener
         )
 
         if (response.size != size):
@@ -104,7 +129,7 @@ def upload_b2(sha256, sha1, file_path, mime_type, size, md5):
         # for some reason the only hash they give me back is the md5, may as well check it,
         # it's redundant if I trust that they are actually verifying the sha1 I send them but why trust if you don't have to?
         if (response.content_md5 != md5):
-            raise Exception("File md5 was " + md5 + " but upload response contains md5=" + response.content_md5)
+            raise Exception("File md5 was " + str(md5) + " but upload response contains md5=" + str(response.content_md5))
         
         print("Uploaded file successfully")
         cur = con.cursor()
@@ -112,6 +137,7 @@ def upload_b2(sha256, sha1, file_path, mime_type, size, md5):
         con.commit()
         print("Updated db")
         uploaded_files+=1
+        uploaded_bytes+=size
     except Exception as ce:
         print('Error: Upload failed', sha256, sha1, file_path, ce, file=sys.stderr)
         raise ce
@@ -188,16 +214,21 @@ for line in sys.stdin:
         modified = stat.st_mtime
         created = stat.st_ctime
         mimetype = mime_type(filename)
-        
+
         if (size == 0):
-            raise Exception("File size is 0")
+            # empty files are sometimes meaningful in a file structure (eg .stignore, .gitkeep, etc)
+            # but also often are corrupted files. It's relatively harmless to include them (since they are represented by a single 0 byte
+            # file in storage and a lot of references) and decide what to do with them later.
+            print("Warning: file is empty. Filename: ", filename, file=sys.stderr)
+            empty_files += 1
+        
         md5, sha1, sha256 = hash_file(filename)
 
         print("Processing file: ", filename, sha1, sha256, size, accessed, created, mimetype)
         upload_required = add_reference(filename, md5, sha1, sha256, accessed, modified, created, mimetype, size)
 
         if (upload_required):
-            #todo make this not block!
+            # todo make this not block!
             # upload_file(sha256, filename, mimetype)
             upload_b2(sha256, sha1, filename, mimetype, size, md5)
             
@@ -213,6 +244,7 @@ for line in sys.stdin:
 print("Files processed: ", counter, file=sys.stdout)
 print("Added files: ", added_files, file=sys.stdout)
 print("Uploaded: ", uploaded_files, file=sys.stdout)
+print("Uploaded bytes: ", uploaded_bytes, file=sys.stdout)
 print("Added filenames: ", added_filenames, file=sys.stdout)
 print("Updated filenames: ", updated_filenames, file=sys.stdout)
-
+print("Empty files: ", empty_files, file=sys.stdout)
