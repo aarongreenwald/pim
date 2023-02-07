@@ -302,3 +302,28 @@ select
 from v_stock_transactions st
          inner join stock_account sa on sa.stock_account_id = st.account_id
 group by sa.name, ticker_symbol, tax_category
+
+;drop view if exists v_file
+;create view v_file as
+select filename.*,
+       f.sha1, f.bytes, f.mimetype, f.storage_account_1, f.storage_account_2,
+       row_number() over (partition by filename.name order by filename.created desc) version
+from filename inner join file f on filename.sha256 = f.sha256
+
+;drop view if exists v_files_current
+;create view v_files_current as
+select * from v_file
+where version = 1
+
+;drop view if exists v_duplicate_files
+;create view v_duplicate_files as
+select * from v_file where sha256 in (select sha256 from filename group by sha256 having count(*) > 1)
+
+;drop view if exists v_orphaned_files
+;create view v_orphaned_files as
+select * from file where sha256 not in (select sha256 from filename)
+
+;drop view if exists v_orphaned_filenames
+;create view v_orphaned_filenames as
+select * from filename where sha256 not in (select sha256 from file)
+
