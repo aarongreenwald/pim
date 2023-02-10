@@ -12,6 +12,7 @@ from b2sdk.v2 import *
 import os
 import sys
 
+DRY_RUN = False
 added_files = 0
 added_filenames = 0
 updated_filenames = 0
@@ -52,7 +53,7 @@ bucket_name = os.getenv("BUCKET_NAME")
 db_path = os.getenv("DB_PATH")
 
 con = sqlite3.connect(db_path, isolation_level=None) # isolation_level might not be necessary
-con.execute('pragma journal_mode=wal') #impact is questionable, doesn't seem to affect benchmarks
+# con.execute('pragma journal_mode=wal') #impact is questionable, doesn't seem to affect benchmarks, and it makes transferring the db harder
 
 def get_b2_sdk_client():    
     info = InMemoryAccountInfo()
@@ -174,7 +175,7 @@ def add_reference(filename, md5, sha1, sha256, accesed, modified, created, mimet
         upload_required = not file[0]
         print("File already in db, upload_required=", upload_required)
 
-    cur.execute("select sha256 from filename where name = ?", [filename])
+    cur.execute("select sha256, created, accessed from filename where name = ?", [filename])
     existing_files = cur.fetchall()
 
     if (not existing_files):
@@ -190,14 +191,25 @@ def add_reference(filename, md5, sha1, sha256, accesed, modified, created, mimet
             values (?, ?, ?, ?)""", [filename, created, sha256, accessed])
         con.commit()
         added_filenames+=1
-    else: #sha256/filename already exists.
+    else:
+        # sha256/filename already exists.
         # when the table is large, I think this costs more than the inserts
-        print("Updating existing filename reference")
-        cur.execute("""update filename set created = min(created, ?), accessed = max(accessed, ?) where sha256 = ? and name = ?""", [created, accessed, sha256, filename])
-        con.commit()
-        updated_filenames+=1
+        # to save unnecessary updates, only update the filename reference if one of the dates needs to be updated
+        filename_record = next((x for x in existing_files if x[0] == sha256), None)
+        if (filename_record is None):
+            raise Exception("That isn't supposed to happen")
+        existing_created = filename_record[1]
+        existing_accessed = filename_record[2]
+        if (created < existing_created or accessed > existing_accessed):
+            print("Updating existing filename reference with new created/accessed timestamps", created, accessed)
+            cur.execute("""update filename set created = min(created, ?), accessed = max(accessed, ?) where sha256 = ? and name = ?""", [created, accessed, sha256, filename])
+            con.commit()
+            updated_filenames+=1
+        else:
+            print("References are up to date, nothing to do")
         
     return upload_required
+
 
 def mime_type(filename):
     # todo improve heuristic
@@ -227,9 +239,7 @@ for line in sys.stdin:
         print("Processing file: ", filename, sha1, sha256, size, accessed, created, mimetype)
         upload_required = add_reference(filename, md5, sha1, sha256, accessed, modified, created, mimetype, size)
 
-        if (upload_required):
-            # todo make this not block!
-            # upload_file(sha256, filename, mimetype)
+        if (upload_required and not DRY_RUN):
             upload_b2(sha256, sha1, filename, mimetype, size, md5)
             
     except Exception as ex:
