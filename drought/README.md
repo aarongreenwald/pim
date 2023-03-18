@@ -12,3 +12,12 @@ APPLICATION_KEY=''
 BUCKET_NAME=''
 DB_PATH="/some/path/to/pim.db"
 ```
+
+Useful commands:
+
+```
+pip3 install --upgrade b2
+b2 authorize-account
+b2 list-large-unfinished-files $bucketName
+b2 cancel-all-unfinished-large-files $bucketName
+```
