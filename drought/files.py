@@ -15,14 +15,20 @@ TODO
 
 * Decide how to handle git/svn repos. 
    * Log the zipped repos, document structure
-* How to handle modified dates when they give context?
 * Deduping repos
-* Improved logging, perhaps writing errors to the db? Or just splitting the logs to multiple files and saving them per timestamped-run
-  * Timestamps on each file processed as well
-* How much is the logging costing in perf? 
-* Performance for subsequent runs - try loading the entire db into memory and skipping files with no changes without hitting the disk 
+* Created/accessed timestamp resolution??
+* How to handle modified dates when they give context? I'm not storing them but they can be useful. 
 * mimetypes might be able to be improved. 
 * Find a better method to upload large files so that I can validate the hashes. Perhaps the lower level API will allow this?
+* Performance:
+  * For files that need to be uploaded, obviously the upload dominates and I'm limited by bandwidth, so parallelization isn't worth much
+  * For subsequent runs, the db updates are expensive so it's important to avoid unnecessary updates. 
+   * Accessed time is always the current time, so don't update based on it. I should probably remove the field completely because it's meaningless
+   * After db updates, it seems the primary cost is hashing large files. I could limit to only sha256. But it's a relatively small cost
+   * How much is the logging costing in perf? Not much, but measure it. 
+   * I'm not sure how db inserts compare to updates, but the reads seem very fast. Still, I could load the entiredb into memory at the start and not 
+hit the disk again unless there's a change. 
+   * The `find` is trivial. 
 * Dry run mode - document required updates and exit. 
 
 Notes
@@ -91,7 +97,7 @@ def upload_b2(sha256, sha1, file_path, mime_type, size, md5):
             # this is stored as the sha1 and validated on all uploads except those that are considered "large",
             # apparently over 100mb. For large files, it's stored in file_infos.large_file_sha1, and not validated. 
             sha1_sum=sha1,
-            progress_listener=CustomTqdmProgressListener(sha256) 
+            progress_listener=TqdmProgressListener(sha256) 
         )
 
         if (response.size != size):
@@ -164,15 +170,16 @@ def add_reference(filename, md5, sha1, sha256, accesed, modified, created, mimet
         added_filenames+=1
     else:
         # sha256/filename already exists.
-        # when the table is large, I think this costs more than the inserts
+        # when the table is large, this seems to cost more than the inserts and definitely more than the reads
         # to save unnecessary updates, only update the filename reference if one of the dates needs to be updated
+        # "accessed time" is always the current timestamp, so it's fairly meaningless as it stands. 
         filename_record = next((x for x in existing_files if x[0] == sha256), None)
         if (filename_record is None):
             raise Exception("That isn't supposed to happen")
         existing_created = filename_record[1]
         existing_accessed = filename_record[2]
-        if (created < existing_created or accessed > existing_accessed):
-            log("Updating existing filename reference with new created/accessed timestamps", created, accessed)
+        if (created < existing_created): # or accessed > existing_accessed # accessed time is always new, because it's _now_. This is meaningless. 
+            log("Updating existing filename reference with new created/accessed timestamps", created, accessed, ". Previously: ", existing_created, existing_accessed)
             cur.execute("""update filename set created = min(created, ?), accessed = max(accessed, ?) where sha256 = ? and name = ?""", [created, accessed, sha256, filename])
             con.commit()
             updated_filenames+=1
@@ -207,7 +214,7 @@ for line in sys.stdin:
         
         md5, sha1, sha256 = hash_file(filename)
 
-        print("Processing file: ", filename, sha1, sha256, size, accessed, created, mimetype)
+        log("Processing file: ", filename, sha1, sha256, size, created, accessed, mimetype)
         upload_required = add_reference(filename, md5, sha1, sha256, accessed, modified, created, mimetype, size)
 
         if (upload_required and not DRY_RUN):
