@@ -7,7 +7,6 @@ import datetime
 from operator import itemgetter
 from dotenv import load_dotenv
 from b2sdk.v2 import *
-from progress import *
 
 """
 
@@ -216,7 +215,7 @@ for line in sys.stdin:
             
     except Exception as ex:
         log_err("Error: Failed to process filename=", line)
-        log_err(ex, file=sys.stderr)
+        log_err(ex)
         log_err("\n-----------------\n")
     finally:
         counter+=1
