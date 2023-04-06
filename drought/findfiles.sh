@@ -1,5 +1,5 @@
-gitrepos=$(find . -name .git -type d | xargs dirname )
-svnrepos=$(find . -name trunk -type d | xargs dirname )
+gitrepos=$(find . -name .git -type d | xargs --no-run-if-empty dirname )
+svnrepos=$(find . -name trunk -type d | xargs --no-run-if-empty dirname )
 
 exclusions=""
 for r in $gitrepos
@@ -20,7 +20,7 @@ echo """
 ========================
 $(date)
 ========================
-Ran: $cmd
+Ran: $cmd in $(pwd)
 
 Skipped repos:
 $svnrepos
