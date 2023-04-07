@@ -1,3 +1,4 @@
+# TODO this doesn't work when there are spaces in the path, because xargs splits on spaces as well as new lines
 gitrepos=$(find . -name .git -type d | xargs --no-run-if-empty dirname )
 svnrepos=$(find . -name trunk -type d | xargs --no-run-if-empty dirname )
 

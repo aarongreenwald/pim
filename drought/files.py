@@ -4,6 +4,7 @@ import os
 import mimetypes
 import sqlite3
 import datetime
+import time
 from operator import itemgetter
 from dotenv import load_dotenv
 from b2sdk.v2 import *
@@ -14,16 +15,14 @@ TODO
 
 
 * Decide how to handle git/svn repos. 
-   * Log the zipped repos, document structure
+   * Review skipped repos
+   * Log/document structure of the zipped repos
 * Deduping repos
-* Created/accessed timestamp resolution??
-* How to handle modified dates when they give context? I'm not storing them but they can be useful. 
 * mimetypes might be able to be improved. 
 * Find a better method to upload large files so that I can validate the hashes. Perhaps the lower level API will allow this?
 * Performance:
   * For files that need to be uploaded, obviously the upload dominates and I'm limited by bandwidth, so parallelization isn't worth much
   * For subsequent runs, the db updates are expensive so it's important to avoid unnecessary updates. 
-   * Accessed time is always the current time, so don't update based on it. I should probably remove the field completely because it's meaningless
    * After db updates, it seems the primary cost is hashing large files. I could limit to only sha256. But it's a relatively small cost
    * How much is the logging costing in perf? Not much, but measure it. 
    * I'm not sure how db inserts compare to updates, but the reads seem very fast. Still, I could load the entiredb into memory at the start and not 
@@ -61,6 +60,7 @@ con = sqlite3.connect(db_path, isolation_level=None) # isolation_level might not
 # con.execute('pragma journal_mode=wal') #impact is questionable, doesn't seem to affect benchmarks, and it makes transferring the db harder
 
 full_log_file = open(LOGS_PATH, "a")
+
 
 def log(*args):
     print(datetime.datetime.now(), " ", *args, file=full_log_file, flush=True)
@@ -135,7 +135,7 @@ def hash_file(file):
         return md5.hexdigest(), sha1.hexdigest(), sha256.hexdigest()
 
 
-def add_reference(filename, md5, sha1, sha256, accesed, modified, created, mimetype, size):
+def add_reference(filename, md5, sha1, sha256, created, mimetype, size):
     global added_filenames, updated_filenames, added_files
     # TODO most of the wall time in this function is spent on inserts/updates to sqlite. 
     upload_required = True
@@ -144,43 +144,52 @@ def add_reference(filename, md5, sha1, sha256, accesed, modified, created, mimet
     file = cur.fetchone()
     if (file is None):
         log("Adding file to db")
-        cur.execute("""insert into file(sha1, sha256, bytes, accessed, created, mimetype) 
-            values (?, ?, ?, ?, ?, ?)""", [sha1, sha256, size, accessed, created, mimetype])
+        cur.execute("""insert into file(sha1, sha256, bytes, created, mimetype, accessed) 
+            values (?, ?, ?, ?, ?, ?)""", [sha1, sha256, size, created, mimetype, time.time()])
         con.commit()
         added_files+=1
-    else:        
+    else:
+        # it's possible the mimetype differs but it's a heuristic anyway
+        # TODO it's also possible the mtime is different.
+        # Since the "created" should represent the first time a file with the given sha256 existed,
+        # we should update the created to the first seen mtime (birth time can't be used, because we can't
+        # be sure the hash was the same). In general, newer mtimes usually happen
+        # when metadata is lost while copying.
+        # In any case, this timestamp is for context only so it's not critical. 
         upload_required = not file[0]
         log("File already in db, upload_required=", upload_required)
 
-    cur.execute("select sha256, created, accessed from filename where name = ?", [filename])
+    cur.execute("select sha256, created from filename where name = ?", [filename])
     existing_files = cur.fetchall()
 
     if (not existing_files):
         log("Adding filename to db")
         cur.execute("""insert into filename(name, created, sha256,  accessed) 
-            values (?, ?, ?, ?)""", [filename, created, sha256, accessed])
+            values (?, ?, ?, ?)""", [filename, created, sha256, time.time()])
         con.commit()
         added_filenames+=1
     elif (sha256 not in set(map(lambda x: x[0], existing_files))):
         log_err("Warning: Filename already exists with a different hash, filename=", filename, ", new_hash=", sha256)
         log("Adding filename to db (new version of already existing filename)")
-        cur.execute("""insert into filename(name, created, sha256,  accessed) 
-            values (?, ?, ?, ?)""", [filename, created, sha256, accessed])
+        # Note: the created time is used to decide which of two hashes is the newer version of a path.
+        # But sometimes the created is just the time the file was copied from somewhere, and this insertion _could_
+        # mask a file that's actually newer. Hard to prevent, though. 
+        cur.execute("""insert into filename(name, created, sha256,  created, accessed) 
+            values (?, ?, ?, ?, ?)""", [filename, created, sha256, created, time.time()])
         con.commit()
         added_filenames+=1
     else:
         # sha256/filename already exists.
         # when the table is large, this seems to cost more than the inserts and definitely more than the reads
         # to save unnecessary updates, only update the filename reference if one of the dates needs to be updated
-        # "accessed time" is always the current timestamp, so it's fairly meaningless as it stands. 
         filename_record = next((x for x in existing_files if x[0] == sha256), None)
         if (filename_record is None):
             raise Exception("That isn't supposed to happen")
         existing_created = filename_record[1]
-        existing_accessed = filename_record[2]
-        if (created < existing_created): # or accessed > existing_accessed # accessed time is always new, because it's _now_. This is meaningless. 
-            log("Updating existing filename reference with new created/accessed timestamps", created, accessed, ". Previously: ", existing_created, existing_accessed)
-            cur.execute("""update filename set created = min(created, ?), accessed = max(accessed, ?) where sha256 = ? and name = ?""", [created, accessed, sha256, filename])
+        if (created < existing_created):
+            # the same path+hash was seen with an earlier mtime. Set the created time of the file version to the earlier timestamp
+            log("Updating existing filename reference with new created timestamp", created, ". Previously: ", existing_created)
+            cur.execute("""update filename set created = min(created, ?), accessed = ? where sha256 = ? and name = ?""", [created, time.time(), sha256, filename])
             con.commit()
             updated_filenames+=1
         else:
@@ -200,9 +209,7 @@ for line in sys.stdin:
         filename = line[:-1]
         stat = os.stat(filename)
         size = stat.st_size
-        accessed = stat.st_atime
-        modified = stat.st_mtime
-        created = stat.st_ctime
+        created = stat.st_mtime # files are considered immutable, so the modified is considered "creation time"
         mimetype = mime_type(filename)
 
         if (size == 0):
@@ -214,8 +221,8 @@ for line in sys.stdin:
         
         md5, sha1, sha256 = hash_file(filename)
 
-        log("Processing file: ", filename, sha1, sha256, size, created, accessed, mimetype)
-        upload_required = add_reference(filename, md5, sha1, sha256, accessed, modified, created, mimetype, size)
+        log("Processing file: ", filename, sha1, sha256, size, created, mimetype)
+        upload_required = add_reference(filename, md5, sha1, sha256, created, mimetype, size)
 
         if (upload_required and not DRY_RUN):
             upload_b2(sha256, sha1, filename, mimetype, size, md5)
