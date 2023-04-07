@@ -1,8 +1,8 @@
 with parent as (select './' parent) --include trailing slash
 --directories
 select substr(replace(name, parent.parent, ''), 0, instr(replace(name, parent.parent, ''), '/')) name
-            , min(created) created
-            , max(accessed) accessed
+            , datetime(min(created), 'unixepoch') created
+            , datetime(min(accessed), 'unixepoch') accessed
             , NULL sha256
             , NULL sha1
             , sum(bytes) bytes
@@ -17,8 +17,8 @@ group by substr(replace(name, parent.parent, ''), 0, instr(replace(name, parent.
 union all
 -- files
 select replace(name, parent.parent, ''),
-       created,
-       accessed,
+       datetime(created, 'unixepoch') created,
+       datetime(accessed, 'unixepoch') accessed,
        sha256,
        sha1,
        bytes,

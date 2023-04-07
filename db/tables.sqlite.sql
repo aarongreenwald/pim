@@ -89,12 +89,30 @@ create table fuel_log(
     ,payment_id integer NOT NULL REFERENCES payment
 );
 
+/*
+ Timestamp semantics:
+
+ file.created is the first time a file with this hash was seen.
+ filename.created is the first time this particular filename pointed to this particular hash.
+
+ Corollaries:
+
+ * Creating a copy of an existing file to another path doesn't change the file.created, but
+ the filename.created of the new copy will be the current time.
+ * The current version of a file at a given path is the filename with the newer created
+ * When consuming old files, the file.created should always get the oldest mtime seen for the hash,
+ and filename.created should also get the oldest mtime for the filename/hash
+
+ Access times are just for logging when the values are changed, for debugging. There's no real semantic meaning to them.
+ Consider getting rid of them.
+ */
+
 create table file(
     -- md5?
     sha256 text primary key not null,
     sha1 text not null, --todo check that this is 1:1 on the pk
     bytes integer not null,
-    accessed timestamp null,
+    accessed timestamp null, --poorly named, this is only updated when the row is updated, should be called "recorded" or something
     created timestamp null,
     mimetype text null,
     storage_account_1 boolean not null default false,
@@ -103,8 +121,8 @@ create table file(
 
 create table filename(
     name text not null,
-    created timestamp null, --this can also be thought of as the modified date on the file
+    created timestamp null, --this can also be thought of as the modified date on the logical "file" (ie a given path)
     sha256 not null references file,
-    accessed timestamp null,
+    accessed timestamp null, --poorly named, this is only updated when the row is updated, should be called "recorded" or something
     unique(name, created) --primary key - this is a "file version"
 )
