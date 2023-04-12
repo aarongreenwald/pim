@@ -67,7 +67,7 @@
       (setq csv-fields-list fields))))
 
 ;; TODO how does autoload work?
-;; TODO separate into pim-table and pim-dir (which should derive from pim-table)
+;; TODO separate into pim-table and pim-dir
 ;;;###autoload
 (define-derived-mode pim-dir-mode csv-mode "pim-dir"
   "Major mode for pim drive directories."
@@ -76,6 +76,7 @@
   (csv-align-mode)
   (read-only-mode)
   (color-columns)
+  (display-line-numbers-mode 0)
   (set-widths)
   
   ;; after inserting text we're at the end
