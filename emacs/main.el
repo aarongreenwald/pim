@@ -13,8 +13,11 @@
 ;; Look into ses-mode, other grid-modes? cell-mode? ftable? table.el? 
 ;; https://vallyscode.github.io/note/tabulated-list-mode/
 
+(defvar pim-mode-current-dir nil
+  "Name of the current directory in pim-mode")
+(make-variable-buffer-local 'pim-mode-current-dir)
 
-(defun csv-text (bufname text)
+(defun csv-text (bufname text dir)
    "Inserts text into BUFNAME and sets up pim-dir-mode."
    (get-buffer-create bufname)
    (pop-to-buffer bufname)
@@ -22,7 +25,8 @@
    (read-only-mode 0)
    (erase-buffer)
    (insert text)
-   (pim-dir-mode)   
+   (pim-dir-mode)
+   (setq pim-mode-current-dir dir)
    )
 
 ;; gimmick copied from the internet - delete eventually
@@ -93,7 +97,33 @@
 
   )
 
-(defun pim-ls-dir ()
+(defun pim-ls-dir (&optional dir)
   (interactive)
-  (pim-run-query "select * from v_file limit 50" "ls-dir"))
+  (or dir (setq dir "./"))
+
+  (plz 'post "http://localhost:4321/api/drive/ls-dir"
+    :headers '(("Content-Type" . "application/json"))
+    :body (json-encode  `(("format" . "csv")
+			  ("path" . ,dir)))
+    ;;  :as #'json-read
+    :then `(lambda (result)
+	     (progn
+	       (csv-text ',"ls-dir" result dir)
+	       (message (concat "Retrieved: " dir))))))
+
+(defun pim-open-dir ()
+  (interactive)  
+  (setq line (buffer-substring (line-beginning-position) (line-end-position)))
+  (csv-align-mode)
+  (setq fields (split-string line ","))
+  (setq dir (nth 0 fields)) ;; TODO improve this logic, use named fields
+  (csv-align-mode)
+  (setq fullname (concat pim-mode-current-dir dir))
+  (message fullname)
+;;  (pim-ls-dir fullname)
+  )
+
+(defun pim-sample-query ()
+  (interactive)
+  (pim-run-query "select * from v_file limit 50" "pim-query"))
 
