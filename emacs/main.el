@@ -80,9 +80,13 @@
   
   ;; after inserting text we're at the end
   ;; this might not be the best place to do this
-  (goto-char 1)
-  
+  ;; (goto-char 1)
+  (goto-line 2) ;skip the header. todo: remove/hide the header
   )
+
+(define-key pim-dir-mode-map (kbd "r") 'pim-refresh-dir)
+(define-key pim-dir-mode-map (kbd "e") 'pim-open-dir)
+(define-key pim-dir-mode-map (kbd "b") 'pim-back-dir)
 
 (defun pim-run-query (query bufname)
   (plz 'post "http://localhost:4321/api/queries/exec"
@@ -101,6 +105,8 @@
   (interactive)
   (or dir (setq dir "./"))
 
+  (message (concat "Loading: " dir))
+  
   (plz 'post "http://localhost:4321/api/drive/ls-dir"
     :headers '(("Content-Type" . "application/json"))
     :body (json-encode  `(("format" . "csv")
@@ -108,8 +114,8 @@
     ;;  :as #'json-read
     :then `(lambda (result)
 	     (progn
-	       (csv-text ',"ls-dir" result dir)
-	       (message (concat "Retrieved: " dir))))))
+	       (csv-text "ls-dir" result ,dir)
+	       (message (concat "Retrieved: " ,dir))))))
 
 (defun pim-open-dir ()
   (interactive)  
@@ -118,10 +124,26 @@
   (setq fields (split-string line ","))
   (setq dir (nth 0 fields)) ;; TODO improve this logic, use named fields
   (csv-align-mode)
-  (setq fullname (concat pim-mode-current-dir dir))
-  (message fullname)
-;;  (pim-ls-dir fullname)
+  (setq fullname (concat pim-mode-current-dir dir "/"))
+  (pim-ls-dir fullname)
   )
+
+(defun pim-refresh-dir ()
+  (interactive)
+  (pim-ls-dir pim-mode-current-dir)
+  )
+
+
+(defun pim-back-dir ()
+  (interactive)
+  (if (string-equal pim-mode-current-dir "./") ;; todo this isn't working
+      (message "Already at root")
+    (progn
+        (setq sections (split-string pim-mode-current-dir "/"))
+	(setq dir (concat (string-join (butlast sections 2) "/") "/"))
+	(pim-ls-dir dir)	
+	)    
+    ))
 
 (defun pim-sample-query ()
   (interactive)
