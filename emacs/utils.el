@@ -3,6 +3,11 @@
   )
 
 (defun parse-csv-to-list (csv)
+  ;; TODO: handle escaping somehow. And consider the best place to handle formatting
+  ;; eg rounding currency numbers, human readable byte-sizes, date formatting, etc
+  ;; I can push the logic down to sql for reusability but if I want to be able to
+  ;; expose/use the raw value I need to send it all to the frontend and hide it in
+  ;; text properties. 
   "Given a csv, returns a list of lists that can be fed to ctbl"
   (setq lines (split-string csv "\n"))
   (mapcar #'parse-csv-line-to-list lines)
