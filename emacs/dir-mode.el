@@ -1,10 +1,9 @@
 ;; TODO how does autoload work?
-;; TODO separate into pim-table and pim-dir
-;; pim-table: generic grid for query output
-;; pim-dir: custom output, don't base on csv-mode for finer control
+;; pim-dir: custom output, currently based on csv-mode but it should be
+;; rewritten to a custom mode for finer control. ctable could be nice but isn't exactly what I want. 
 ;; pim-dir can also be used in "file-mode", ie results of search that aren't
 ;; a single directory, some different columns and different shortcuts
-;; pim-table should allow arbitrary funtions on cell under point as well row perhaps
+;; For generic table (eg sql query output, see grid-mode)
 ;;;###autoload
 (define-derived-mode pim-dir-mode csv-mode "pim-dir"
   "Major mode for pim drive directories."
@@ -23,14 +22,25 @@
   )
 
 (defun send-to-pim-dir-buffer (data dir)
-  (csv-text "ls-dir" data)
+  (insert-text-to-buffer "pim-ls-dir" data)
   (pim-dir-mode)
   (setq pim-mode-current-dir dir))
+
+;; TODO - instead of csv-mode, a custom dir mode
+(defun send-to-pim-dir-buffer2 (csv)
+  "Given a csv, create a pim-dir buffer"
+  ;; think about the API here. I can convert to lists first, or just iterate over the
+  ;; csv and insert to the buffer properly formatted
+  (setq lines (split-string csv "\n"))
+  (dolist (line lines)
+    (insert "\n")
+    (insert (concat "Formatting" line))
+    )
+  )
 
 (defvar pim-mode-current-dir nil
   "Name of the current directory in pim-mode")
 (make-variable-buffer-local 'pim-mode-current-dir)
-
 
 (defun pim-ls-dir (&optional dir)
   (interactive)

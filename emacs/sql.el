@@ -1,41 +1,38 @@
+(global-set-key (kbd "C-<f11>") 'pim-sql-scratch)
+(define-key sql-mode-map (kbd "C-e") 'pim-exec-query-selection)
+
 ;; Interactive sql: M-x sql-sqlite
-(defun csv-to-ctbl (csv)
-  "Shows a csv in a ctable grid"
-  (ctbl:popup-table-buffer-easy (parse-csv-to-list csv))
- )
+;;;;;;;;;;;;;;;;;;;;;;;
+;; How to get sqli mode to output to a grid?
 
-(defun parse-csv-line (line)
-  (split-string line ",")
+(defun pim-run-query (query bufname)
+  (plz 'post "http://localhost:4321/api/queries/exec"
+       :headers '(("Content-Type" . "application/json"))
+       :body (json-encode  `(("format" . "csv")
+			     ("sql" . ,query)))
+       ;;  :as #'json-read
+       :then `(lambda (data)
+		(progn
+		  (insert-to-pim-grid-buffer ',bufname data)
+		  (message "Completed query"))))
   )
 
-(defun parse-csv-to-list (csv)
-  "Given a csv, returns a list of lists that can be fed to ctbl"
-  (setq lines (split-string csv "\n"))
-  (mapcar #'parse-csv-line lines)
-  )
+(defun pim-sample-query ()
+  (interactive)
+  (pim-run-query "select date(record_date / 1000, 'unixepoch') date, ils, usd from v_car_summary order by record_date desc" "pim-query"))
 
-(defun csv-to-pim-dir (csv)
-  "Given a csv, create a pim-dir buffer"
-  ;; think about the API here. I can convert to lists first, or just iterate over the
-  ;; csv and insert to the buffer properly formatted
-  (setq lines (split-string csv "\n"))
-  (dolist (line lines)
-    (insert "\n")
-    (insert (concat "Formatting" line))
-    )
-  )
+;; todo run sql query under point
+(defun pim-exec-query-selection ()
+  (interactive)
+  (message "Running query...")
+  (setq sql (buffer-substring-no-properties (mark) (point)))
+  (pim-run-query sql "pim-query"))
 
+(defun pim-sql-scratch ()
+  (interactive)
+  (get-buffer-create "pim-sql_scratch")
+  (pop-to-buffer "pim-sql_scratch")
+  (sql-mode))
 
-(defun gen-row (lst)
-
-)
-(defun insert-csv-line (txt)
-  (setq lst (progn
-          (insert "\n<table>\n")
-          (setq str txt)
-          (gen-row (split-string str ","))
-          (insert "\n</table>\n")
-          ))
-  )
 
 
