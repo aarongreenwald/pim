@@ -1,10 +1,10 @@
-;; Currently based on csv-mode, can it be based on ctable?
 ;;;;;;;;;;;;;;;;;
 ;; Look into ses-mode, other grid-modes? cell-mode? ftable? table.el? 
 ;; https://vallyscode.github.io/note/tabulated-list-mode/
 
+;; pim-grid based on csv-mode, deprecated in favor of ctable
 ;; pim-grid should allow arbitrary funtions on cell under point as well row perhaps
-(define-derived-mode pim-grid-mode csv-mode "pim-grid"
+(define-derived-mode pim-grid-deprecated-mode csv-mode "pim-grid-deprecated"
   "Major mode for output of pim sql queries."
   (csv-populate-fields-list)
   (csv-header-line)
@@ -18,6 +18,12 @@
   ;; this might not be the best place to do this
   ;; (goto-char 1)
   (goto-line 2) ;skip the header. todo: remove/hide the header
+  )
+
+(define-derived-mode pim-grid-mode ctbl:table-mode "pim-grid"
+  "Major mode for output of pim sql queries."  
+  (display-line-numbers-mode 0)
+  (goto-line 3) ;skip the header and separated
   )
 
 (defun generate-column-model (headers)
@@ -61,6 +67,10 @@
   ;;               ((= 0 (% (1- row-index) 2)) "Darkseagreen1")
   ;;               (t nil))))
 
+  ;; open-table-buffer expects passed buffer to exist if it doesn't
+  (get-buffer-create bufname)
+  (pop-to-buffer bufname)
+
   (let*( (column-model (generate-column-model headers))
     (data list)
     (model 
@@ -68,11 +78,27 @@
       :column-model column-model
       :data data))
     (component
-     (ctbl:create-table-component-buffer
+     ;; this approach works, but setting the mode to pim-grid-mode breaks
+     ;; ctbl:component
+     (ctbl:open-table-buffer
       :model model
-      :param param)))
-  
+      :param param
+      :buffer bufname)))    
+;;    (pim-grid-mode)
 
+     ;; Alternative to open-table-buffer: get the raw text so we can insert directly to the buffer we choose
+     ;; https://github.com/kiwanami/emacs-ctable/blob/48b73742757a3ae5736d825fe49e00034cc453b5/readme.md#view-components
+     ;; (ctbl:get-table-text      
+     ;;  :model model
+     ;;  :param param)))
+
+    ;; (insert-text-to-buffer bufname component)
+    ;; (pim-grid-mode)   
+    ;; (setq-local ctbl:component component) ;;doesn't seem to work right
+
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    
     ;; Click hook sample for tables of known type
     ;; For everything else, set a variable with the current row
     ;; in ctbl:cp-add-selection-change-hook and then use it in other functions
@@ -98,13 +124,5 @@
     ;; Note: I can add keybindings to ctbl:table-mode-map
 
     ;; more samples: https://github.com/kiwanami/emacs-ctable/blob/master/samples/large-table.el
-    (pop-to-buffer (ctbl:cp-get-buffer component))
 
-    ;; move to the custom mode
-    (display-line-numbers-mode 0)
-    ) 
-
-  ;; The old way
-  ;;(insert-text-to-buffer bufname text)
-  ;;(pim-grid-mode)
-  )
+    ))

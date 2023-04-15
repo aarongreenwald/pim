@@ -45,6 +45,10 @@
   "Assuming a mode based on csv-mode: list of field names in the csv")
 (make-variable-buffer-local 'csv-field-index-header-fields-list)
 
+(defvar csv-fields-list nil
+  "Assuming a mode based on csv-mode: list of field names in the csv")
+(make-variable-buffer-local 'csv-field-index-header-fields-list)
+
 (defun csv-populate-fields-list ()
   (save-excursion
     (goto-char (point-min))
