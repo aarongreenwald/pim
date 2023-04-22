@@ -67,3 +67,20 @@
       ))))
        
 
+;; pim-grid based on csv-mode, deprecated in favor of ctable
+;; pim-grid should allow arbitrary funtions on cell under point as well row perhaps
+(define-derived-mode pim-grid-deprecated-mode csv-mode "pim-grid-deprecated"
+  "Major mode for output of pim sql queries."
+  (csv-populate-fields-list)
+  (csv-header-line)
+  (csv-align-mode)
+  (read-only-mode)
+  (color-columns)
+  (display-line-numbers-mode 0)
+  (set-widths)
+  
+  ;; after inserting text we're at the end
+  ;; this might not be the best place to do this
+  ;; (goto-char 1)
+  (goto-line 2) ;skip the header. todo: remove/hide the header
+  )

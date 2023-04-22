@@ -16,6 +16,8 @@
   (load-pim-file "./main.el"))
 
 (load-pim-file "./dir-mode.el")
+(load-pim-file "./dir-mode.csv.el")
 (load-pim-file "./grid-mode.el")
+(load-pim-file "./drive.el")
 (load-pim-file "./utils.el")
 (load-pim-file "./sql.el")
