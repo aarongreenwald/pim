@@ -10,12 +10,12 @@
 ;; * c: jump to column
 ;; * e, a: first, last columns
 ;; TODO:
-;; * Why do q, ? not work?
+;; * How to add the keymap override to the doc? 
 ;; * mark/unmark cells/rows, change their color and use their values in functions (sum, avg, etc)
 ;; * Common functions on current value that run queries, ideally pass a specific keymap when inserting to grid that specifies which keys call which functions, the rest can be called interactively. On a generic sql query, there are no special functions
 ;; * Optionally set buffer to be disposable instead of reusing a permanent buffer, so that stacking is possible
 
-(defun insert-to-pim-grid-buffer (bufname text &optional keymap)
+(defun insert-to-pim-grid-buffer (bufname text &optional keymap temp-buffer)
   "Expects a csv in text, inserts to a buffer and sets to pim-grid-mode"
   (setq data-list (parse-csv-to-list text))
   (setq headers (pop data-list))
@@ -76,6 +76,7 @@
 		      (ctbl:show-cell-in-tooltip)))
 
     (pim-grid-mode 1)
+    (if temp-buffer (local-set-key (kbd "q") 'kill-buffer-and-window))
     ))
 
 
@@ -107,6 +108,7 @@ So this will have to do.
 "
   :init-value nil
   :lighter " pim-grid"
+
   )
 
 (add-hook 'pim-grid-mode-on-hook
@@ -146,4 +148,4 @@ So this will have to do.
 ;; TODO this pollutes ctbl, if I could get pim-grid to work as a major/minor mode
 ;; reliably this can be moved to there. 
 (define-key ctbl:table-mode-map (kbd "s") 'ctbl:show-cell-in-tooltip)
-(define-key ctbl:table-mode-map (kbd "?") 'ctbl:describe-mode)
+(define-key ctbl:table-mode-map (kbd "?") 'describe-mode)

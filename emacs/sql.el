@@ -7,7 +7,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;
 ;; How to get sqli mode to output to a grid?
 
-(defun pim-run-query (query bufname)
+(defun pim-run-query (query bufname &optional keymap temp-buffer)
   (plz 'post "http://localhost:4321/api/queries/exec"
        :headers '(("Content-Type" . "application/json"))
        :body (json-encode  `(("format" . "csv")
@@ -15,7 +15,7 @@
        ;;  :as #'json-read
        :then `(lambda (data)
 		(progn
-		  (insert-to-pim-grid-buffer ',bufname data)
+		  (insert-to-pim-grid-buffer ',bufname data ',keymap ',temp-buffer)
 		  (message "Completed query"))))
   )
 

@@ -2,7 +2,7 @@
   "Name of the current directory in a pim-dir buffer (can be grid-mode or dir-mode, either way this is used.)")
 (make-variable-buffer-local 'pim-dir-current-dir)
 
-(defun pim-ls-dir (&optional dir)
+(defun pim-dir-ls (&optional dir)
   (interactive)
   (or dir (setq dir "./"))
 
@@ -24,7 +24,7 @@
 
 (defun pim-dir-show-in-grid (data dir keymap)
   "pim-grid"
-  (insert-to-pim-grid-buffer "pim-ls-dir" data keymap)
+  (insert-to-pim-grid-buffer "pim-dir-ls" data keymap)
   (setq pim-dir-current-dir dir))
 
 
@@ -33,6 +33,8 @@
   (define-key map (kbd "r") 'pim-refresh-dir)
   (define-key map (kbd "g") 'pim-dir-grid-open-dir)
   (define-key map (kbd "b") 'pim-back-dir)
+  (define-key map (kbd "f") 'pim-dir-get-all-filenames-for-hash)
+  (define-key map (kbd "v") 'pim-dir-get-versions-for-filename)
   map)
 
 (defun pim-dir-grid-open-dir ()
@@ -40,12 +42,12 @@
   (interactive)
   (setq dir (nth 1 (pim-query-get-selected-row)))
   (setq fullname (concat pim-dir-current-dir dir "/"))
-  (pim-ls-dir fullname)
+  (pim-dir-ls fullname)
   )
 
 (defun pim-refresh-dir ()
   (interactive)
-  (pim-ls-dir pim-dir-current-dir)
+  (pim-dir-ls pim-dir-current-dir)
   )
 
 
@@ -58,7 +60,29 @@ for the parent directory"
     (progn
         (setq sections (split-string pim-dir-current-dir "/"))
 	(setq dir (concat (string-join (butlast sections 2) "/") "/"))
-	(pim-ls-dir dir)	
+	(pim-dir-ls dir)	
 	)    
     ))
 
+(defun pim-dir-get-all-filenames-for-hash ()
+  "Returns all current filenames matching the current hash. Must be on a pim-grid cell called 'sha256'."
+  (interactive)
+  (setq col-name (pim-query-get-selected-cell-name))
+  (if (not (string-equal col-name "sha256"))
+      (message (concat col-name " is not a sha256 cell"))
+    (setq sha256 (pim-query-get-selected-cell-value))
+    ;; todo maybe show non-current as well? 
+    (setq sql (format "select * from v_files_current where sha256 = '%s'" sha256))
+    (pim-run-query sql "pim-filenames" nil 1)
+  ))
+
+(defun pim-dir-get-versions-for-filename ()
+  "Returns all versions of a given filename. Must be on a pim-grid cell called 'name'"
+  (interactive)
+  (setq col-name (pim-query-get-selected-cell-name))
+  (if (not (string-equal col-name "name"))
+      (message (concat col-name " is not a name cell"))
+    (setq filename (concat pim-dir-current-dir (pim-query-get-selected-cell-value)))
+    (setq sql (format "select * from v_file where name = '%s' order by version desc" filename))
+    (pim-run-query sql "pim-filenames" nil 1)
+  ))
