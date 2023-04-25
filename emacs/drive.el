@@ -65,24 +65,17 @@ for the parent directory"
     ))
 
 (defun pim-dir-get-all-filenames-for-hash ()
-  "Returns all current filenames matching the current hash. Must be on a pim-grid cell called 'sha256'."
-  (interactive)
-  (setq col-name (pim-query-get-selected-cell-name))
-  (if (not (string-equal col-name "sha256"))
-      (message (concat col-name " is not a sha256 cell"))
-    (setq sha256 (pim-query-get-selected-cell-value))
-    ;; todo maybe show non-current as well? 
-    (setq sql (format "select * from v_files_current where sha256 = '%s'" sha256))
-    (pim-run-query sql "pim-filenames" nil 1)
-  ))
+  "Returns all current filenames matching the current hash. Must be on a pim-grid row that has a column named 'sha256'"
+  (interactive)  
+  (setq sha256 (pim-query-get-column-value-from-selected-row "sha256"))
+  ;; todo maybe show non-current as well? 
+  (setq sql (format "select * from v_files_current where sha256 = '%s'" sha256))
+  (pim-run-query sql "pim-filenames" nil 1))
 
 (defun pim-dir-get-versions-for-filename ()
-  "Returns all versions of a given filename. Must be on a pim-grid cell called 'name'"
+  "Returns all versions of a given filename. Must be on a pim-grid row that has a column called 'name'"
   (interactive)
-  (setq col-name (pim-query-get-selected-cell-name))
-  (if (not (string-equal col-name "name"))
-      (message (concat col-name " is not a name cell"))
-    (setq filename (concat pim-dir-current-dir (pim-query-get-selected-cell-value)))
-    (setq sql (format "select * from v_file where name = '%s' order by version desc" filename))
-    (pim-run-query sql "pim-filenames" nil 1)
-  ))
+  (setq name (pim-query-get-column-value-from-selected-row "name"))
+  (setq filename (concat pim-dir-current-dir name))
+  (setq sql (format "select * from v_file where name = '%s' order by version desc" filename))
+  (pim-run-query sql "pim-file-versions" nil 1))

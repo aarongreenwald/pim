@@ -126,6 +126,10 @@ So this will have to do.
 ;;         (nth col-id (nth row-id rows))
 ;;       nil)))
 
+(defun pim-query-get-column-by-name (col-name)
+  (cl-position col-name (nth 0 pim-grid-data) :test 'string-equal)
+  )
+
 (defun pim-query-get-selected-cell-name ()
   (interactive)
   (setq column (cdr (ctbl:cp-get-selected ctbl:component)))
@@ -140,6 +144,10 @@ So this will have to do.
   ;;todo consider converting list to alist using the column headers
   ;;in (nth 0 pim-grid-data)
   (ctbl:cp-get-selected-data-row ctbl:component))
+
+(defun pim-query-get-column-value-from-selected-row (col-name)
+  (nth (pim-query-get-column-by-name col-name) (pim-query-get-selected-row)))
+
 
 (defvar pim-grid-data nil
   "Raw data in the grid - first element is headers, second element is list of lists (rows of fields)")

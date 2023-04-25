@@ -19,10 +19,6 @@
 		  (message "Completed query"))))
   )
 
-(defun pim-sample-query ()
-  (interactive)
-  (pim-run-query "select date(record_date / 1000, 'unixepoch') date, ils, usd from v_car_summary order by record_date desc" "pim-query"))
-
 ;; todo run sql query under point
 (defun pim-exec-query-selection ()
   (interactive)
