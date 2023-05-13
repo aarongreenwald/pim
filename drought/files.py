@@ -18,6 +18,9 @@ TODO
    * Review skipped repos
    * Log/document structure of the zipped repos
 * Deduping repos
+* Cleaning files
+* Merge drought/pim
+* Build frontend
 * mimetypes might be able to be improved. 
 * Find a better method to upload large files so that I can validate the hashes. Perhaps the lower level API will allow this?
 * Performance:
