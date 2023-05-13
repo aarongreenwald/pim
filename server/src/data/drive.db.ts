@@ -18,7 +18,7 @@ with parent as (select '${dir}' parent) --include trailing slash
             , min(storage_account_2) storage_account_2
             , NULL version
     --            , NULL name
-    from v_file, parent
+    from v_files_current, parent
     where name like parent.parent || '%/%'
     group by substr(replace(name, parent.parent, ''), 0, instr(replace(name, parent.parent, ''), '/'))
 
@@ -36,7 +36,7 @@ with parent as (select '${dir}' parent) --include trailing slash
        storage_account_2,
        version
     --       name
-    from v_file, parent
+    from v_files_current, parent
     where name like parent.parent || '%' and replace(name, parent.parent, '') not like '%/%'
 )
 select 
