@@ -1,7 +1,11 @@
 (global-set-key (kbd "C-<f11>") 'pim-sql-scratch)
 
 ;; todo delay until sql is loaded
-(define-key sql-mode-map (kbd "C-e") 'pim-exec-query-selection)
+
+(add-hook 'sql-mode-hook (
+			  lambda ()
+				 (define-key sql-mode-map (kbd "C-e") 'pim-exec-query-selection)))
+
 
 ;; Interactive sql: M-x sql-sqlite
 ;;;;;;;;;;;;;;;;;;;;;;;

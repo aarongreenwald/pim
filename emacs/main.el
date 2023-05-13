@@ -1,6 +1,8 @@
 (global-set-key (kbd "C-x <f2>") 'reload-pim)
 
-;; install package "plz", ctable
+(use-package plz)
+(use-package ctable)
+(use-package csv-mode)
 (require 'plz)
 (require 'ctable)
 (require 'cl)
