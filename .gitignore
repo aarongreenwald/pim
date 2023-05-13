@@ -3,4 +3,5 @@
 *.db
 web/build
 server/build
+server/temporary_files
 **/*~
