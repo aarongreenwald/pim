@@ -63,14 +63,15 @@ function isDateColumn(key: string) {
 }
 
 function getColumnRenderer(key: string) {
-    return (value) => isDateColumn(key) ? //TODO - consider putting the time portion in a tooltip or perhaps as part of the string
-        //TODO this converts to local time, which is wrong - none of the dates in this system are relative to the user's current location, the time in the database is always meant to be displayed as is
-        //it only seems ok because I am always ahead of UTC, so the day is the same. Set the client clock
-        //to less than UTC and days will all be off by one.
-        new Date(value[key]).toDateString() :
-        currencyFields.includes(key) ?
-            <Currency value={value[key]} currencyCode={key}/> :
-            value[key];
+  const columnRenderer = (value) => isDateColumn(key) ? //TODO - consider putting the time portion in a tooltip or perhaps as part of the string
+    //TODO this converts to local time, which is wrong - none of the dates in this system are relative to the user's current location, the time in the database is always meant to be displayed as is
+    //it only seems ok because I am always ahead of UTC, so the day is the same. Set the client clock
+    //to less than UTC and days will all be off by one.
+    new Date(value[key]).toDateString() :
+    currencyFields.includes(key) ?
+    <Currency value={value[key]} currencyCode={key}/> :
+  value[key];
+  return columnRenderer; 
 }
 
 interface DateColumnFilters {

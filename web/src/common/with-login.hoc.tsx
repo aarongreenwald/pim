@@ -1,7 +1,7 @@
 import {useCallback, useEffect, useState} from 'react';
 import {getLoggedIn, login, logout} from '../services/server-api';
 import styled from '@emotion/styled';
-import {ActionButton, DefaultButton, Spinner, TextField} from '@fluentui/react';
+import {DefaultButton, Spinner, TextField} from '@fluentui/react';
 import * as React from 'react';
 
 function LoginForm({onLoggedIn}: {onLoggedIn: (success: boolean) => void}) {

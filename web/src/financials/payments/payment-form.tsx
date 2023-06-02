@@ -98,8 +98,7 @@ export const PaymentForm: React.FC<PanelProps<PaymentId>> = ({onClose, id}) => {
             <CategoryDropdown
                 showLabel
                 value={payment.categoryId}
-                onChange={updateCategory}>
-            </CategoryDropdown>
+                onChange={updateCategory} />
 
             <TextField
                 label="Notes"
