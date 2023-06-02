@@ -46,11 +46,11 @@ export function run(db: sqlite.Database, sql: string, params: any[] = []): Promi
  * @param db
  * @param sql
  * @param params
- * @returns {Promise<unknown>}
+ * @returns {Promise<T>}
  */
 export function get<T>(db: sqlite.Database, sql: string, params = [] as any): Promise<T> {
     return new Promise((resolve, reject) => {
-        db.get(sql, params, function(err, data) {
+        db.get(sql, params, function(err, data: T) {
             if (err) reject(err)
             resolve(data)
         })
