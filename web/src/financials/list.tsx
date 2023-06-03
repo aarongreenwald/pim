@@ -62,6 +62,7 @@ function isDateColumn(key: string) {
     return key.toLowerCase().includes('date') || key.toLowerCase() === 'timestamp';
 }
 
+
 function getColumnRenderer(key: string) {
   const columnRenderer = (value) => isDateColumn(key) ? //TODO - consider putting the time portion in a tooltip or perhaps as part of the string
     //TODO this converts to local time, which is wrong - none of the dates in this system are relative to the user's current location, the time in the database is always meant to be displayed as is
