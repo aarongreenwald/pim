@@ -67,11 +67,11 @@ export const FileEditor: React.FC<FileEditorProps> = ({content, onSaveContent, o
         }
     }, [editor])
 
-    const saveContent = useCallback(() => {
+    const saveContent = useCallback(async () => {
         const draft = getEditorValue();
         if (content !== draft) { //perhaps the comparison should be to the saved content map and not the prop?
             setSaving(true)
-            onSaveContent(draft).then(() => {
+            await onSaveContent(draft).then(() => {
                 //if the user is typing, an onchange will recalculate this anyway. But if not,
                 //it's necessary to compare the current value to what was saved. draft is definitely the most reliable value
                 setIsEditorDirty(getEditorValue() !== draft)
