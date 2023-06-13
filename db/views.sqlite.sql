@@ -67,8 +67,8 @@ select * from all_categories
  */
 drop view if exists v_rollup_categories;
 create view v_rollup_categories as
-WITH RECURSIVE rollup_category(category_id, group_category_id, root_category_id, level) AS (
-    select category_id, category_id, category_id, 0 as level
+WITH RECURSIVE rollup_category(category_id, group_category_id, root_category_id, level, full_name) AS (
+    select category_id, category_id, category_id, 0 as level,  '' as full_name -- root is implied by the where clause on the calling query
     from category
          -- where category_id = @root --if this was a TVF
     UNION ALL
@@ -77,12 +77,13 @@ WITH RECURSIVE rollup_category(category_id, group_category_id, root_category_id,
            --and the first level is left as is, and subsequent levels get rolled up
            case when level >= 1 then rollup_category.group_category_id else category.category_id end,
            rollup_category.root_category_id root,
-           level + 1
+           level + 1,
+	   full_name || ' > ' || category.name full_name
     from category
              inner join rollup_category on parent_category_id = rollup_category.category_id
 )
 select rc.category_id, rc.group_category_id, rc.root_category_id,
-       c.name name, gc.name group_category_name, r.name root_category_name, level
+       c.name name, gc.name group_category_name, r.name root_category_name, level, full_name
 --the joins are just for readability, so the the category names are return. Consider removing them
 --and doing the join outside the view if necessary
 from rollup_category rc left join category c on rc.category_id = c.category_id
