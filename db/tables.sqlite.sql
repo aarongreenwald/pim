@@ -55,6 +55,8 @@ CREATE TABLE stock_transaction (stock_transaction_id integer primary key not nul
     ,ticker_symbol varchar(20) NOT NULL
     ,unit_price decimal(19,4) NOT NULL
     ,quantity decimal(12,4) NOT NULL
+    ,cost_basis decimal(19,4) NULL -- relevant for sales only
+    ,commission decimal(19,4) NULL -- all assignable transaction fees go here
 );
 
 create table stock_split(
@@ -63,6 +65,26 @@ create table stock_split(
     , previous_share_qty int NOT NULL
     , new_share_qty int NOT NULL
 );
+
+create table fx_transaction(fx_transaction_id integer primary key not null
+   /*
+   Table assumes that all transactions include a constant local currency (eg USD), which is implied. An alternative is to specify it per row, but then there's nothing that forces a given currency to always be in the same column, and at that point I may as well have bought/sold columns and keep all numbers positive. Easier to read and ue, harder to sum across the table to find the balance of a given currency. Might be a worthwhile refactor, though. 
+
+   The transaction rate is implied by foreign_qty / local_qty. This can also be changed, so that instead of recording amount_paid I record the unit_price (fx_rate), but then I need to make sure that the rate is in the correct direction. With amount_paid I can easily validate that they have opposite signs. 
+
+   The outflow of USD is local_qty + local_commission. Separating commissions from qty is a bit annoying, but might be useful for tracking. On the other hand, in stock_transaction the commission must be separated because the price*qty is also the cost_basis, in this table there might be no point. Revisit this if it proves too clunky to use. Also, there might be foreign_commissions to deal with as well. 
+   */
+   , transaction_date timestamp NOT NULL --see comment about stock_transaction date
+   , account_id int NOT NULL REFERENCES stock_account -- TODO: support fx in cash_accounts as well, possibly by combining the tables or possibly with a separate FK
+   , foreign_currency char(3) NOT NULL 
+   , foreign_qty decimal(19,4) NOT NULL --eg the amount of foreign currency bought (+) /sold (-)
+   , local_qty decimal(19, 4) NOT NULL --amount in base currency (eg USD), not including commission that can be separated out. Sign is opposite foreign_qty
+   , local_commission decimal(19, 4) NULL --Separate commissions and fees, also in base currency. 
+   , note text NULL
+   , check (foreign_qty != 0 and local_qty != 0)
+   , check (foreign_qty > 0 != local_qty > 0) --opposite signs
+)
+
 
 create table cash_assets_allocation(cash_assets_allocation_id integer primary key not null
     --consider a better name than record_date, since it's not a snapshot but a transaction
