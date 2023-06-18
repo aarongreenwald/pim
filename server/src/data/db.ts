@@ -494,6 +494,11 @@ export const updateStockTransaction = async (transaction: StockTransactionDto) =
     await run(db, sql, params)
 }
 
+export const execQueryNoResults = async sql => {
+  const db = await getDb(false);
+  return await run(db, sql);
+}
+
 export const execReadonlyQuery = async sql => {
   const db = await getDb(true);
   return await all<any>(db, sql);

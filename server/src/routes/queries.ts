@@ -17,17 +17,24 @@ const formatCsv = data => {
 
 export const setupQueriesRoutes = (app: Express) => {
     app.route('/queries/exec')
-        .post(jsonParser, (req, res) => {
-            db.execReadonlyQuery(req.body.sql)
-                .then(data => res.send(
-                    req.body.format == "csv" ?
-                        formatCsv(data) :
-                        JSON.stringify(data)
-                ))
-                .then(data => res.send())
-                .catch(ex => {
-                    console.error(ex)
-                    res.status(500).send(ex)
-                })
+      .post(jsonParser, (req, res) => {
+	req.body.writeMode ?
+	  db.execQueryNoResults(req.body.sql)
+	    .then(res.send)
+	    .catch(ex => {
+	      console.error(ex)
+	      res.status(500).send(ex)
+	    }) :
+	  db.execReadonlyQuery(req.body.sql)
+            .then(data => res.send(
+              req.body.format == "csv" ?
+                formatCsv(data) :
+                JSON.stringify(data)
+            ))
+            .then(data => res.send())
+            .catch(ex => {
+              console.error(ex)
+              res.status(500).send(ex)
+            })
         })
 }
