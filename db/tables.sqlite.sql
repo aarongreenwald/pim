@@ -85,6 +85,22 @@ create table fx_transaction(fx_transaction_id integer primary key not null
    , check (foreign_qty > 0 != local_qty > 0) --opposite signs
 )
 
+create table stock_dividend(dividend_id integer primary key not null --this might be useless but relatively harmless
+   , account_id int not null references stock_account
+   , ticker_symbol varchar(20) NOT NULL
+   , payment_date date not null
+   , total_amount decimal(19,4) not null
+   , amount_per_share decimal(19, 4) null
+   , unique(account_id, ticker_symbol, payment_date)
+)
+
+create table stock_account_cash_transaction(transaction_id integer primary key not null
+       , transaction_date date NOT NULL
+       , account_id int NOT NULL REFERENCES stock_account
+       , currency char(3) default 'USD'
+       , amount decimal(19,4) NOT NULL
+       , note text NULL
+)
 
 create table cash_assets_allocation(cash_assets_allocation_id integer primary key not null
     --consider a better name than record_date, since it's not a snapshot but a transaction
