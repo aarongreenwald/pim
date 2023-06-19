@@ -6,6 +6,10 @@
 
 (add-hook 'sql-mode-hook (lambda () (define-key sql-mode-map (kbd "C-E") 'pim-exec-query-selection-write)))
 
+(add-hook 'sql-mode-hook (lambda ()
+			   (setq pim-sql-current-overlay (make-overlay 1 1))
+			   (overlay-put pim-sql-current-overlay 'face '(:background "brightblack"))))
+
 ;; Interactive sql: M-x sql-sqlite
 ;;;;;;;;;;;;;;;;;;;;;;;
 ;; How to get sqli mode to output to a grid?
@@ -60,10 +64,7 @@
   (setq end (nth 1 vals))
   (buffer-substring-no-properties begin end))
 
-;; todo better styling, and make it work in all buffers, consistently
-;; probably needs to be buffer-local in all sql-mode buffers.
-(setq pim-sql-overlay (make-overlay 1 1))
-(overlay-put pim-sql-overlay 'face '(:background "cyan"))
+
 
 ;; todo this should be called constantly? Or only on demand? 
 (defun pim-highlight-current-sql-statement ()
@@ -71,7 +72,7 @@
   (setq vals (pim-get-current-sql-statement-region))
   (setq begin (nth 0 vals))
   (setq end (nth 1 vals))
-  (move-overlay pim-sql-overlay begin end))
+  (move-overlay pim-sql-current-overlay begin end (current-buffer)))
 
 
 (defun pim-sql-scratch ()
