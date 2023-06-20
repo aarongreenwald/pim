@@ -1,11 +1,7 @@
 (global-set-key (kbd "C-<f11>") 'pim-sql-scratch)
 
-;; todo delay until sql is loaded
-
 (add-hook 'sql-mode-hook (lambda () (define-key sql-mode-map (kbd "C-e") 'pim-exec-query-selection)))
-
 (add-hook 'sql-mode-hook (lambda () (define-key sql-mode-map (kbd "C-E") 'pim-exec-query-selection-write)))
-
 (add-hook 'sql-mode-hook (lambda ()
 			   (setq pim-sql-current-overlay (make-overlay 1 1))
 			   (overlay-put pim-sql-current-overlay 'face '(:background "brightblack"))))
@@ -14,6 +10,8 @@
 ;;;;;;;;;;;;;;;;;;;;;;;
 ;; How to get sqli mode to output to a grid?
 
+;; todo switch to use pim-api-request
+;; override pim-host with "http://localhost:4321/api/" for testing
 (defun pim-run-query (query bufname write-mode &optional keymap temp-buffer)
   (plz 'post "http://localhost:4321/api/queries/exec"
        :headers '(("Content-Type" . "application/json"))
@@ -28,12 +26,12 @@
 		    (message (concat "Succeeded: " data)))))
   ))
 
-;; todo run sql query under point
 (defun pim-exec-query-selection ()
   (interactive)
   (pim-highlight-current-sql-statement)
   ;; todo save execution history (comint?)
   (message "Running query...")
+  ;; for running selection instead of query under point
   ;; (setq sql (buffer-substring-no-properties (mark) (point)))
   (setq sql (pim-get-current-sql-statement))
   (pim-run-query sql "pim-query" 0))
@@ -63,7 +61,6 @@
   (setq begin (nth 0 vals))
   (setq end (nth 1 vals))
   (buffer-substring-no-properties begin end))
-
 
 
 ;; todo this should be called constantly? Or only on demand? 
