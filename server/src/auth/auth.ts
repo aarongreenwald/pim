@@ -63,7 +63,7 @@ export const setupAuth = (app: Express) => {
         secret,
         rolling: true,
         cookie: {
-            maxAge: 60000 * 60 * 24,
+            maxAge: 60000 * 60 * 24 * 7,
             secure: 'auto'
         }
 
