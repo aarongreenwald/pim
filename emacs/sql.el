@@ -1,7 +1,7 @@
 (global-set-key (kbd "C-<f11>") 'pim-sql-scratch)
 
 (add-hook 'sql-mode-hook (lambda () (define-key sql-mode-map (kbd "C-e") 'pim-exec-query-selection)))
-(add-hook 'sql-mode-hook (lambda () (define-key sql-mode-map (kbd "C-E") 'pim-exec-query-selection-write)))
+(add-hook 'sql-mode-hook (lambda () (define-key sql-mode-map (kbd "C-x C-e") 'pim-exec-query-selection-write)))
 (add-hook 'sql-mode-hook (lambda ()
 			   (setq pim-sql-current-overlay (make-overlay 1 1))
 			   (overlay-put pim-sql-current-overlay 'face '(:background "brightblack"))))
@@ -10,15 +10,13 @@
 ;;;;;;;;;;;;;;;;;;;;;;;
 ;; How to get sqli mode to output to a grid?
 
-;; todo switch to use pim-api-request
-;; override pim-host with "http://localhost:4321/api/" for testing
+;; Note: override pim-host with "http://localhost:4321/api/" for testing
 (defun pim-run-query (query bufname write-mode &optional keymap temp-buffer)
-  (plz 'post "http://localhost:4321/api/queries/exec"
-       :headers '(("Content-Type" . "application/json"))
-       :body (json-encode  `(("format" . "csv")
-			     ("sql" . ,query)
-			     ("writeMode" . ,write-mode)))
-       ;;  :as #'json-read
+  (pim-api-request 'post "queries/exec"
+       :body  `(("format" . "csv")
+		("sql" . ,query)
+		("writeMode" . ,write-mode))
+       :as 'string
        :then `(lambda (data)
 		(progn
 		  (if (equal ',write-mode 0) 
@@ -27,6 +25,7 @@
   ))
 
 (defun pim-exec-query-selection ()
+  "Run the query under the point with readonly permissions and put the result in a pim-grid buffer."
   (interactive)
   (pim-highlight-current-sql-statement)
   ;; todo save execution history (comint?)
@@ -37,6 +36,7 @@
   (pim-run-query sql "pim-query" 0))
 
 (defun pim-exec-query-selection-write ()
+  "Run the query under the point with write permissions. The response will be shown in the message pane (no grid)"
   (interactive)
   (pim-highlight-current-sql-statement)
   (message "Executing query...")

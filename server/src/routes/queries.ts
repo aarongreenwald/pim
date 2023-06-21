@@ -20,7 +20,7 @@ export const setupQueriesRoutes = (app: Express) => {
       .post(jsonParser, (req, res) => {
 	req.body.writeMode ?
 	  db.execQueryNoResults(req.body.sql)
-	    .then(res.send)
+	    .then(data => res.send(JSON.stringify(data)))
 	    .catch(ex => {
 	      console.error(ex)
 	      res.status(500).send(ex)
@@ -31,7 +31,6 @@ export const setupQueriesRoutes = (app: Express) => {
                 formatCsv(data) :
                 JSON.stringify(data)
             ))
-            .then(data => res.send())
             .catch(ex => {
               console.error(ex)
               res.status(500).send(ex)

@@ -9,7 +9,7 @@
   (f-touch "~/.pim/host"))
 
 
-(setq pim-host (f-read-text "~/.pim/host" 'utf-8))
+(setq pim-host (f-read-text "~/.pim/host" 'utf-8)) ;;  "http://localhost:4321/api/")
 (defun pim-load-cookie () (f-read-text "~/.pim/auth" 'utf-8)) ;; how slow is this? Probably negligible. 
 
 (defun pim-login(password)
@@ -27,13 +27,13 @@
   )
   )))
 
-(cl-defun pim-api-request (method path &key body then)
+(cl-defun pim-api-request (method path &key body then as)
   ;;todo handle auth failures, try to login in and then run the request again. 
   (let ((cookie (pim-load-cookie)))
     (plz method (concat pim-host path)
       :headers `(("Content-Type" . "application/json")
 		 ("Cookie" . ,cookie))
       :body (if body (json-encode body) nil)
-      :as #'json-read
+      :as (or as #'json-read)
       :then then)))
 
