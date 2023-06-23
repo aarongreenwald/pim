@@ -55,8 +55,10 @@ CREATE TABLE stock_transaction (stock_transaction_id integer primary key not nul
     ,ticker_symbol varchar(20) NOT NULL
     ,unit_price decimal(19,4) NOT NULL
     ,quantity decimal(12,4) NOT NULL
-    ,cost_basis decimal(19,4) NULL -- relevant for sales only
+    ,cost_basis decimal(19,4) NULL -- relevant for SELL (negative qty) only
     ,commission decimal(19,4) NULL -- all assignable transaction fees go here
+    ,check (commission is null or commission > 0) --always positive, regardless of buy/sell
+    ,check ((quantity > 0 and cost_basis is null) or (quantity < 0 and cost_basis > 0))
 );
 
 create table stock_split(

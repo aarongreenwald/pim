@@ -57,25 +57,47 @@ export const StocksForm: React.FC<PanelProps<StockTransactionId>> = ({onClose, i
 
                 <Stack.Item grow={5}>
                     <CurrencyInput
-                        amount={stockTransaction.costBasis}
+                        amount={stockTransaction.unitPrice}
                         currency={'USD'}
-                        name="costBasis"
+                        name="unitPrice"
                         onChange={updateTransaction}
                     />
                 </Stack.Item>
 
-                <Stack.Item grow>
-                    <Label>Total</Label>
-                    <TextField
-                        borderless
-                        underlined
-                        readOnly
-                        value={currencySymbols.usd + (stockTransaction.costBasis * stockTransaction.quantity).toFixed(2)}
-                    />
+             </Stack>
 
-                </Stack.Item>
+             <Stack.Item>
+               <Label>Total</Label>
+               <TextField
+                  borderless
+                  underlined
+                  readOnly
+                  value={currencySymbols.usd + (stockTransaction.unitPrice * stockTransaction.quantity).toFixed(2)}
+               />
+             </Stack.Item>
+             {
+               stockTransaction.quantity < 0 &&
 
-            </Stack>
+               <Stack.Item>
+                 <CurrencyInput
+                    label="Cost Basis"
+                    amount={stockTransaction.costBasis}
+                    currency={'USD'}
+                    name="costBasis"
+                    onChange={updateTransaction}
+                 />
+               </Stack.Item>
+             }
+
+             <Stack.Item>
+               <CurrencyInput
+                  label="Commission"
+                  amount={stockTransaction.commission}
+                  currency={'USD'}
+                  name="commission"
+                  onChange={updateTransaction}
+             />
+             </Stack.Item>
 
             <Stack horizontal tokens={stackTokens}>
                 <PrimaryButton onClick={submitForm}>Save</PrimaryButton>
@@ -130,14 +152,16 @@ function useStockTransactionForm(onClose: () => void, stockTransactionId?: Stock
 function initializeTransaction(): StockTransaction {
     const today = formatDay(new Date())
     return {
-        id: -1,
-        accountId: null,
-        accountName: null, //appease TS
-        transactionDate: today,
-        transactionTime: '',
-        costBasis: null,
-        tickerSymbol: '',
-        quantity: null
+      id: -1,
+      accountId: null,
+      accountName: null, //appease TS
+      transactionDate: today,
+      transactionTime: '',
+      unitPrice: null,
+      commission: null,
+      costBasis: null,
+      tickerSymbol: '',
+      quantity: null
     };
 }
 

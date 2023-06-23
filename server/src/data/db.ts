@@ -409,12 +409,14 @@ export const getStockTransactions = async () => {
     const db = await getDb();
     const sql = `
         select stock_transaction_id id, 
-               sa.stock_account_id accountId,
+               datetime(transaction_date / 1000, 'unixepoch') transactionDate,
+               -- sa.stock_account_id accountId,
                sa.name accountName,
                ticker_symbol tickerSymbol,
-               datetime(transaction_date / 1000, 'unixepoch') transactionDate, 
                quantity, 
-               unit_price costBasis
+               unit_price unitPrice,
+               commission,
+               cost_basis costBasis
         from v_stock_transactions st 
             inner join stock_account sa on st.account_id = sa.stock_account_id
         order by transaction_date desc
@@ -430,7 +432,9 @@ export const getStockTransaction = async (transactionId: StockTransactionId) => 
                ticker_symbol tickerSymbol,
                datetime(transaction_date / 1000, 'unixepoch') transactionDate,
                quantity, 
-               unit_price costBasis
+               unit_price unitPrice,
+               cost_basis costBasis,
+               commission
         from v_stock_transactions
         where stock_transaction_id = ?
     `;
@@ -449,24 +453,27 @@ export const getStockAccounts = async () => {
 export const insertStockTransaction = async (transaction: StockTransactionDto) => {
     const sql = `
     insert into main.stock_transaction
-        (transaction_date, account_id, ticker_symbol, unit_price, quantity)
-    values (?,?,?,?,?)
-  `
-    //TODO: validations - the fallback to null done here forces the db to reject
-    //bad data but there should probably be a validation and sanitization step prior to getting here
+        (transaction_date, account_id, ticker_symbol, unit_price, quantity, cost_basis, commission)
+    values (?,?,?,?,?,?,?)
+`
+
+  //TODO: validations - the fallback to null done here forces the db to reject
+  //bad data but there should probably be a validation and sanitization step prior to getting here
     const params = [
-        new Date(transaction.transactionDate).getTime(),
-        transaction.accountId || null,
-        transaction.tickerSymbol || null,
-        transaction.costBasis || null,
-        transaction.quantity || null,
+      new Date(transaction.transactionDate).getTime(),
+      transaction.accountId || null,
+      transaction.tickerSymbol || null,
+      transaction.unitPrice || null,
+      transaction.quantity || null,
+      transaction.costBasis || null,
+      transaction.commission || null
     ]
     const db = await getDb(false);
 
     const {lastId} = await run(db, sql, params)
     //if the get() rejects but the run() resolved, the server will return 500 which is not good
     //client will be tempted to retry, but the post was successful
-    return get<StockTransactionDto>(db, `select *from main.stock_transaction where stock_transaction_id = ?`, lastId)
+    return get<StockTransactionDto>(db, `select * from main.stock_transaction where stock_transaction_id = ?`, lastId)
 }
 
 export const updateStockTransaction = async (transaction: StockTransactionDto) => {
@@ -476,18 +483,22 @@ export const updateStockTransaction = async (transaction: StockTransactionDto) =
             account_id = ?,
             ticker_symbol = ?,
             unit_price = ?,
-            quantity = ?                    
+            quantity = ?,
+            cost_basis = ?,
+            commission = ?
         where main.stock_transaction.stock_transaction_id = ?        
   `
     //TODO: validations - the fallback to null done here forces the db to reject
     //bad data but there should probably be a validation and sanitization step prior to getting here
     const params = [
-        new Date(transaction.transactionDate).getTime(),
-        transaction.accountId || null,
-        transaction.tickerSymbol || null,
-        transaction.costBasis || null,
-        transaction.quantity || null,
-        transaction.id
+      new Date(transaction.transactionDate).getTime(),
+      transaction.accountId || null,
+      transaction.tickerSymbol || null,
+      transaction.unitPrice || null,
+      transaction.quantity || null,
+      transaction.costBasis || null,
+      transaction.commission || null,
+      transaction.id
     ]
     const db = await getDb(false);
 

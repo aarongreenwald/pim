@@ -157,7 +157,9 @@ export interface StockTransactionDto {
   //so that timezone information is stripped out
   transactionDate: string;
   quantity: number;
-  costBasis: number;
+  unitPrice: Money;
+  costBasis: Money;
+  commission: Money;
 }
 
 export interface StockHoldingSummaryDto {

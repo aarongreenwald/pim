@@ -313,8 +313,13 @@ with recursive split_multiples as (
                         on osh.split_number = sm.split_number + 1
                             and osh.ticker_symbol = sm.ticker_symbol
 
-)select * from split_multiples;
+) select * from split_multiples;
 
+-- Primary purpose of this view is to account for splits. It retroactively pretends that a transaction happened at half the price,
+-- with twice as many shares, so that holdings can be calculated. The commission doesn't change because it's not per-share, so the total
+-- amount spent on commissions does not change retroactively.
+-- Untested, in particular wrt to selling stocks that have been split, or splitting stocks that have been sold, and what that does to the
+-- overall holdings/cost basis calculation. There might be bugs here. 
 drop view if exists v_stock_transactions;
 create view v_stock_transactions as
 select
@@ -323,7 +328,9 @@ select
      , account_id
      , stock_transaction.ticker_symbol
      , 1.0 * unit_price / coalesce(multiplier, 1) unit_price
+     , 1.0 * cost_basis / coalesce(multiplier, 1) cost_basis
      , quantity * coalesce(multiplier, 1) quantity
+     , commission
 from stock_transaction
          left join v_stock_split_multipliers ss
                    on stock_transaction.ticker_symbol = ss.ticker_symbol
@@ -338,7 +345,10 @@ select
     tax_category,
     ticker_symbol,
     sum(quantity) quantity,
-    sum(unit_price * st.quantity) / sum(quantity) cost_basis
+    -- SELLs have a cost_basis and a unit_price, BUYs have only a unit price
+    -- The cost_basis of the outstanding shares (currently held) is the sum of
+    -- the buy price for all shares less the buy price for the shares sold. I have to check this. 
+    sum(coalesce(cost_basis, unit_price) * st.quantity) / sum(quantity) cost_basis
 from v_stock_transactions st
          inner join stock_account sa on sa.stock_account_id = st.account_id
 group by sa.name, ticker_symbol, tax_category
