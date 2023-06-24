@@ -20,6 +20,8 @@ export const PaymentForm: React.FC<PanelProps<PaymentId>> = ({onClose, id}) => {
         saveAndClose,
         showIncurredDates,
         setShowIncurredDates,
+	showSplitFields,
+	setShowSplitFields,
         formStartRef
     } = usePaymentForm(onClose, id);
 
@@ -77,15 +79,22 @@ export const PaymentForm: React.FC<PanelProps<PaymentId>> = ({onClose, id}) => {
                 onChange={updateCurrency}
                 options={currencyRadioOptions}/>
 
-            <CurrencyInput
-                amount={payment.amount}
-                currency={payment.currency}
-                name="amount"
-                onChange={updatePayment}
-            />
+            <Stack horizontal tokens={stackTokens}>
+		<CurrencyInput
+                    amount={payment.amount}
+                    currency={payment.currency}
+                    name="amount"
+                    onChange={updatePayment}
+		/>
+
+                <Toggle
+                    label={'Split'}
+                    checked={showSplitFields}
+                    onChange={(_, val) => setShowSplitFields(val)}/>
+            </Stack>
 
             {
-                showIncurredDates &&
+                showSplitFields &&
                 <CurrencyInput
                     label="Incurred Amount"
                     amount={payment.incurredAmount}
@@ -125,14 +134,18 @@ export const PaymentForm: React.FC<PanelProps<PaymentId>> = ({onClose, id}) => {
 function usePaymentForm(onClose: () => void, paymentId?: PaymentId, ) {
     const [showIncurredDates, setShowIncurredDates] = useState<boolean>(false);
     const [payment, setPayment] = useState<Payment>(paymentId ? null : initializePayment())
+    const [showSplitFields, setShowSplitFields] = useState<boolean>(false);
     const formStartRef = useRef<ITextField>();
 
     useEffect(() => {
         if (paymentId) {
             getPayment(paymentId)
                 .then(payment => {
-                    if (payment.incurredBeginDate || payment.incurredEndDate || payment.incurredAmount !== null) {
+                    if (payment.incurredBeginDate || payment.incurredEndDate) {
                         setShowIncurredDates(true);
+                    }
+                    if (payment.incurredAmount !== null) {
+                        setShowSplitFields(true);
                     }
                     return payment;
                 })
@@ -140,6 +153,20 @@ function usePaymentForm(onClose: () => void, paymentId?: PaymentId, ) {
             //TODO cleanup - if the panel is closed before the request finishes an error is thrown
         }
     }, [paymentId])
+
+    useEffect(() => {
+	if (showSplitFields && payment.incurredAmount == null && payment.amount !== null) {
+            setPayment(payment => ({
+                ...payment,
+                incurredAmount: payment.amount / 2
+            }))
+	} else if (!showSplitFields) {
+            setPayment(payment => ({
+                ...payment,
+                incurredAmount: null
+            }))
+	}
+    }, [showSplitFields]) //eslint-disable-line react-hooks/exhaustive-deps
 
     const updateCurrency = useCallback((_, {key}) => {
         setPayment({
@@ -177,7 +204,8 @@ function usePaymentForm(onClose: () => void, paymentId?: PaymentId, ) {
         } else {
             await savePayment(preparePayment(payment, showIncurredDates))
             setShowIncurredDates(false)
-            setPayment(initializePayment(payment.paidDate))
+            setShowSplitFields(false)
+            setPayment(payment => initializePayment(payment.paidDate))
             formStartRef.current.focus();
         }
     }, [payment, saveAndClose, showIncurredDates])
@@ -190,6 +218,8 @@ function usePaymentForm(onClose: () => void, paymentId?: PaymentId, ) {
         saveAndClose,
         showIncurredDates,
         setShowIncurredDates,
+	showSplitFields,
+	setShowSplitFields,
         formStartRef
     };
 }
