@@ -1,6 +1,7 @@
 import * as db from '../data/db';
 import bodyParser from 'body-parser';
 import { Express } from 'express';
+import {errorHandler} from 'src/utils/utils';
 const jsonParser = bodyParser.json();
 
 const formatCsv = data => {
@@ -21,19 +22,13 @@ export const setupQueriesRoutes = (app: Express) => {
 	req.body.writeMode ?
 	  db.execQueryNoResults(req.body.sql)
 	    .then(data => res.send(JSON.stringify(data)))
-	    .catch(ex => {
-	      console.error(ex)
-	      res.status(500).send(ex)
-	    }) :
+	    .catch(errorHandler(res)) :
 	  db.execReadonlyQuery(req.body.sql)
             .then(data => res.send(
               req.body.format == "csv" ?
                 formatCsv(data) :
                 JSON.stringify(data)
             ))
-            .catch(ex => {
-              console.error(ex)
-              res.status(500).send(ex)
-            })
+            .catch(errorHandler(res))
         })
 }

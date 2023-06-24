@@ -1,6 +1,7 @@
 import * as db from '../data/drive.db';
 import bodyParser from 'body-parser';
 import { Express } from 'express';
+import {errorHandler} from 'src/utils/utils';
 const jsonParser = bodyParser.json();
 
 // TODO extract util
@@ -25,10 +26,6 @@ export const setupDriveRoutes = (app: Express) => {
                         formatCsv(data) :
                         JSON.stringify(data)
                 ))
-                .then(data => res.send())
-                .catch(ex => {
-                    console.error(ex)
-                    res.status(500).send(ex)
-                })
+                .catch(errorHandler(res))
         })
 }

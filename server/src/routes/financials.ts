@@ -1,6 +1,7 @@
 import * as db from '../data/db';
 import bodyParser from 'body-parser';
 import {Express} from 'express';
+import {errorHandler} from 'src/utils/utils';
 const jsonParser = bodyParser.json();
 
 export const setupFinancialsRoutes = (app: Express) => {
@@ -12,18 +13,12 @@ export const setupFinancialsRoutes = (app: Express) => {
         .post(jsonParser, (req, res) => {
             db.insertPayment(req.body)
                 .then(data => res.send(JSON.stringify(data)))
-                .catch(ex => {
-                    console.error(ex)
-                    res.status(500).send(ex)
-                })
+                .catch(errorHandler(res))
         })
         .put(jsonParser, (req, res) => {
             db.updatePayment(req.body)
                 .then(() => res.status(200).send())
-                .catch(ex => {
-                    console.error(ex)
-                    res.status(500).send(ex)
-                })
+                .catch(errorHandler(res))
         })
 
     app.get('/payments/:id', (req, res) => {
@@ -69,10 +64,7 @@ export const setupFinancialsRoutes = (app: Express) => {
     app.post('/cash-allocations', jsonParser, (req, res) => {
         db.insertCashAssetAllocationRecord(req.body)
             .then(() => res.status(200).send())
-            .catch(ex => {
-                console.error(ex)
-                res.status(500).send(ex)
-            })
+            .catch(errorHandler(res))
     })
 
     app.get('/unreported-spending', (req, res) => {
@@ -87,18 +79,12 @@ export const setupFinancialsRoutes = (app: Express) => {
         .post(jsonParser, (req, res) => {
             db.insertIncome(req.body)
                 .then(data => res.send(JSON.stringify(data)))
-                .catch(ex => {
-                    console.error(ex)
-                    res.status(500).send(ex)
-                })
+                .catch(errorHandler(res))
         })
         .put(jsonParser, (req, res) => {
             db.updateIncome(req.body)
                 .then(() => res.status(200).send())
-                .catch(ex => {
-                    console.error(ex)
-                    res.status(500).send(ex)
-                })
+                .catch(errorHandler(res))
         })
 
     app.get('/income/:id', (req, res) =>
@@ -113,28 +99,19 @@ export const setupFinancialsRoutes = (app: Express) => {
         .get((req, res) => {
             const pageSize = parseInt(req.query.pageSize as string);
             Promise.all([db.getFuelLog(pageSize), db.getFuelLogSummary()])
-                .then(([fuelLog, summary]) => res.send(JSON.stringify({fuelLog, summary})))
-                .catch(ex => {
-                    console.error(ex)
-                    res.status(500).send(ex)
-                })
+              .then(([fuelLog, summary]) => res.send(JSON.stringify({fuelLog, summary})))
+              .catch(errorHandler(res))
         })
         .post(jsonParser, (req, res) => {
             db.insertFuelLog(req.body)
-                .then(() => res.send(200))
-                .catch(ex => {
-                    console.error(ex)
-                    res.status(500).send(ex)
-                })
+              .then(() => res.send(200))
+              .catch(errorHandler(res))
         })
 
     app.get('/stock-holdings-summary', (req, res) => {
         db.getStockHoldingsSummary()
-            .then(data => res.send(JSON.stringify(data)))
-            .catch(ex => {
-                console.error(ex)
-                res.status(500).send(ex)
-            })
+          .then(data => res.send(JSON.stringify(data)))
+          .catch(errorHandler(res))
     })
 
     app.route('/stock-transactions')
@@ -143,19 +120,13 @@ export const setupFinancialsRoutes = (app: Express) => {
         )
         .post(jsonParser, (req, res) => {
             db.insertStockTransaction(req.body)
-                .then(data => res.send(JSON.stringify(data)))
-                .catch(ex => {
-                    console.error(ex)
-                    res.status(500).send(ex)
-                })
+              .then(data => res.send(JSON.stringify(data)))
+              .catch(errorHandler(res))
         })
         .put(jsonParser, (req, res) => {
             db.updateStockTransaction(req.body)
-                .then(() => res.status(200).send())
-                .catch(ex => {
-                    console.error(ex)
-                    res.status(500).send(ex)
-                })
+              .then(() => res.status(200).send())
+              .catch(errorHandler(res))
         })
 
     app.get('/stock-transactions/:id', (req, res) =>
@@ -177,18 +148,12 @@ export const setupFinancialsRoutes = (app: Express) => {
   app.route('/fx-transactions')    
         .post(jsonParser, (req, res) => {
             db.insertFxTransaction(req.body)
-                .then(data => res.send(JSON.stringify(data)))
-                .catch(ex => {
-                    console.error(ex)
-                    res.status(500).send(ex)
-                })
+              .then(data => res.send(JSON.stringify(data)))
+              .catch(errorHandler(res))
         })
         .put(jsonParser, (req, res) => {
             db.updateFxTransaction(req.body)
-                .then(() => res.status(200).send())
-                .catch(ex => {
-                    console.error(ex)
-                    res.status(500).send(ex)
-                })
+              .then(() => res.status(200).send())
+              .catch(errorHandler(res))
         })
 }

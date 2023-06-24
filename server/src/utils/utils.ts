@@ -3,3 +3,8 @@
   first character.
  */
 export const resolvePath = path => path.startsWith('~') ? path.replace('~', require('os').homedir()) : path;
+
+export const errorHandler = (res) => (ex) => {
+  console.error(ex)
+  res.status(500).send({ex: ex, msg: ex.toString()})
+}
