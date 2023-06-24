@@ -1,7 +1,7 @@
 import * as db from '../data/db';
 import bodyParser from 'body-parser';
 import { Express } from 'express';
-import {errorHandler} from 'src/utils/utils';
+import {errorHandler} from '../utils/utils';
 const jsonParser = bodyParser.json();
 
 const formatCsv = data => {
