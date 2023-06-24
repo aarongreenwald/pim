@@ -165,4 +165,30 @@ export const setupFinancialsRoutes = (app: Express) => {
     app.get('/stock-accounts', (req, res) =>
         db.getStockAccounts().then(data => res.send(JSON.stringify(data)))
     )
+
+  app.get('/fx-history', (req, res) =>
+    db.getFxHistory().then(data => res.send(JSON.stringify(data)))
+  )
+
+  app.get('/fx-transactions/:id', (req, res) =>
+    db.getFxTransaction((req.params as any).id).then(data => res.send(JSON.stringify(data)))
+  )
+  
+  app.route('/fx-transactions')    
+        .post(jsonParser, (req, res) => {
+            db.insertFxTransaction(req.body)
+                .then(data => res.send(JSON.stringify(data)))
+                .catch(ex => {
+                    console.error(ex)
+                    res.status(500).send(ex)
+                })
+        })
+        .put(jsonParser, (req, res) => {
+            db.updateFxTransaction(req.body)
+                .then(() => res.status(200).send())
+                .catch(ex => {
+                    console.error(ex)
+                    res.status(500).send(ex)
+                })
+        })
 }

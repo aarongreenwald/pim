@@ -1,25 +1,28 @@
 import {
-    CarSummary,
-    CashAccount,
-    CashAssetAllocation,
-    CashAssetAllocationRecord,
-    CashAssetRecord,
-    Category,
-    CategoryId,
-    FuelLog,
-    FuelLogSummary,
-    NewFuelLogDto,
-    Income,
-    IncomeId,
-    Payment,
-    PaymentId,
-    SpendingByCategory,
-    UnreportedSpending,
-    vPayment,
-    StockTransactionDto,
-    StockHoldingSummaryDto,
-    StockTransactionId,
-    StockAccountDto
+  CarSummary,
+  CashAccount,
+  CashAssetAllocation,
+  CashAssetAllocationRecord,
+  CashAssetRecord,
+  Category,
+  CategoryId,
+  FuelLog,
+  FuelLogSummary,
+  NewFuelLogDto,
+  Income,
+  IncomeId,
+  Payment,
+  PaymentId,
+  SpendingByCategory,
+  UnreportedSpending,
+  vPayment,
+  StockTransactionDto,
+  StockHoldingSummaryDto,
+  StockTransactionId,
+  StockAccountDto,
+  FxTransactionId,
+  vFxHistory,
+  FxTransactionDto
 } from '@pim/common';
 import {all, beginTransaction, commitTransaction, get, getDb, rollbackTransaction, run} from './db.helpers';
 
@@ -504,6 +507,101 @@ export const updateStockTransaction = async (transaction: StockTransactionDto) =
 
     await run(db, sql, params)
 }
+
+/**
+* The DB table supports transactions between a fixed local currency (USD) and any other
+* currency. But the views as well as the queries here (and subsequently the frontend)
+* require the foreign currency to be ILS for now. 
+*/
+
+export const getFxHistory  = async () => {
+    const db = await getDb();
+    const sql = `
+        select fx_transaction_id id, 
+               datetime(transaction_date / 1000, 'unixepoch') transactionDate,
+               account_name accountName,
+               ils,
+               usd,
+               usd_commission usdCommission,
+               fx_rate fxRate,
+               effective_rate effectiveRate,
+               note
+        from v_fx_history 
+        order by transaction_date desc
+    `;
+    return all<vFxHistory>(db, sql)
+}
+
+export const getFxTransaction = async (transactionId: FxTransactionId) => {
+  const db = await getDb();
+  //TODO this should be a view that assumes ils and matches vFXhistory in column names. 
+    const sql = `
+        select fx_transaction_id id,
+               account_id accountId,
+               datetime(transaction_date / 1000, 'unixepoch') transactionDate,
+               foreign_qty ilsAmount,
+               local_qty usdAmount, 
+               local_commission usdCommission,
+               note
+        from fx_transaction
+        where fx_transaction_id = ? and foreign_currency = 'ILS'
+    `;
+    return get<FxTransactionDto>(db, sql, transactionId)
+}
+
+
+export const insertFxTransaction = async (transaction: FxTransactionDto) => {
+    const sql = `
+    insert into fx_transaction
+        (transaction_date, account_id, foreign_currency, foreign_qty, local_qty, local_commission, note)
+    values (?,?,'ILS',?,?,?,?)
+`
+
+  //TODO: validations - the fallback to null done here forces the db to reject
+  //bad data but there should probably be a validation and sanitization step prior to getting here
+  const params = [
+    new Date(transaction.transactionDate).getTime(),
+    transaction.accountId || null,
+    transaction.ilsAmount || null,
+    transaction.usdAmount || null,
+    transaction.usdCommission || null,
+    transaction.note || null,
+  ]
+  const db = await getDb(false);
+  
+  const {lastId} = await run(db, sql, params)
+  //if the get() rejects but the run() resolved, the server will return 500 which is not good
+  //client will be tempted to retry, but the post was successful
+  return get<FxTransactionDto>(db, `select * from fx_transaction where fx_transaction_id = ?`, lastId)
+}
+
+export const updateFxTransaction = async (transaction: FxTransactionDto) => {
+    const sql = `
+        update fx_transaction
+        set transaction_date = ?,
+            account_id = ?,
+            foreign_qty = ?,
+            local_qty = ?,
+            local_commission = ?,
+            note = ?
+        where fx_transaction.fx_transaction_id = ?        
+  `
+    //TODO: validations - the fallback to null done here forces the db to reject
+    //bad data but there should probably be a validation and sanitization step prior to getting here
+    const params = [
+      new Date(transaction.transactionDate).getTime(),
+      transaction.accountId || null,
+      transaction.ilsAmount || null,
+      transaction.usdAmount || null,
+      transaction.usdCommission || null,
+      transaction.note || null,
+      transaction.id
+    ]
+    const db = await getDb(false);
+
+    await run(db, sql, params)
+}
+
 
 export const execQueryNoResults = async sql => {
   const db = await getDb(false);

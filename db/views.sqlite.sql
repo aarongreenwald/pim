@@ -353,6 +353,23 @@ from v_stock_transactions st
          inner join stock_account sa on sa.stock_account_id = st.account_id
 group by sa.name, ticker_symbol, tax_category
 
+
+-- Filter out anything not ILS for now so that I can assume the currency. 
+;drop view if exists v_fx_history
+;create view v_fx_history as
+select
+  fx_transaction_id,
+  transaction_date,
+  sa.name account_name,
+  foreign_qty ils,
+  local_qty usd,
+  -1.0 * local_commission usd_commission,
+  abs(1.0 * foreign_qty / local_qty) fx_rate,
+  abs(1.0 * foreign_qty / (local_qty - local_commission)) effective_rate,
+  note
+from fx_transaction f left join stock_account sa on f.account_id = sa.stock_account_id
+where foreign_currency = 'ILS'
+
 ;drop view if exists v_file
 ;create view v_file as
 select filename.*,

@@ -4,6 +4,7 @@ export type PaymentId = number;
 export type IncomeId = number;
 export type StockTransactionId = number;
 export type StockAccountId = number;
+export type FxTransactionId = number;
 export type Currency = 'ILS' | 'USD';
 export type TaxCategory = 'Taxable' | 'Exempt' | 'Deferred';
 
@@ -150,7 +151,7 @@ export interface StockAccountDto {
 
 export interface StockTransactionDto {
   id: StockTransactionId;
-  accountId: StockTransactionId;
+  accountId: StockAccountId;
   accountName: string;
   tickerSymbol: string;
   //transfer a string in the form '2022-01-29 21:34:23.000'
@@ -168,4 +169,28 @@ export interface StockHoldingSummaryDto {
   tickerSymbol: string;
   quantity: number;
   costBasis: number;
+}
+
+export interface vFxHistory {
+  id: FxTransactionId;
+  accountName: string;
+  transactionDate: string; //datetime???
+  ils: Money;
+  usd: Money;
+  usdCommission: Money;
+  fxRate: number;
+  effectiveRate: number;
+  note: string;
+}
+
+export interface FxTransactionDto {
+  id: FxTransactionId;
+  //transfer a string in the form '2022-01-29 21:34:23.000'
+  //so that timezone information is stripped out
+  transactionDate: string;
+  accountId: StockAccountId;
+  ilsAmount: Money;
+  usdAmount: Money;
+  usdCommission: Money;
+  note: string;
 }

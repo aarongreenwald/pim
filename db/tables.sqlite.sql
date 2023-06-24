@@ -85,6 +85,8 @@ create table fx_transaction(fx_transaction_id integer primary key not null
    , note text NULL
    , check (foreign_qty != 0 and local_qty != 0)
    , check (foreign_qty > 0 != local_qty > 0) --opposite signs
+   --todo add this in prod before committing
+   , check (local_commission is null or local_commission > 0) --always positive, regardless of direction
 )
 
 create table stock_dividend(dividend_id integer primary key not null --this might be useless but relatively harmless
@@ -96,6 +98,7 @@ create table stock_dividend(dividend_id integer primary key not null --this migh
    , unique(account_id, ticker_symbol, payment_date)
 )
 
+--todo add a standard way to add corrections/reconciliations
 create table stock_account_cash_transaction(transaction_id integer primary key not null
        , transaction_date date NOT NULL
        , account_id int NOT NULL REFERENCES stock_account

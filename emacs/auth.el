@@ -9,7 +9,8 @@
   (f-touch "~/.pim/host"))
 
 
-(setq pim-host (f-read-text "~/.pim/host" 'utf-8)) ;;  "http://localhost:4321/api/")
+(setq pim-host (f-read-text "~/.pim/host" 'utf-8)) ;;todo show pim-host value in sql-mode
+;;(setq pim-host "http://localhost:4321/api/")
 (defun pim-load-cookie () (f-read-text "~/.pim/auth" 'utf-8)) ;; how slow is this? Probably negligible. 
 
 (defun pim-login(password)

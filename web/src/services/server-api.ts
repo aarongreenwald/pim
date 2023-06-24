@@ -24,7 +24,10 @@ import {
     NotesSearchResults,
     StockTransactionDto,
     StockTransactionId,
-    StockAccountDto
+  StockAccountDto,
+  vFxHistory,
+  FxTransactionDto,
+  FxTransactionId
 } from '@pim/common';
 
 const handleResponse = (res) => {
@@ -87,6 +90,15 @@ export const getIncome: (incomeId: IncomeId) => Promise<Income> = (incomeId) =>
 
 export const saveIncome: (income: Income) => Promise<Income> = (income) =>
     income.id === -1 ? post('income', income) : put('income', income)
+
+export const getFxHistory: () => Promise<vFxHistory[]> = () =>
+  get('fx-history');
+
+export const getFxTransaction: (transactionId: FxTransactionId) => Promise<FxTransactionDto> = (transactionId) =>
+  get(`fx-transactions/${transactionId}`);
+
+export const saveFxTransaction: (fxTransaction: FxTransactionDto) => Promise<FxTransactionDto> = (fxTransaction) =>
+  fxTransaction.id === -1 ? post('fx-transactions', fxTransaction) : put('fx-transactions', fxTransaction)
 
 export const getAllStocks: () => Promise<StockTransactionDto[]> = () =>
     get('stock-transactions');
