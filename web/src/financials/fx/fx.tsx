@@ -1,10 +1,10 @@
-import {List} from './list';
+import {List} from '../list';
 import {useCallback, useEffect, useMemo, useState} from 'react';
 import * as React from 'react';
-import {getFxHistory} from '../services/server-api';
+import {getFxHistory} from '../../services/server-api';
 import {CommandBar, ICommandBarItemProps, Panel} from '@fluentui/react';
 import {useBoolean} from '@uifabric/react-hooks';
-import {commandBarStyles} from './styles';
+import {commandBarStyles} from '../styles';
 import {FxForm} from './fx-form';
 import {FxTransactionId, vFxHistory} from '@pim/common';
 

@@ -1,13 +1,13 @@
 import {useCallback, useEffect, useState} from 'react';
 import * as React from 'react';
 import {StockAccountId, FxTransactionDto, FxTransactionId} from '@pim/common';
-import {getFxTransaction, saveFxTransaction} from '../services/server-api';
+import {getFxTransaction, saveFxTransaction} from '../../services/server-api';
 import {PrimaryButton, DefaultButton, Stack, TextField} from '@fluentui/react'
-import {PanelProps} from '../common/panel.types';
-import {stackTokens} from './styles';
-import {CurrencyInput} from './currency-input';
-import {StockAccountDropdown} from './stocks/stock-account-dropdown';
-import {formatDay, formatTimeInput} from '../common/date.utils';
+import {PanelProps} from '../../common/panel.types';
+import {stackTokens} from '../styles';
+import {CurrencyInput} from '../currency-input';
+import {StockAccountDropdown} from '../stocks/stock-account-dropdown';
+import {formatDay, formatTimeInput} from '../../common/date.utils';
 
 export const FxForm: React.FC<PanelProps<FxTransactionId>> = ({onClose, id}) => {
     const {fxTransaction, updateTransaction, updateAccount, submitForm} = useFxTransactionForm(onClose, id);

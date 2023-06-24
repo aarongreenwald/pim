@@ -10,7 +10,7 @@ import {Home} from '../home/home.index';
 import {Income} from '../financials/income/income';
 import {Payments} from '../financials/payments/payments';
 import {Stocks} from '../financials/stocks/stocks';
-import {Fx} from '../financials/fx';
+import {Fx} from '../financials/fx/fx';
 
 interface NavigationProps {
     hideNav: () => void;
