@@ -3,7 +3,7 @@ import {getCarSummary, getCashAllocations, getUnreportedSpending} from '../../se
 import {List} from '../list';
 import * as React from 'react';
 import {CarSummary, CashAssetAllocation, UnreportedSpending} from '@pim/common';
-import {useBoolean} from '@uifabric/react-hooks';
+import {useBoolean} from '@fluentui/react-hooks';
 import {CommandBar, ICommandBarItemProps, Panel, Stack} from '@fluentui/react';
 import {commandBarStyles} from '../styles';
 import {AddCashRecord} from './add-cash-record';

@@ -3,7 +3,7 @@ import {useCallback, useEffect, useMemo, useState} from 'react';
 import * as React from 'react';
 import {getAllIncome} from '../../services/server-api';
 import {CommandBar, ICommandBarItemProps, Panel} from '@fluentui/react';
-import {useBoolean} from '@uifabric/react-hooks';
+import {useBoolean} from '@fluentui/react-hooks';
 import {commandBarStyles} from '../styles';
 import {IncomeForm} from './income-form';
 import {IncomeId, Income as IncomeModel} from '@pim/common';

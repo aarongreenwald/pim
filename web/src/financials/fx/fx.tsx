@@ -3,7 +3,7 @@ import {useCallback, useEffect, useMemo, useState} from 'react';
 import * as React from 'react';
 import {getFxHistory} from '../../services/server-api';
 import {CommandBar, ICommandBarItemProps, Panel} from '@fluentui/react';
-import {useBoolean} from '@uifabric/react-hooks';
+import {useBoolean} from '@fluentui/react-hooks';
 import {commandBarStyles} from '../styles';
 import {FxForm} from './fx-form';
 import {FxTransactionId, vFxHistory} from '@pim/common';

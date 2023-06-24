@@ -1,7 +1,7 @@
 import * as React from 'react';
 import {DefaultButton, Stack, Panel, Label} from '@fluentui/react';
 import {RecentNotes} from '../notes/recent-notes';
-import {useBoolean} from '@uifabric/react-hooks';
+import {useBoolean} from '@fluentui/react-hooks';
 import {useCallback, useEffect, useState} from 'react';
 import {getFuelLog} from '../services/server-api';
 import {FuelLogDto} from '@pim/common';

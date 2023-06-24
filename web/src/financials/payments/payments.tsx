@@ -6,7 +6,7 @@ import {CommandBar, ICommandBarItemProps, Panel} from '@fluentui/react';
 import {List, SortConfig, SortDirection} from '../list';
 import {PaymentForm} from './payment-form';
 import {commandBarStyles} from '../styles';
-import {useBoolean} from '@uifabric/react-hooks';
+import {useBoolean} from '@fluentui/react-hooks';
 
 export const Payments: React.FC = () => {
     const {

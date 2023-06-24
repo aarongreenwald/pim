@@ -4,7 +4,7 @@ import {FuelLogDto, PaymentId} from '@pim/common';
 import {getFuelLog} from '../../services/server-api';
 import {CommandBar, ICommandBarItemProps, Panel, List as FluentList, Text} from '@fluentui/react';
 import {commandBarStyles} from '../styles';
-import {useBoolean} from '@uifabric/react-hooks';
+import {useBoolean} from '@fluentui/react-hooks';
 import {LogFuelForm} from './log-fuel-form';
 import {FuelLogCard} from './fuel-log-card';
 import {PaymentForm} from '../payments/payment-form';

@@ -3,7 +3,7 @@ import {useCallback, useEffect, useMemo, useState} from 'react';
 import * as React from 'react';
 import {getAllStocks} from '../../services/server-api';
 import {CommandBar, ICommandBarItemProps, Panel} from '@fluentui/react';
-import {useBoolean} from '@uifabric/react-hooks';
+import {useBoolean} from '@fluentui/react-hooks';
 import {commandBarStyles} from '../styles';
 import {StocksForm} from './stocks-form';
 import {StockTransactionId, StockTransactionDto} from '@pim/common';
