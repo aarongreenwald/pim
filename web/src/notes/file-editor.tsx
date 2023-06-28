@@ -5,8 +5,8 @@ import * as React from 'react';
 import AceEditor from 'react-ace';
 import {Prompt} from 'react-router';
 import {saveAndCloseIcon, saveIcon, toggleEditorIcon, wrapLinesIcon} from './icons';
-require('ace-builds/src-noconflict/mode-markdown');
-require('ace-builds/src-noconflict/theme-tomorrow_night_eighties');
+import 'ace-builds/src-noconflict/mode-markdown';
+import 'ace-builds/src-noconflict/theme-tomorrow_night_eighties';
 import 'ace-builds/src-min-noconflict/ext-searchbox';
 
 //see more themes here: https://ace.c9.io/build/kitchen-sink.html
