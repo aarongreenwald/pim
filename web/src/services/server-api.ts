@@ -4,6 +4,7 @@ import {
     CashAccount,
     CashAllocationsDto,
     CashAssetAllocationRecord,
+    CashAssetAllocationHistory,
     CashAssetRecord,
     Category,
     CategoryId,
@@ -78,6 +79,9 @@ export const getCashRecords = (recordDate: string | number | Date): Promise<Cash
 
 export const getCashAllocations = (): Promise<CashAllocationsDto> =>
     get('cash-allocations')
+
+export const getCashAssetAllocationHistory = (allocationCode: string): Promise<CashAssetAllocationHistory[]> =>
+    get(`cash-allocations/history/${allocationCode}`)
 
 export const getUnreportedSpending = (): Promise<UnreportedSpending[]> =>
     get('unreported-spending')

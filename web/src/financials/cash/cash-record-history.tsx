@@ -4,11 +4,12 @@ import {List} from '../list';
 import * as React from 'react';
 import {CarSummary, CashAssetAllocation, UnreportedSpending} from '@pim/common';
 import {useBoolean} from '@fluentui/react-hooks';
-import {CommandBar, ICommandBarItemProps, Panel, Stack} from '@fluentui/react';
+import {CommandBar, ICommandBarItemProps, Panel, PanelType, Stack} from '@fluentui/react';
 import {commandBarStyles} from '../styles';
 import {AddCashRecord} from './add-cash-record';
 import {formatDay} from '../../common/date.utils';
 import {AddCashAssetAllocation} from './add-cash-asset-allocation';
+import {CashAllocationHistory} from './cash-allocation-history';
 
 export const CashRecordHistory: React.FC = () => {
     const [carSummary, setCarSummary] = useState<CarSummary[]>([]);
@@ -37,6 +38,9 @@ export const CashRecordHistory: React.FC = () => {
     const [selectedItem, setSelectedItem] = useState<string>(null)
     const hideEditCar = () => setSelectedItem(null);
 
+    const [selectedAllocation, setSelectedAllocation] = useState<string>(null)
+    const hideViewAllocationHistory = () => setSelectedAllocation(null);
+
     return (
         <>
             <CommandBar items={commands} styles={commandBarStyles}/>
@@ -46,6 +50,7 @@ export const CashRecordHistory: React.FC = () => {
                     <>
                         <List<CashAssetAllocation>
                             data={cashAllocations}
+                            onClick={alloc => setSelectedAllocation(alloc.allocationCode == 'Unallocated' ? null : alloc.allocationCode )}
                             idField={'allocationCode'} />
                     </>
                 }
@@ -76,6 +81,14 @@ export const CashRecordHistory: React.FC = () => {
                 headerText="Update Cash Allocations"
                 onDismiss={hideAddCaa}>
                 <AddCashAssetAllocation onClose={hideAddCaa} />
+            </Panel>
+
+            <Panel
+		type={PanelType.large}
+                isOpen={!!selectedAllocation}
+                headerText={selectedAllocation}
+                onDismiss={hideViewAllocationHistory}>
+                <CashAllocationHistory id={selectedAllocation} onClose={hideViewAllocationHistory} />
             </Panel>
 
             <Panel

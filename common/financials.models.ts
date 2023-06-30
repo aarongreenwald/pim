@@ -90,6 +90,14 @@ export interface CashAssetAllocation {
   usd: Money;
 }
 
+export interface CashAssetAllocationHistory {
+  recordDate: string;
+  ils: Money;
+  usd: Money;
+  allocationCode: string;
+  note?: string;
+}
+
 export interface UnallocatedCash {
   ils: Money;
   usd: Money;

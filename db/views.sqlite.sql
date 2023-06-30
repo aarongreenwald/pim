@@ -89,11 +89,9 @@ select rc.category_id, rc.group_category_id, rc.root_category_id,
 from rollup_category rc left join category c on rc.category_id = c.category_id
                         left join category gc on rc.group_category_id = gc.category_id
                         left join category r on rc.root_category_id = r.category_id
-;
 
-drop view if exists v_cash_assets_allocation;
-
-create view v_cash_assets_allocation as
+;drop view if exists v_cash_assets_allocation;
+;create view v_cash_assets_allocation as
 select allocation_code,
        sum(case currency when 'USD' then amount else null end) usd,
        sum(case currency when 'ILS' then amount else null end) ils
@@ -101,6 +99,14 @@ from cash_assets_allocation
 group by allocation_code
 having coalesce(usd, 0) <> 0 or coalesce(ils, 0) <> 0;
 
+;drop view if exists v_cash_assets_allocation_history;
+;create view v_cash_assets_allocation_history as
+select record_date,
+       allocation_code,
+       case currency when 'USD' then amount else null end usd,
+       case currency when 'ILS' then amount else null end ils,
+       note
+from cash_assets_allocation;
 
 /*
  v_unallocated_cash_snapshot represents the current status of unallocated money.

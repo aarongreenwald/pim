@@ -61,6 +61,10 @@ export const setupFinancialsRoutes = (app: Express) => {
         })
     })
 
+    app.get('/cash-allocations/history/:allocationCode', (req, res) => {
+	db.getCashAssetsAllocationHistory((req.params as any).allocationCode).then(data => res.send(JSON.stringify(data)))
+    })
+
     app.post('/cash-allocations', jsonParser, (req, res) => {
         db.insertCashAssetAllocationRecord(req.body)
             .then(() => res.status(200).send())

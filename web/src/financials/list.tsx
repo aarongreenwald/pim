@@ -24,7 +24,7 @@ interface ListProps<T = unknown> {
     data: T[];
     sortConfig?: SortConfig;
     sortData?: (sort: SortConfig) => void;
-    idField: string;
+    idField?: string;
     searchableTextFields?: string[];
     onClick?: (row: T) => void;
 }

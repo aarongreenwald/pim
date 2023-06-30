@@ -22,7 +22,8 @@ import {
   StockAccountDto,
   FxTransactionId,
   vFxHistory,
-  FxTransactionDto
+  FxTransactionDto,
+  CashAssetAllocationHistory
 } from '@pim/common';
 import {all, beginTransaction, commitTransaction, get, getDb, rollbackTransaction, run} from './db.helpers';
 
@@ -272,8 +273,6 @@ export const updateCashAssetRecords = async (recordDate: string, accountBalances
         await rollbackTransaction(db);
         throw ex
     }
-
-
 }
 
 export const getCashAssetsAllocation = async () => {
@@ -297,6 +296,15 @@ export const getUnreportedSpending = async () => {
     )
 }
 
+export const getCashAssetsAllocationHistory = async (allocationCode  = null) => {
+    const db = await getDb();
+    return all<CashAssetAllocationHistory>(db,
+	`
+          select record_date recordDate, allocation_code allocationCode, ils, usd, note from v_cash_assets_allocation_history
+          ${allocationCode ? 'where allocation_code = ?' : ''}
+          order by record_date desc
+       `, [allocationCode].filter(Boolean))
+}
 
 export const getAllCategories = async () => {
   const db = await getDb();
