@@ -6,17 +6,14 @@ const jsonParser = bodyParser.json();
 
 export const setupQueriesRoutes = (app: Express) => {
     app.route('/queries/exec')
-      .post(jsonParser, (req, res) => {
-	req.body.writeMode ?
-	  db.execQueryNoResults(req.body.sql)
-	    .then(data => res.send(JSON.stringify(data)))
-	    .catch(errorHandler(res)) :
-	  db.execReadonlyQuery(req.body.sql)
-            .then(data => res.send(
-              req.body.format == "list" ?
-                asArrays(data) :
-                JSON.stringify(data)
-            ))
-            .catch(errorHandler(res))
+	.post(jsonParser, (req, res) => {
+	    const promise: Promise<any> = req.body.writeMode ? db.execQueryNoResults(req.body.sql) : db.execReadonlyQuery(req.body.sql);	    
+            promise
+		.then(data => res.send(
+		    req.body.format == "list" && !req.body.writeMode ?
+			asArrays(data) :
+			JSON.stringify(data)
+		))
+		.catch(errorHandler(res))
         })
 }

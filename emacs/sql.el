@@ -20,16 +20,18 @@
 		     :as #'json-read
 		     :then `(lambda (data)
 			      (progn
-				(if (equal ',write-mode 0) 
-				    (insert-to-pim-grid-buffer ',bufname data ',keymap ',temp-buffer)
-				  (message (concat "Succeeded: " data))))))))
+				(if (equal ',write-mode 0)
+				    (progn
+				      (message "Succeeded on %s" pim-host)
+				      (insert-to-pim-grid-buffer ',bufname data ',keymap ',temp-buffer))
+				  (message "Succeeded on %s, result: %s" pim-host  data)))))))
 
 (defun pim-exec-query-selection ()
   "Run the query under the point with readonly permissions and put the result in a pim-grid buffer."
   (interactive)
   (pim-highlight-current-sql-statement)
   ;; todo save execution history (comint?)
-  (message "Running query...")
+  (message (concat "Running query on " pim-host))
   ;; for running selection instead of query under point
   ;; (setq sql (buffer-substring-no-properties (mark) (point)))
   (setq sql (pim-get-current-sql-statement))
@@ -40,7 +42,8 @@
   (interactive)
   (pim-highlight-current-sql-statement)
   (message "Executing query...")
-  (setq sql (buffer-substring-no-properties (mark) (point)))
+  ;;  (setq sql (buffer-substring-no-properties (mark) (point)))
+  (setq sql (pim-get-current-sql-statement))
   (pim-run-query sql nil 1)
   )
 
