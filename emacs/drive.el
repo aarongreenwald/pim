@@ -7,20 +7,19 @@
   (or dir (setq dir "./"))
 
   (message (concat "Loading: " dir))
-  
-  (plz 'post "http://localhost:4321/api/drive/ls-dir"
-    :headers '(("Content-Type" . "application/json"))
-    :body (json-encode  `(("format" . "csv")
-			  ("path" . ,dir)))
-    ;;  :as #'json-read
-    :then `(lambda (result)
-	     (progn
-	       ;; switch to one of these to use pim-dir-mode instead of grid-mode.
-	       ;; (send-to-pim-dir-csv-buffer result ,dir)
-	       ;; (send-to-pim-dir-buffer result ,dir)
-	       ;; grid
-	       (pim-dir-show-in-grid result ,dir (pim-dir-grid-keymap))
-	       (message (concat "Retrieved: " ,dir))))))
+
+  (let ((json-array-type 'list))
+    (pim-api-request 'post "drive/ls-dir"
+		     :body  `(("format" . "list")
+			      ("path" . ,dir))
+		     :then `(lambda (result)
+			      (progn
+				;; switch to one of these to use pim-dir-mode instead of grid-mode.
+				;; (send-to-pim-dir-csv-buffer result ,dir)
+				;; (send-to-pim-dir-buffer result ,dir)
+				;; grid
+				(pim-dir-show-in-grid result ,dir (pim-dir-grid-keymap))
+				(message (concat "Retrieved: " ,dir)))))))
 
 (defun pim-dir-show-in-grid (data dir keymap)
   "pim-grid"

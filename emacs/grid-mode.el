@@ -15,9 +15,8 @@
 ;; * Common functions on current value that run queries, ideally pass a specific keymap when inserting to grid that specifies which keys call which functions, the rest can be called interactively. On a generic sql query, there are no special functions
 ;; * Optionally set buffer to be disposable instead of reusing a permanent buffer, so that stacking is possible
 
-(defun insert-to-pim-grid-buffer (bufname text &optional keymap temp-buffer)
-  "Expects a csv in text, inserts to a buffer and sets to pim-grid-mode"
-  (setq data-list (parse-csv-to-list text))
+(defun insert-to-pim-grid-buffer (bufname data-list &optional keymap temp-buffer)
+  "Expects a 2 dimensional list, the first element is a list of headers, what follows is a list of data. Inserts to a buffer and sets to pim-grid-mode"
   (setq headers (pop data-list))
 
   (setq param (copy-ctbl:param ctbl:default-rendering-param))

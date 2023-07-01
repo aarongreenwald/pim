@@ -49,8 +49,8 @@ Function also verifies the available cookie is still valid, if not performs a lo
   )))
 
 (cl-defun pim-api-request (method path &key body then as)
-;;todo handle auth failures, try to login in and then run the request again.
-;;also: capture the new cookie and save it.
+  ;;todo handle auth failures, try to login in and then run the request again.
+  ;;also: capture the new cookie and save it.
   (let ((cookie (pim-load-cookie)))
     (plz method (concat pim-host path)
       :headers `(("Content-Type" . "application/json")

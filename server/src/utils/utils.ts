@@ -8,3 +8,14 @@ export const errorHandler = (res) => (ex) => {
   console.error(ex)
   res.status(500).send({ex: ex, msg: ex.toString()})
 }
+
+export const asArrays = data => {
+    if (!data.length) {
+        return []
+    }
+    const keys = Object.keys(data[0])
+    return [
+        keys,
+        ...(data.map(row => keys.map(key => row[key])))
+    ]
+}

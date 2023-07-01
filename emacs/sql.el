@@ -12,17 +12,17 @@
 
 ;; Note: override pim-host with "http://localhost:4321/api/" for testing
 (defun pim-run-query (query bufname write-mode &optional keymap temp-buffer)
-  (pim-api-request 'post "queries/exec"
-       :body  `(("format" . "csv")
-		("sql" . ,query)
-		("writeMode" . ,write-mode))
-       :as 'string
-       :then `(lambda (data)
-		(progn
-		  (if (equal ',write-mode 0) 
-		      (insert-to-pim-grid-buffer ',bufname data ',keymap ',temp-buffer)
-		    (message (concat "Succeeded: " data)))))
-  ))
+  (let ((json-array-type 'list))
+    (pim-api-request 'post "queries/exec"
+		     :body  `(("format" . "list")
+			      ("sql" . ,query)
+			      ("writeMode" . ,write-mode))
+		     :as #'json-read
+		     :then `(lambda (data)
+			      (progn
+				(if (equal ',write-mode 0) 
+				    (insert-to-pim-grid-buffer ',bufname data ',keymap ',temp-buffer)
+				  (message (concat "Succeeded: " data))))))))
 
 (defun pim-exec-query-selection ()
   "Run the query under the point with readonly permissions and put the result in a pim-grid buffer."
