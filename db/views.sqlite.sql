@@ -360,6 +360,14 @@ from v_stock_transactions st
 group by sa.name, ticker_symbol, tax_category
 
 
+;drop view if exists v_stock_holdings_summary
+
+;create view v_stock_holdings_summary as
+select ticker_symbol, tax_category, sum(quantity) quantity, sum(cost_basis * quantity) / sum(quantity) costBasis
+from v_stock_holdings
+group by tax_category, ticker_symbol
+
+
 -- Filter out anything not ILS for now so that I can assume the currency. 
 ;drop view if exists v_fx_history
 ;create view v_fx_history as
