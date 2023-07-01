@@ -153,7 +153,79 @@ So this will have to do.
   "Raw data in the grid - first element is headers, second element is list of lists (rows of fields)")
 (make-variable-buffer-local 'pim-grid-data)
 
+(defvar pim-grid-mark-stats (list 0 0 0)
+  "Structure holds: avg, sum, count of marked cells.")
+(make-variable-buffer-local 'pim-grid-data-marked-stats)
+
+(defvar pim-grid-marked-cells nil
+  "Mapping between cell-id and overlay")
+(make-variable-buffer-local 'pim-grid-data-marked-cells)
+
+
+(defun pim-query-toggle-mark-cell()
+  "Marks/unmarks the currently selected cell, overlaying it with a special style, and 
+keeps stats (sum/count/average) on the selected cells."
+  (interactive)
+  ;; todo if it isn't a number it's treated as "0", I think, and messes up count and average. 
+  (setq cell-value (string-to-number (pim-query-get-selected-cell-value)))
+  (setq cell-id (ctbl:component-selected ctbl:component))
+
+  (setq overlay (plist-get pim-grid-marked-cells cell-id))
+
+  (when overlay
+      (progn
+	(message "unmarking")
+	(delete-overlay overlay)
+	(setq pim-grid-marked-cells (plist-put pim-grid-marked-cells cell-id nil))))    
+
+  (unless overlay
+    (message "marking")
+    (pim-query-set-mark-overlay (ctbl:cp-get-selected ctbl:component)))
+  
+  (let ((cnt (nth 0 pim-grid-mark-stats))
+	(sum (nth 1 pim-grid-mark-stats))
+	(avg (nth 2 pim-grid-mark-stats)))
+    (let ((new-cnt (+ cnt (if overlay -1 1)))
+	  (new-sum (+ sum (if overlay (* -1 cell-value) cell-value))))
+      (setq pim-grid-mark-stats (list new-cnt new-sum (if (= 0 new-cnt) 0 (/ new-sum new-cnt))))))
+  
+    (pim-query-show-mark-stats))
+
+(defun pim-query-set-mark-overlay (cell-id)
+  (setq component ctbl:component)
+  (let ((last (ctbl:component-selected component))
+        (dest (ctbl:component-dest component))
+        (model (ctbl:component-model component)))
+      (ctbl:find-all-by-cell-id dest cell-id
+				(lambda (begin end)
+				  (let ((overlay (make-overlay begin end)))
+				    (overlay-put overlay 'face '(:background "brightmagenta"))
+				    (setq pim-grid-marked-cells (plist-put pim-grid-marked-cells cell-id overlay))
+				    )))))
+
+(defun pim-query-reset-marks ()
+  (interactive)
+  ;; todo iterate over plist and delete all overlays
+  ;;  (setq overlay (plist-get pim-grid-marked-cells cell-id))
+  (setq pim-grid-mark-stats (list 0 0 0))
+  (cl-loop for key in pim-grid-marked-cells
+	   for i from 0
+	   if (oddp i)
+	   do (delete-overlay key))
+  (setq pim-grid-marked-cells (list))
+  )
+
+(defun pim-query-show-mark-stats()
+  (interactive)
+      (message (concat "Count: " (number-to-string (nth 0 pim-grid-mark-stats))
+		     " | Sum: " (number-to-string (nth 1 pim-grid-mark-stats))
+		     " | Avg: " (number-to-string (nth 2 pim-grid-mark-stats))))
+)
+
 ;; TODO this pollutes ctbl, if I could get pim-grid to work as a major/minor mode
 ;; reliably this can be moved to there. 
 (define-key ctbl:table-mode-map (kbd "s") 'ctbl:show-cell-in-tooltip)
 (define-key ctbl:table-mode-map (kbd "?") 'describe-mode)
+(define-key ctbl:table-mode-map (kbd "x") 'pim-query-toggle-mark-cell)
+(define-key ctbl:table-mode-map (kbd "u") 'pim-query-reset-marks)
+;; (define-key ctbl:table-mode-map (kbd "M-m") 'pim-query-show-mark-stats)
