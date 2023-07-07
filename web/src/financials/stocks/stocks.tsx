@@ -1,16 +1,20 @@
 import {List} from '../list';
 import {useCallback, useEffect, useMemo, useState} from 'react';
 import * as React from 'react';
-import {getAllStocks} from '../../services/server-api';
+import {getAllStocks, getStockHoldingsSummary} from '../../services/server-api';
 import {CommandBar, ICommandBarItemProps, Panel} from '@fluentui/react';
 import {useBoolean} from '@fluentui/react-hooks';
 import {commandBarStyles} from '../styles';
 import {StocksForm} from './stocks-form';
-import {StockTransactionId, StockTransactionDto} from '@pim/common';
+import {StockTransactionId, StockTransactionDto, StockHoldingSummaryDto} from '@pim/common';
 
 export const Stocks: React.FC = () => {
     const [stocks, setStocks] = useState([]);
-    const reloadData = useCallback(() => getAllStocks().then(setStocks), [])
+    const [stockHoldingsSummary, setStockHoldingsSummary] = useState<StockHoldingSummaryDto[]>([])
+    const reloadData = useCallback(() => {
+	getAllStocks().then(setStocks)
+	getStockHoldingsSummary().then(setStockHoldingsSummary)
+    }, [])
     useEffect(() => {reloadData()}, [reloadData])
 
     const [addStockTransaction, {setTrue: showAddStockTransaction, setFalse: hideAddStockTransaction}] = useBoolean(false)
@@ -22,6 +26,11 @@ export const Stocks: React.FC = () => {
     return (
         <>
             <CommandBar items={commands} styles={commandBarStyles}/>
+            {
+		stockHoldingsSummary &&
+		<List<StockHoldingSummaryDto>
+                    data={stockHoldingsSummary} />
+            }
             {
 
                 stocks &&

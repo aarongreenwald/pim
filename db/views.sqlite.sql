@@ -363,7 +363,7 @@ group by sa.name, ticker_symbol, tax_category
 ;drop view if exists v_stock_holdings_summary
 
 ;create view v_stock_holdings_summary as
-select ticker_symbol, tax_category, sum(quantity) quantity, sum(cost_basis * quantity) / sum(quantity) costBasis
+select ticker_symbol, tax_category, sum(quantity) quantity, sum(cost_basis * quantity) / sum(quantity) cost_basis
 from v_stock_holdings
 group by tax_category, ticker_symbol
 

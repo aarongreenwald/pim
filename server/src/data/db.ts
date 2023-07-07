@@ -410,8 +410,8 @@ export const insertFuelLog = async (fuelLogDto: NewFuelLogDto) => {
 export const getStockHoldingsSummary = async () => {
     const db = await getDb();
     const sql = `
-        select name accountName, tax_category taxCategory, ticker_symbol tickerSymbol, quantity, cost_basis costBasis
-        from v_stock_holdings
+        select ticker_symbol tickerSymbol, tax_category taxCategory, quantity, cost_basis costBasis
+        from v_stock_holdings_summary
     `;
     return all<StockHoldingSummaryDto>(db, sql)
 }

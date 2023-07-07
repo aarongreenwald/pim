@@ -28,7 +28,8 @@ import {
   StockAccountDto,
   vFxHistory,
   FxTransactionDto,
-  FxTransactionId
+  FxTransactionId,
+  StockHoldingSummaryDto
 } from '@pim/common';
 
 const handleResponse = (res) => {
@@ -106,6 +107,9 @@ export const saveFxTransaction: (fxTransaction: FxTransactionDto) => Promise<FxT
 
 export const getAllStocks: () => Promise<StockTransactionDto[]> = () =>
     get('stock-transactions');
+
+export const getStockHoldingsSummary: () => Promise<StockHoldingSummaryDto[]> = () =>
+    get('stock-holdings-summary');
 
 export const getStockTransaction: (transactionId: StockTransactionId) => Promise<StockTransactionDto> = (transactionId) =>
     get(`stock-transactions/${transactionId}`);
