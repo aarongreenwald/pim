@@ -202,3 +202,19 @@ export interface FxTransactionDto {
   usdCommission: Money;
   note: string;
 }
+
+export interface StockAccountCashBalance {
+    id: StockAccountId;
+    accountName: string;
+    ils: Money;
+    usd: Money;
+}
+
+export interface StockAccountCashFlow {
+    recordType: 'cash_flow' | 'stock_transaction'; //TODO add all types
+    recordId: FxTransactionId | StockTransactionId; //TODO
+    date: string;
+    ils: Money;
+    usd: Money;
+    description: string;
+}

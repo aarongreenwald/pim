@@ -29,7 +29,10 @@ import {
   vFxHistory,
   FxTransactionDto,
   FxTransactionId,
-  StockHoldingSummaryDto
+  StockHoldingSummaryDto,
+  StockAccountCashBalance,
+  StockAccountId,
+  StockAccountCashFlow
 } from '@pim/common';
 
 const handleResponse = (res) => {
@@ -119,6 +122,12 @@ export const saveStockTransaction: (stockTransaction: StockTransactionDto) => Pr
 
 export const getStockAccounts: () => Promise<StockAccountDto[]> = () =>
     get('/stock-accounts')
+
+export const getStockAccountCashBalances: () => Promise<StockAccountCashBalance[]> = () =>
+    get('stock-accounts/cash-balances');
+
+export const getStockAccountCashFlow: (accountId: StockAccountId) => Promise<StockAccountCashFlow[]>  = (accountId) =>
+    get(`stock-accounts/${accountId}/cash-flow`);
 
 export const getAllCategories = (): Promise<Category[]> =>
   get('categories', )

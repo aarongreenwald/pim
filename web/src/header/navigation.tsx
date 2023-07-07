@@ -10,6 +10,7 @@ import {Home} from '../home/home.index';
 import {Income} from '../financials/income/income';
 import {Payments} from '../financials/payments/payments';
 import {Stocks} from '../financials/stocks/stocks';
+import {StockAccountsCash} from '../financials/stocks/stock-accounts-cash';
 import {Fx} from '../financials/fx/fx';
 
 interface NavigationProps {
@@ -29,6 +30,7 @@ export const Navigation: React.FC<NavigationProps> = ({hideNav, showNav, shouldS
                 <Route path="/spending" component={Payments}/>
                 <Route path="/income" component={Income}/>
 		<Route path="/stocks" component={Stocks}/>
+                <Route path="/stock-accounts" component={StockAccountsCash}/>
 		<Route path="/fx" component={Fx}/>
                 <Route path="/cash" component={CashRecordHistory}/>
                 <Route path="/fuel" component={FuelHistory}/>
@@ -73,6 +75,11 @@ const navGroups = [
                 key: 'stocks',
                 name: 'Stocks',
                 url: '#/stocks'
+            },
+            {
+		key: 'stock-accounts',
+		name: 'Stock Accounts',
+		url: '#/stock-accounts'
             },
             {
                 key: 'fx',

@@ -23,7 +23,9 @@ import {
   FxTransactionId,
   vFxHistory,
   FxTransactionDto,
-  CashAssetAllocationHistory
+  CashAssetAllocationHistory,
+  StockAccountCashBalance,
+  StockAccountCashFlow
 } from '@pim/common';
 import {all, beginTransaction, commitTransaction, get, getDb, rollbackTransaction, run} from './db.helpers';
 
@@ -610,6 +612,26 @@ export const updateFxTransaction = async (transaction: FxTransactionDto) => {
     await run(db, sql, params)
 }
 
+export const getStockAccountCashBalances = async() => {
+    const sql = `select account_id id, name accountName, ils, usd
+                 from v_stock_account_cash_balances cb
+                 left join stock_account sa on cb.account_id = sa.stock_account_id`
+
+    const db = await getDb(true)
+    return await all<StockAccountCashBalance[]>(db, sql)
+}
+
+export const getStockAccountCashFlow = async(id: StockTransactionId) => {
+    const sql = `select name accountName, transaction_date date, record_type recordType, record_id recordId, ils, usd, description
+                 from v_stock_account_cash_flow cf
+                 left join stock_account sa on cf.account_id = sa.stock_account_id
+                 where cf.account_id = ?
+                 order by transaction_date desc
+`
+
+    const db = await getDb(true)
+    return await all<StockAccountCashFlow[]>(db, sql, [id])    
+}
 
 export const execQueryNoResults = async sql => {
   const db = await getDb(false);
@@ -618,5 +640,5 @@ export const execQueryNoResults = async sql => {
 
 export const execReadonlyQuery = async sql => {
   const db = await getDb(true);
-  return await all<any>(db, sql);
+  return await all<any[]>(db, sql);
 }

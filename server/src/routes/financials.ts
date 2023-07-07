@@ -141,6 +141,13 @@ export const setupFinancialsRoutes = (app: Express) => {
         db.getStockAccounts().then(data => res.send(JSON.stringify(data)))
     )
 
+
+  app.get('/stock-accounts/cash-balances', (req, res) =>
+      db.getStockAccountCashBalances().then(data => res.send(JSON.stringify(data))))
+
+  app.get('/stock-accounts/:id/cash-flow', (req, res) =>
+      db.getStockAccountCashFlow((req.params as any).id).then(data => res.send(JSON.stringify(data))))
+    
   app.get('/fx-history', (req, res) =>
     db.getFxHistory().then(data => res.send(JSON.stringify(data)))
   )

@@ -222,33 +222,40 @@ having p.start_date > 0;
               inner join car_date_allocations alloc on car.record_date = alloc.record_date
 
 ;drop view if exists v_stock_account_cash_flow
+
 ;create view v_stock_account_cash_flow as
 select
 	'cash_flow' record_type,
+	transaction_id record_id,
 	transaction_date,
 	account_id,
 	case currency when 'ILS' then amount else null end ils,
-	case currency when 'USD' then amount else null end usd
+	case currency when 'USD' then amount else null end usd,
+	null description
 from stock_account_cash_transaction
 --todo: add dividend flow
 union all
 select
 	'stock_transaction' record_type,
+	stock_transaction_id record_id,
 	transaction_date,
 	account_id,
 	null ils,
 	 --positive quantities are purchases (outflow), negative qty are sales (income), commissions are always positive and are outflow
-	(-1 * unit_price * quantity) - coalesce(commission, 0) as usd
+	(-1 * unit_price * quantity) - coalesce(commission, 0) as usd,
+	case when quantity > 0 then 'B ' else 'S ' end || quantity || ' ' || ticker_symbol  || ' @ $' || unit_price as description
 from stock_transaction
 union all
 select
 	'fx_transaction' record_type,
+	fx_transaction_id record_id,
 	transaction_date,
 	account_id,
 	-- in both cases, the sign represents flow from account. Commissions are always negative flow on USD
 	-- if the currency isn't ils, ignore
 	case foreign_currency when 'ILS' then foreign_qty else NULL end ils,
-	local_qty - local_commission usd
+	local_qty - local_commission usd,
+	note description
 from fx_transaction
 
 ;drop view if exists v_stock_account_cash_balances
