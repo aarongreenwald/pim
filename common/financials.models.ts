@@ -172,7 +172,7 @@ export interface StockTransactionDto {
 }
 
 export interface StockHoldingSummaryDto {
-  accountName: string;
+  accountName?: string;
   taxCategory: TaxCategory;
   tickerSymbol: string;
   quantity: number;
