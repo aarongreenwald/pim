@@ -47,6 +47,15 @@
   (pim-run-query sql nil 1)
   )
 
+(defun pim-view-sql-schema ()
+  (interactive)
+  (let ((sql "
+select name, type, sql
+from sqlite_schema
+where name not like 'sqlite_%'
+order by type"))
+    (pim-run-query sql "pim-schema" 0)))
+
 (defun pim-get-current-sql-statement-region ()
   (interactive)
   
