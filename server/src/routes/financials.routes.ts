@@ -1,4 +1,4 @@
-import * as db from '../data/db';
+import * as db from '../data/financials.db';
 import bodyParser from 'body-parser';
 import {Express} from 'express';
 import {errorHandler} from '../utils/utils';

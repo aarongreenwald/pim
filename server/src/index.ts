@@ -1,9 +1,9 @@
 if (process.env.DOTENV) {
     require('dotenv').config({ path: process.env.DOTENV })
 }
-import { setupNotesRoutes } from './routes/notes';
-import { setupFinancialsRoutes } from './routes/financials';
-import { setupQueriesRoutes } from './routes/queries';
+import { setupNotesRoutes } from './routes/notes.routes';
+import { setupFinancialsRoutes } from './routes/financials.routes';
+import { setupQueriesRoutes } from './routes/queries.routes';
 import { setupDriveRoutes } from './routes/drive.routes';
 import express from 'express';
 import { setupAuth } from './auth/auth';
