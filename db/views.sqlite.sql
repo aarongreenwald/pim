@@ -233,6 +233,16 @@ select
 	case currency when 'USD' then amount else null end usd,
 	null description
 from stock_account_cash_transaction
+union all
+select
+	'stock_dividend' record_type,
+	dividend_id record_id,	
+	payment_date,
+	account_id,
+	null ils,
+	total_amount as usd,
+	ticker_symbol || ' - ' || amount_per_share || ' per share'
+from stock_dividend
 --todo: add dividend flow
 union all
 select
