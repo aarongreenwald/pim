@@ -1,4 +1,15 @@
 /*
+ General note about dates: all the date fields should be switched to int in format: yyyymmdd. Arithmetic is a bit harder,
+and the FE will need to work a bit more to parse, but it's easier to read in sql, easy to access year/month
+components (beats yyyy-mm-dd), and I rarely do arithmetic anyway. 
+
+Consider a convention using decimal values, for ordering transactions within dates, or another 
+way to determine order of transactions that are related within a date. The current situation is 
+that there is no way to analyze anything except at BOD or EOD. Maybe it's fine. 
+*/
+
+
+/*
  In order for the rollup logic to work right, there must be exactly one category ("uncategorized" or "root")
  with a null parent_category_id
  */
@@ -46,10 +57,19 @@ CREATE TABLE stock_account(stock_account_id integer primary key not null
 
 CREATE TABLE stock_transaction (stock_transaction_id integer primary key not null
     /*
-        Consider changing this to a date, with timezone. As it stands, it is a timestamp but without timezone,
-        and represents the time in New York. Some of the historical data I have (automatic reinvestment of dividends)
-        seems to have been exported in Jerusalem time, which needs to be fixed.
-    */
+	Historically, the values saved in the timestamp field are a the timestamp in New York, without a timezone component.
+	This is confusing and silly. I should either create two fields (date + time) and record NY time,
+	or store a UTC timestamp and have it entered/rendered by the UI based on the local (user's) timezone. 
+
+	It's tricky because when entering the data it's easier to use local time but when looking at historical data
+	I'd be interested in always seeing the time in NY at the time of the trade
+	(it would be ridiculous for the date to change when moving around the world).
+	Also, some brokerages show me local time and some show exchange time.
+	And some of the historical data I have (eg automatic reinvestment of dividends) was apparently exported in Jerusalem time, this needs to be fixed. 
+
+	The best option is for two separate fields and for them to be exchange times. It's more readable and more honest,
+	since it's not really a timestamp as much as a record of the exchange. In the view, show exchange times,
+	in the edit form consider allowing the user to select the timezone and then normalize it before inserting.  */
     ,transaction_date timestamp NOT NULL
     ,account_id int NOT NULL REFERENCES stock_account
     ,ticker_symbol varchar(20) NOT NULL
@@ -70,11 +90,23 @@ create table stock_split(
 
 create table fx_transaction(fx_transaction_id integer primary key not null
    /*
-   Table assumes that all transactions include a constant local currency (eg USD), which is implied. An alternative is to specify it per row, but then there's nothing that forces a given currency to always be in the same column, and at that point I may as well have bought/sold columns and keep all numbers positive. Easier to read and ue, harder to sum across the table to find the balance of a given currency. Might be a worthwhile refactor, though. 
+   Table assumes that all transactions include a constant local currency (eg USD), which is implied.
+   An alternative is to specify it per row, but then there's nothing that forces a given currency to always be in the same column,
+   and at that point I may as well have bought/sold columns and keep all numbers positive.
+   Easier to read and ue, harder to sum across the table to find the balance of a given currency. Might be a worthwhile refactor, though. 
 
-   The transaction rate is implied by foreign_qty / local_qty. This can also be changed, so that instead of recording amount_paid I record the unit_price (fx_rate), but then I need to make sure that the rate is in the correct direction. With amount_paid I can easily validate that they have opposite signs. 
+   The transaction rate is implied by foreign_qty / local_qty. This can also be changed,
+   so that instead of recording amount_paid I record the unit_price (fx_rate),
+   but then I need to make sure that the rate is in the correct direction.
+   With amount_paid I can easily validate that they have opposite signs. 
 
-   The outflow of USD is local_qty + local_commission. Separating commissions from qty is a bit annoying, but might be useful for tracking. On the other hand, in stock_transaction the commission must be separated because the price*qty is also the cost_basis, in this table there might be no point. Revisit this if it proves too clunky to use. Also, there might be foreign_commissions to deal with as well. 
+   The outflow of USD is local_qty + local_commission. Separating commissions from qty is a bit annoying,
+   but might be useful for tracking. On the other hand, in stock_transaction the commission must be separated
+   because the price*qty is also the cost_basis, in this table there might be no point.
+   Revisit this if it proves too clunky to use. Also, there might be foreign_commissions to deal with as well. 
+
+   About the date: this should be a UTC timestamp. Unlike stock_transactions,
+   the FX markets function outside of NY and it doesn't make sense to limit it to a NY perspective. 
    */
    , transaction_date timestamp NOT NULL --see comment about stock_transaction date
    , account_id int NOT NULL REFERENCES stock_account -- TODO: support fx in cash_accounts as well, possibly by combining the tables or possibly with a separate FK
@@ -98,7 +130,9 @@ create table stock_dividend(dividend_id integer primary key not null --this migh
    , unique(account_id, ticker_symbol, payment_date)
 )
 
---todo add a standard way to add corrections/reconciliations
+--TODO: "Transfer funds" needs to add a transaction here as well as payment + allocation.
+--maybe there's a better way to consolidate tables?
+--TODO add a standardized way to add corrections/reconciliations
 create table stock_account_cash_transaction(transaction_id integer primary key not null
        , transaction_date date NOT NULL
        , account_id int NOT NULL REFERENCES stock_account
@@ -124,7 +158,7 @@ create table financial_constants(
 
 create table fuel_log(
     fuel_log_id integer primary key not null
-    ,timestamp datetime NOT NULL
+    ,timestamp datetime NOT NULL --todo change to a timestamp? Need to consider how this is displayed when I travel, perhaps historical data should be recorded from the local perspective and shown from the local perspective? 
     ,odometer integer NOT NULL
     ,liters decimal(6,4) NOT NULL
     ,is_full boolean NOT NULL DEFAULT TRUE
