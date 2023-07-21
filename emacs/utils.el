@@ -84,3 +84,39 @@
   ;; (goto-char 1)
   (goto-line 2) ;skip the header. todo: remove/hide the header
   )
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;
+;; Custom Menu - Sample Code
+;;;;;;;;;;;;;;;;;;;;;;;
+
+
+(defun query-pim ()
+  (interactive)
+  (shell-command "echo hello"))
+
+(global-set-key [f9] 'query-pim)
+
+(defun create-note ()
+  (interactive)
+  (shell-command "echo hello")
+  )
+
+
+(define-key-after
+  global-map
+  [menu-bar pim-menu]
+  (cons "PIM" (make-sparse-keymap "hoot hoot"))
+  'tools )
+
+(define-key
+  global-map
+  [menu-bar pim-menu query-pim]
+  '("Query Database" . query-pim))
+
+
+(define-key
+  global-map
+  [menu-bar pim-menu create-note]
+  '("Create Note" . create-note))
