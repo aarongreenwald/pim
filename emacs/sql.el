@@ -12,19 +12,19 @@
 
 ;; Note: override pim-host with "http://localhost:4321/api/" for testing
 (defun pim-run-query (query bufname write-mode &optional keymap temp-buffer)
-  (let ((json-array-type 'list))
-    (pim-api-request 'post "queries/exec"
-		     :body  `(("format" . "list")
-			      ("sql" . ,query)
-			      ("writeMode" . ,write-mode))
-		     :as #'json-read
-		     :then `(lambda (data)
-			      (progn
-				(if (equal ',write-mode 0)
-				    (progn
-				      (message "Succeeded on %s" pim-host)
-				      (insert-to-pim-grid-buffer ',bufname data ',keymap ',temp-buffer))
-				  (message "Succeeded on %s, result: %s" pim-host  data)))))))
+  (setq json-array-type 'list) ;; should be a let-binding here, but for some reason it stopped working in emacs 29
+  (pim-api-request 'post "queries/exec"
+		   :body  `(("format" . "list")
+			    ("sql" . ,query)
+			    ("writeMode" . ,write-mode))
+		   :as #'json-read
+		   :then `(lambda (data)
+			    (progn
+			      (if (equal ',write-mode 0)
+				  (progn
+				    (message "Succeeded on %s" pim-host)
+				    (insert-to-pim-grid-buffer ',bufname data ',keymap ',temp-buffer))
+				(message "Succeeded on %s, result: %s" pim-host  data))))))
 
 (defun pim-exec-query-selection ()
   "Run the query under the point with readonly permissions and put the result in a pim-grid buffer."
