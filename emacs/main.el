@@ -17,6 +17,11 @@
   (save-some-buffers)
   (load-pim-file "./main.el"))
 
+;; ruins web/src/notes
+;; (setq notes-dir (concat "^/home/aaron" "/code/notes/.*\\'"))
+;; (add-to-list 'auto-mode-alist  (cons (notes-dir ' markdown-mode)))
+;; (setq initial-major-mode (quote markdown-mode))
+
 (load-pim-file "./auth.el")
 (load-pim-file "./dir-mode.el")
 (load-pim-file "./dir-mode.csv.el")

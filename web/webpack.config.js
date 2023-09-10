@@ -41,7 +41,7 @@ module.exports = {
     new ESLintPlugin({
       extensions: ["js", "jsx", "ts", "tsx"],
     }),
-    //    dev && new BundleAnalyzerPlugin(),
+    dev && new BundleAnalyzerPlugin(),
     dev && new WebpackNotifierPlugin(),
     prod && new webpack.DefinePlugin({
       'process.env': {

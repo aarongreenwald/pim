@@ -1,13 +1,16 @@
 import {useCallback, useEffect, useRef, useState} from 'react';
 import {IconButton} from '@fluentui/react';
-import Editor from '@monaco-editor/react';
+// import Editor from '@monaco-editor/react';
 import * as React from 'react';
 import AceEditor from 'react-ace';
 import {Prompt} from 'react-router';
 import {saveAndCloseIcon, saveIcon, toggleEditorIcon, wrapLinesIcon} from './icons';
-import 'ace-builds/src-noconflict/mode-markdown';
-import 'ace-builds/src-noconflict/theme-tomorrow_night_eighties';
-import 'ace-builds/src-min-noconflict/ext-searchbox';
+require('ace-builds/src-noconflict/mode-markdown');
+require('ace-builds/src-noconflict/theme-tomorrow_night_eighties');
+require('ace-builds/src-min-noconflict/ext-searchbox');
+require('ace-builds/src-noconflict/keybinding-emacs');
+
+//see more extensions: https://github.com/ajaxorg/ace-builds/tree/master/src
 
 //see more themes here: https://ace.c9.io/build/kitchen-sink.html
 //more options here: https://ace.c9.io/build/kitchen-sink.html //TODO - search
@@ -17,6 +20,8 @@ import 'ace-builds/src-min-noconflict/ext-searchbox';
  * TODO - LRU this cache. In can grow to the size of the notes repo, which currently isn't that big so this isn't urgent
  */
 const savedContents = new Map<string, string>();
+
+const Editor: any = () => null; //eslint-disable-line
 
 interface FileEditorProps {
     content: string;
@@ -143,7 +148,8 @@ export const FileEditor: React.FC<FileEditorProps> = ({content, onSaveContent, o
                         onChange={val => setIsEditorDirty(val !== content)} // compare to savedContents? probably doesn't matter
                         onMount={onEditorMount}
                     /> :
-                    <AceEditor
+                 
+		<AceEditor
                         ref={editorRef}
                         width={'100%'}
                         fontSize={14}
@@ -153,12 +159,14 @@ export const FileEditor: React.FC<FileEditorProps> = ({content, onSaveContent, o
                         highlightActiveLine
                         wrapEnabled={wordWrap}
                         tabSize={2}
-                        theme="tomorrow_night_eighties"
+			theme="tomorrow_night_eighties"
                         showPrintMargin={false}
                         name="file-editor"
                         defaultValue={content}
+			keyboardHandler="emacs"
                         onChange={val => setIsEditorDirty(val !== content)} // compare to savedContents? probably doesn't matter
-                        editorProps={{ $blockScrolling: true }}
+			editorProps={{ $blockScrolling: true, keyboardHandler: 'ace/keyboard/emacs'
+			}}
                         commands={[
                             {
                                 name: 'save',

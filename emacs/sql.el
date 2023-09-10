@@ -4,7 +4,7 @@
 (add-hook 'sql-mode-hook (lambda () (define-key sql-mode-map (kbd "C-x C-e") 'pim-exec-query-selection-write)))
 (add-hook 'sql-mode-hook (lambda ()
 			   (setq pim-sql-current-overlay (make-overlay 1 1))
-			   (overlay-put pim-sql-current-overlay 'face '(:background "brightblack"))))
+			   (overlay-put pim-sql-current-overlay 'face '(:background "brightblack")))) ;; TODO not compatible with modus theme
 
 ;; Interactive sql: M-x sql-sqlite
 ;;;;;;;;;;;;;;;;;;;;;;;

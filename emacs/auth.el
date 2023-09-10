@@ -59,3 +59,5 @@ Function also verifies the available cookie is still valid, if not performs a lo
       :as (or as #'json-read)
       :then then)))
 
+
+(pim-connect-local)

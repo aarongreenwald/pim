@@ -166,7 +166,8 @@ So this will have to do.
 keeps stats (sum/count/average) on the selected cells."
   (interactive)
   ;; todo if it isn't a number it's treated as "0", I think, and messes up count and average. 
-  (setq cell-value (string-to-number (pim-query-get-selected-cell-value)))
+  ;;  (setq cell-value (string-to-number (pim-query-get-selected-cell-value)))
+  (setq cell-value (pim-query-get-selected-cell-value))
   (setq cell-id (ctbl:component-selected ctbl:component))
 
   (setq overlay (plist-get pim-grid-marked-cells cell-id))

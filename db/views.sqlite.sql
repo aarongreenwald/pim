@@ -104,9 +104,50 @@ having coalesce(usd, 0) <> 0 or coalesce(ils, 0) <> 0;
 select record_date,
        allocation_code,
        case currency when 'USD' then amount else null end usd,
+       sum(case currency when 'USD' then amount else null end)
+           over (partition by allocation_code order by record_date asc	      
+	         rows between unbounded preceding and current row) running_total_usd,
        case currency when 'ILS' then amount else null end ils,
+       sum(case currency when 'ILS' then amount else null end)
+           over (partition by allocation_code order by record_date asc	      
+	         rows between unbounded preceding and current row) running_total_ils,
        note
 from cash_assets_allocation;
+
+--WIP
+with cash_flow_by_date as (
+select strftime('%Y%m%d', paid_date / 1000, 'unixepoch') date, -1 * sum(usd) usd, -1 * sum(ils) ils
+from v_payment
+group by strftime('%Y%m%d', paid_date / 1000, 'unixepoch')
+union all
+select strftime('%Y%m%d', paid_date / 1000, 'unixepoch'),
+               sum(case currency when 'ILS' then amount else 0 end) ils,
+               sum(case currency when 'USD' then amount else 0 end) usd
+from income
+group by strftime('%Y%m%d', paid_date / 1000, 'unixepoch')
+),
+foo as (
+    select strftime('%Y%m%d', record_date / 1000, 'unixepoch') date, ils, usd, 0 ils_flow, 0 usd_flow
+    from v_car_summary
+    union all
+    select date, null, null, ils, usd from cash_flow_by_date
+), allocation_changes_by_date as (
+     select strftime('%Y%m%d', caah.record_date / 1000, 'unixepoch') date
+     , sum(ils) ils, sum(usd) usd
+     from v_cash_assets_allocation_history caah
+     group by strftime('%Y%m%d', caah.record_date / 1000, 'unixepoch')
+), allocation_snapshot_by_date as (
+  select date,
+  sum(ils) over ( order by date asc rows between unbounded preceding and current row) ils,
+  sum(usd) over ( order by date asc rows between unbounded preceding and current row) usd
+from allocation_changes_by_date)
+select *
+-- for the union of all available dates, calculate a running total of
+-- "last available car (eg foo.ils) + cash_flow (eg ils_flow)", that's the assumed balance
+-- subtract the allocation_snapshot and that's the unallocated cash
+-- then triple check for logic bugs
+from allocation_snapshot_by_date order by date desc
+
 
 /*
  v_unallocated_cash_snapshot represents the current status of unallocated money.
@@ -203,7 +244,10 @@ having p.start_date > 0;
 
 /*
  TODO check that this is right. It would be better to leave the currency unpivoted until later,
- as a future improvement. Also, consider a way to expose the breakdown of allocations at a given date
+ as a future improvement. Also, consider a way to expose the breakdown of allocations at a given date. Possibly add running totals to the v_cash_assets_allocation_history view. 
+
+The problem with this is that it captures the unallocated cash only at the moment of the CAR, right 
+before new income lands and the allocations are updated. See WIP for improvement
  */
 ;drop view if exists v_unallocated_cash_history
 ;create view v_unallocated_cash_history as
