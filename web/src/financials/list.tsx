@@ -29,7 +29,7 @@ interface ListProps<T = unknown> {
     onClick?: (row: T) => void;
 }
 
-const idFields = ['id', 'categoryId'];
+const idFields = ['id', 'categoryId', 'recordId'];
 
 const fieldIsNotId = fieldName => !idFields.includes(fieldName)
 const formatFieldName = fieldName => {

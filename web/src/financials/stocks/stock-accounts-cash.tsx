@@ -6,6 +6,7 @@ import {CommandBar, ICommandBarItemProps, Panel} from '@fluentui/react';
 import {useBoolean} from '@fluentui/react-hooks';
 import {commandBarStyles} from '../styles';
 import {StocksForm} from './stocks-form';
+import {FxForm} from '../fx/fx-form';
 import {StockAccountCashBalance, StockAccountId, StockAccountCashFlow} from '@pim/common';
 
 export const StockAccountsCash: React.FC = () => {
@@ -53,6 +54,14 @@ export const StockAccountsCash: React.FC = () => {
                     headerText="Edit Stock Transaction"
                     onDismiss={hideEditItem}>
                     <StocksForm onClose={hideEditItem} id={selectedItem && selectedItem.recordId}/>
+                </Panel>
+            }
+            {
+                <Panel
+                    isOpen={selectedItem && selectedItem.recordType == 'fx_transaction'}
+                    headerText="Edit FX Transaction"
+                    onDismiss={hideEditItem}>
+                    <FxForm onClose={hideEditItem} id={selectedItem && selectedItem.recordId}/>
                 </Panel>
             }
             {
