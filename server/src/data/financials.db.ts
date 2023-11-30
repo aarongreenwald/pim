@@ -625,11 +625,11 @@ export const getStockAccountCashBalances = async() => {
 }
 
 export const getStockAccountCashFlow = async(id: StockTransactionId) => {
-    const sql = `select name accountName, transaction_date date, record_type recordType, record_id recordId, ils, usd, description
+  const sql = `select name accountName, transaction_date date, transaction_time time, record_type recordType, record_id recordId, ils, usd, description
                  from v_stock_account_cash_flow cf
                  left join stock_account sa on cf.account_id = sa.stock_account_id
                  where cf.account_id = ?
-                 order by transaction_date desc
+                 order by transaction_date desc, transaction_time desc, record_type desc, record_id desc
 `
 
     const db = await getDb(true)

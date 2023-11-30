@@ -213,9 +213,10 @@ export interface StockAccountCashBalance {
 }
 
 export interface StockAccountCashFlow {
-    recordType: 'cash_flow' | 'stock_transaction'; //TODO add all types
+    recordType: 'cash_flow' | 'stock_transaction' | 'fx_transaction' | 'stock_dividend'; //TODO add all types
     recordId: FxTransactionId | StockTransactionId; //TODO
     date: BasicISODate;
+    time: string;
     ils: Money;
     usd: Money;
     description: string;

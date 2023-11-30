@@ -225,13 +225,17 @@ having p.start_date > 0;
      from v_car_summary car
               inner join car_date_allocations alloc on car.record_date = alloc.record_date
 
+/*
+TODO once the issue with timestamps is sorted out, this might need to be fixed.
+Currently it's mixing timestamps in different timezones (fx is UTC, stock is exchange time). 
+*/
 ;drop view if exists v_stock_account_cash_flow
-
 ;create view v_stock_account_cash_flow as
 select
 	'cash_flow' record_type,
 	transaction_id record_id,
 	transaction_date,
+	null transaction_time,
 	account_id,
 	case currency when 'ILS' then amount else null end ils,
 	case currency when 'USD' then amount else null end usd,
@@ -242,17 +246,18 @@ select
 	'stock_dividend' record_type,
 	dividend_id record_id,	
 	payment_date,
+        null transaction_time,
 	account_id,
 	null ils,
 	total_amount as usd,
 	ticker_symbol || ' - ' || amount_per_share || ' per share'
 from stock_dividend
---todo: add dividend flow
 union all
 select
 	'stock_transaction' record_type,
 	stock_transaction_id record_id,
-	transaction_date,
+	cast(strftime('%Y%m%d', transaction_date / 1000, 'unixepoch') as int),
+        strftime('%H:%M:%f', transaction_date / 1000, 'unixepoch'),
 	account_id,
 	null ils,
 	 --positive quantities are purchases (outflow), negative qty are sales (income), commissions are always positive and are outflow
@@ -263,7 +268,8 @@ union all
 select
 	'fx_transaction' record_type,
 	fx_transaction_id record_id,
-	transaction_date,
+	cast(strftime('%Y%m%d', transaction_date / 1000, 'unixepoch') as int),
+        strftime('%H:%M:%f', transaction_date / 1000, 'unixepoch'),
 	account_id,
 	-- in both cases, the sign represents flow from account. Commissions are always negative flow on USD
 	-- if the currency isn't ils, ignore

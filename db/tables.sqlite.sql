@@ -1,11 +1,20 @@
 /*
- General note about dates: all the date fields should be switched to int in format: yyyymmdd. Arithmetic is a bit harder,
-and the FE will need to work a bit more to parse, but it's easier to read in sql, easy to access year/month
-components (beats yyyy-mm-dd), and I rarely do arithmetic anyway. 
+General note about dates:
+
+Calendar dates are stored in ints, in the ISO8601 yyyymmdd format. Arithmetic is a bit harder than
+when using proper dates, and the FE needs to do a tiny bit more work to parse, but it's easier to read
+in SQL, easier to access year/month/date components (even easier than with yyyy-mm-dd strings, which
+have the advantage of being even easier to read and parseable by JS Date()). 
 
 Consider a convention using decimal values, for ordering transactions within dates, or another 
 way to determine order of transactions that are related within a date. The current situation is 
-that there is no way to analyze anything except at BOD or EOD. Maybe it's fine. 
+that there is no way to analyze anything except at BOD or EOD. Maybe it's fine.
+
+Although the DB schema has int columns, they're actually still Date affinity because the code was updated
+without updating the actual DB. I'm not sure it actually matters.
+
+Financial dates with a time component are still stored as timestamps, but these should be converted to two fields,
+one date and another with the time component (format TBD). See stock_transaction table comment. 
 */
 
 
@@ -18,9 +27,9 @@ CREATE TABLE category(category_id  integer primary key not null
     ,parent_category_id null references category);
 
 CREATE TABLE payment(payment_id  integer primary key not null
-    ,paid_date date not null
-    ,incurred_begin_date date null --if empty assume the paid_date
-    ,incurred_end_date date null --if empty assume the incurred_begin_date
+    ,paid_date int not null
+    ,incurred_begin_date int null --if empty assume the paid_date
+    ,incurred_end_date int null --if empty assume the incurred_begin_date
     ,recipient varchar(50) not null
     ,amount decimal(19,4) not null
     ,incurred_amount decimal(19,4) not null
@@ -32,7 +41,7 @@ CREATE TABLE payment(payment_id  integer primary key not null
 
 CREATE TABLE income(income_id integer primary key not null
     , source varchar(50) NOT NULL
-    , paid_date date NOT NULL
+    , paid_date int NOT NULL
     , amount decimal(19,4) NOT NULL
     , currency char(3) not null default 'ILS'
     , note text NULL
@@ -45,7 +54,7 @@ CREATE TABLE cash_account(cash_account_id integer primary key not null
 );
 
 CREATE TABLE cash_assets_record(cash_assets_record_id integer primary key not null
-    ,record_date date NOT NULL
+    ,record_date int NOT NULL
     ,cash_account_id int NOT NULL REFERENCES cash_account
     ,amount decimal(19,4) NOT NULL
     ,unique(record_date, cash_account_id)
@@ -63,7 +72,7 @@ CREATE TABLE stock_transaction (stock_transaction_id integer primary key not nul
 
 	It's tricky because when entering the data it's easier to use local time but when looking at historical data
 	I'd be interested in always seeing the time in NY at the time of the trade
-	(it would be ridiculous for the date to change when moving around the world).
+	(it would be ridiculous for the displayed date to change when moving around the world).
 	Also, some brokerages show me local time and some show exchange time.
 	And some of the historical data I have (eg automatic reinvestment of dividends) was apparently exported in Jerusalem time, this needs to be fixed. 
 
@@ -82,7 +91,7 @@ CREATE TABLE stock_transaction (stock_transaction_id integer primary key not nul
 );
 
 create table stock_split(
-      split_date date NOT NULL
+      split_date int NOT NULL
     , ticker_symbol varchar(20) NOT NULL
     , previous_share_qty int NOT NULL
     , new_share_qty int NOT NULL
@@ -124,7 +133,7 @@ create table fx_transaction(fx_transaction_id integer primary key not null
 create table stock_dividend(dividend_id integer primary key not null --this might be useless but relatively harmless
    , account_id int not null references stock_account
    , ticker_symbol varchar(20) NOT NULL
-   , payment_date date not null
+   , payment_date int not null
    , total_amount decimal(19,4) not null
    , amount_per_share decimal(19, 4) null
    , unique(account_id, ticker_symbol, payment_date)
@@ -134,7 +143,7 @@ create table stock_dividend(dividend_id integer primary key not null --this migh
 --maybe there's a better way to consolidate tables?
 --TODO add a standardized way to add corrections/reconciliations
 create table stock_account_cash_transaction(transaction_id integer primary key not null
-       , transaction_date date NOT NULL
+       , transaction_date int NOT NULL
        , account_id int NOT NULL REFERENCES stock_account
        , currency char(3) default 'USD'
        , amount decimal(19,4) NOT NULL
@@ -143,7 +152,7 @@ create table stock_account_cash_transaction(transaction_id integer primary key n
 
 create table cash_assets_allocation(cash_assets_allocation_id integer primary key not null
     --consider a better name than record_date, since it's not a snapshot but a transaction
-    ,record_date date NOT NULL
+    ,record_date int NOT NULL
     ,allocation_code varchar(6) NOT NULL
     ,currency char(3) NOT NULL
     ,amount decimal(19,4) NOT NULL
