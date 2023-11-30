@@ -6,7 +6,7 @@ import {PrimaryButton, DefaultButton, Stack, TextField} from '@fluentui/react'
 import {PanelProps} from '../../common/panel.types';
 import {horizontalChoiceGroup, stackTokens, StyledChoiceGroup} from '../styles';
 import {currencyRadioOptions, defaultCurrency} from '../currencies';
-import {formatDay} from '../../common/date.utils';
+import {expandISODate, todayAsISODate} from '../../common/date.utils';
 import {CurrencyInput} from '../currency-input';
 
 export const IncomeForm: React.FC<PanelProps<IncomeId>> = ({onClose, id}) => {
@@ -21,7 +21,7 @@ export const IncomeForm: React.FC<PanelProps<IncomeId>> = ({onClose, id}) => {
                label={'Date'}
                type="date"
                onChange={updateIncome}
-               value={formatDay(income.paidDate)}
+               value={expandISODate(income.paidDate)}
                name="paidDate"/>
 
             <TextField
@@ -98,7 +98,7 @@ function useIncomeForm(onClose: () => void, incomeId?: IncomeId) {
 function initializeIncome(): Income {
   return {
     id: -1,
-    paidDate: formatDay(new Date()),
+    paidDate: todayAsISODate() as number,
     amount: null,
     source: '',
     currency: defaultCurrency,

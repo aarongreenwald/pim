@@ -14,8 +14,8 @@ import {
 import {currencyFields, currencySymbols} from './currencies';
 import styled from '@emotion/styled';
 import {useDebouncedInput} from '../common/debounced-input.hook';
-import {formatDay} from '../common/date.utils';
-import {Currency, Money} from '@pim/common';
+import {collapseISODate, expandISODate, isoDateToFullDisplay} from '../common/date.utils';
+import {BasicISODate, Currency, Money} from '@pim/common';
 import {CurrencyInput} from './currency-input';
 import {stackTokens} from './styles';
 import {cancelIcon, hideIcon} from '../notes/icons';
@@ -67,7 +67,7 @@ function getColumnRenderer(key: string) {
     //TODO this converts to local time, which is wrong - none of the dates in this system are relative to the user's current location, the time in the database is always meant to be displayed as is
     //it only seems ok because I am always ahead of UTC, so the day is the same. Set the client clock
     //to less than UTC and days will all be off by one.
-    new Date(value[key]).toDateString() :
+    isoDateToFullDisplay(value[key]) :
     currencyFields.includes(key) ?
     <Currency value={value[key]} currencyCode={key}/> :
   value[key];
@@ -75,8 +75,8 @@ function getColumnRenderer(key: string) {
 }
 
 interface DateColumnFilters {
-    start?: Date;
-    end?: Date
+    start?: BasicISODate;
+    end?: BasicISODate
 }
 
 interface CurrencyColumnFilters {
@@ -240,27 +240,27 @@ const FilterMenu: React.FC<FilterMenuProps> = (props) => {
             <>
                 <TextField label="Start"
                            type='Date'
-                           value={filter?.start ? formatDay(filter?.start) : undefined}
+                           value={filter?.start ? expandISODate(filter?.start) : undefined}
                            onChange={(_, value) => {
-                               setColumnFilters(prev => ({
-                                   ...prev,
-                                   [column.key]: {
-                                       ...prev[column.key],
-                                       start: new Date(value)
-                                   }
-                               }))
+                             setColumnFilters(prev => ({
+                               ...prev,
+                               [column.key]: {
+                                 ...prev[column.key],
+                                 start: collapseISODate(value) as number
+                               }
+                             }))
                            }} />
                 <TextField label="End"
                            type='Date'
-                           value={filter?.end ? formatDay(filter?.end) : undefined}
+                           value={filter?.end ? expandISODate(filter?.end) : undefined}
                            onChange={(_, value) => {
-                               setColumnFilters(prev => ({
-                                   ...prev,
-                                   [column.key]: {
-                                       ...prev[column.key],
-                                       end: new Date(value)
-                                   }
-                               }))
+                             setColumnFilters(prev => ({
+                                 ...prev,
+                                 [column.key]: {
+                                     ...prev[column.key],
+                                     end: collapseISODate(value) as number
+                                 }
+                             }))
                            }} />
             </>
         )
@@ -297,7 +297,7 @@ function rowMatchesColumnFilters<T>(row: T, filters: ColumnFilters): boolean {
     for (const key in filters) {
         if (isDateColumn(key)) {
             const filter = filters[key] as DateColumnFilters;
-            const dateValue = new Date(row[key]);
+            const dateValue = row[key];
             if (filter.start && dateValue < filter.start) {
                 return false
             }

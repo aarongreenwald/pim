@@ -8,7 +8,7 @@ import {CategoryDropdown} from './category-dropdown';
 import {currencyRadioOptions, defaultCurrency} from '../currencies';
 import {horizontalChoiceGroup, stackTokens, StyledChoiceGroup} from '../styles';
 import {CurrencyInput} from '../currency-input';
-import {formatDay} from '../../common/date.utils';
+import {collapseISODate, expandISODate, todayAsISODate} from '../../common/date.utils';
 
 export const PaymentForm: React.FC<PanelProps<PaymentId>> = ({onClose, id}) => {
     const {
@@ -37,7 +37,7 @@ export const PaymentForm: React.FC<PanelProps<PaymentId>> = ({onClose, id}) => {
                    label={'Date'}
                    type="date"
                    onChange={updatePayment}
-                   value={formatDay(payment.paidDate)}
+                  value={payment.paidDate ? expandISODate(payment.paidDate) : undefined}
                    name="paidDate"/>
 
                 <Toggle
@@ -52,14 +52,14 @@ export const PaymentForm: React.FC<PanelProps<PaymentId>> = ({onClose, id}) => {
                         label={'Incurred Begin'}
                         type="date"
                         onChange={updatePayment}
-                        value={payment.incurredBeginDate ? formatDay(payment.incurredBeginDate) : undefined}
+                        value={payment.incurredBeginDate ? expandISODate(payment.incurredBeginDate) : undefined}
                         name="incurredBeginDate"/>
 
                     <TextField
                         label={'Incurred End'}
                         type="date"
                         onChange={updatePayment}
-                        value={payment.incurredEndDate ? formatDay(payment.incurredEndDate) : undefined}
+                        value={payment.incurredEndDate ? expandISODate(payment.incurredEndDate) : undefined}
                         name="incurredEndDate"/>
                 </>
             }
@@ -182,10 +182,10 @@ function usePaymentForm(onClose: () => void, paymentId?: PaymentId, ) {
         });
     }, [payment])
 
-    const updatePayment = useCallback(({target}) => {
+  const updatePayment = useCallback(({target}) => {
         setPayment({
             ...payment,
-            [target.name]: target.value
+          [target.name]: target.type == 'date' ? collapseISODate(target.value)  : target.value
         })
     }, [payment])
 
@@ -225,12 +225,13 @@ function usePaymentForm(onClose: () => void, paymentId?: PaymentId, ) {
 }
 
 const preparePayment = (payment: Payment, useIncurredDates: boolean): Payment => ({
-    ...payment,
-    incurredBeginDate: useIncurredDates ? payment.incurredBeginDate : null,
-    incurredEndDate: useIncurredDates ? payment.incurredEndDate : null,
+  ...payment,
+  paidDate: payment.paidDate,
+  incurredBeginDate: useIncurredDates ? payment.incurredBeginDate : null,
+  incurredEndDate: useIncurredDates ? payment.incurredEndDate : null,
 })
 
-function initializePayment(paidDate = formatDay(new Date())): Payment {
+function initializePayment(paidDate = todayAsISODate() as number): Payment { //TODO
   return {
     id: -1,
     paidDate,

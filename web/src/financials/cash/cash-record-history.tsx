@@ -2,12 +2,12 @@ import {useCallback, useEffect, useMemo, useState} from 'react';
 import {getCarSummary, getCashAllocations, getUnreportedSpending} from '../../services/server-api';
 import {List} from '../list';
 import * as React from 'react';
-import {CarSummary, CashAssetAllocation, UnreportedSpending} from '@pim/common';
+import {BasicISODate, CarSummary, CashAssetAllocation, UnreportedSpending} from '@pim/common';
 import {useBoolean} from '@fluentui/react-hooks';
 import {CommandBar, ICommandBarItemProps, Panel, PanelType, Stack} from '@fluentui/react';
 import {commandBarStyles} from '../styles';
 import {AddCashRecord} from './add-cash-record';
-import {formatDay} from '../../common/date.utils';
+import {expandISODate} from '../../common/date.utils';
 import {AddCashAssetAllocation} from './add-cash-asset-allocation';
 import {CashAllocationHistory} from './cash-allocation-history';
 
@@ -35,7 +35,7 @@ export const CashRecordHistory: React.FC = () => {
     const [addCaa, {setTrue: showAddCaa, setFalse: hideAddCaa}] = useBoolean(false)
     const commands = useCommandBarCommands(showAddCar, showAddCaa, reloadData);
 
-    const [selectedItem, setSelectedItem] = useState<string>(null)
+    const [selectedItem, setSelectedItem] = useState<BasicISODate>(null)
     const hideEditCar = () => setSelectedItem(null);
 
     const [selectedAllocation, setSelectedAllocation] = useState<string>(null)
@@ -93,7 +93,7 @@ export const CashRecordHistory: React.FC = () => {
 
             <Panel
                 isOpen={!!selectedItem}
-                headerText={`Edit ${(formatDay(selectedItem))}`}
+                headerText={selectedItem && `Edit ${(expandISODate(selectedItem))}`}
                 onDismiss={hideEditCar}>
                 <AddCashRecord onClose={() => setSelectedItem(null)} id={selectedItem}/>
             </Panel>

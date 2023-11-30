@@ -147,10 +147,14 @@ drop view if exists v_period;
 create view v_period as
 select
     coalesce(lead(record_date) over (order by record_date desc), 0) start_date,
-    record_date - (24 * 60 * 60) end_date
+    cast(strftime('%Y%m%d',
+	          date(substr(record_date, 0, 5) || '-' || substr(record_date, 5, 2) || '-' || substr(record_date, 7, 2),
+	               '-1 day')
+	) as integer) end_date,
+    record_date next_start_date
 from v_car_summary
 union all
-select max(record_date), 4102358400000 from v_car_summary
+select max(record_date), 20991231 from v_car_summary
 ;
 
 /*
@@ -192,7 +196,7 @@ with
         --defined as the day before the next CAR)
         select period.end_date, -1 * ils, -1 * usd
         from v_car_summary inner join period
-            on record_date = period.end_date + (24 * 60 * 60)
+            on record_date = period.next_start_date
     )
 select p.start_date, p.end_date,
        sum(ils) ils, sum(usd) usd

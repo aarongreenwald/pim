@@ -7,6 +7,7 @@ import {FuelLog, NewFuelLogDto} from '@pim/common';
 import {saveFuelLog} from '../../services/server-api';
 import {CurrencyInput} from '../currency-input';
 import {FuelLogPreviewCard} from './fuel-log-preview-card';
+import {todayAsISODate} from '../../common/date.utils';
 
 export const LogFuelForm: React.FC<PanelProps<number, FuelLog>> = ({onClose, onSave, data}) => {
     const previousFuelLog = data;
@@ -94,12 +95,13 @@ function useLogFuelForm(onClose: () => void, onSave: () => void) {
 
 function initializeFuelLog(): NewFuelLogDto {
     return {
-        id: -1,
-        timestamp: new Date(),
-        price: null, //TODO set to previously used price
-        odometer: 0,
-        liters: 0,
-        note: '',
-        isFull: true
+      id: -1,
+      date: todayAsISODate() as number, // currently only for payment
+      timestamp: new Date(), // for fuel log - TODO use date + local time as separate fields
+      price: null, //TODO set to previously used price
+      odometer: 0,
+      liters: 0,
+      note: '',
+      isFull: true
     };
 }

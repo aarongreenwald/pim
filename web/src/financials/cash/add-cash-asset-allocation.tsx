@@ -1,13 +1,12 @@
 import {useCallback, useState} from 'react';
 import * as React from 'react';
 import {CashAssetAllocationRecord, PaymentId} from '@pim/common';
-import {format} from 'date-fns';
 import {saveAllocationRecord} from '../../services/server-api';
 import {PrimaryButton, DefaultButton, Stack, TextField} from '@fluentui/react'
 import {PanelProps} from '../../common/panel.types';
 import {currencyRadioOptions, defaultCurrency} from '../currencies';
 import {horizontalChoiceGroup, stackTokens, StyledChoiceGroup} from '../styles';
-import {formatDay} from '../../common/date.utils';
+import {expandISODate, todayAsISODate} from '../../common/date.utils';
 import {CurrencyInput} from '../currency-input';
 
 export const AddCashAssetAllocation: React.FC<PanelProps<PaymentId>> = ({onClose}) => {
@@ -22,7 +21,7 @@ export const AddCashAssetAllocation: React.FC<PanelProps<PaymentId>> = ({onClose
                label="Date"
                type="date"
                onChange={updateRecord}
-               value={formatDay(allocation.recordDate)}
+               value={expandISODate(allocation.recordDate)}
                name="recordDate"/>
 
             <TextField
@@ -89,7 +88,7 @@ function useCaaForm() {
 function initializeRecord(): CashAssetAllocationRecord {
   return {
     // id: -1,
-    recordDate: format(new Date(), 'yyyy-MM-dd'),
+    recordDate: todayAsISODate(),
     amount: null,
     allocationCode: '',
     currency: defaultCurrency,

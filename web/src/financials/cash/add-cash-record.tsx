@@ -3,12 +3,12 @@ import {Checkbox, DefaultButton, PrimaryButton, Stack, TextField} from '@fluentu
 import {stackTokens} from '../styles';
 import * as React from 'react';
 import {useCallback, useEffect, useState} from 'react';
-import {CashAccount} from '@pim/common';
+import {BasicISODate, CashAccount} from '@pim/common';
 import {getActiveCashAccounts, getCashRecords, saveCashRecords} from '../../services/server-api';
-import {formatDay} from '../../common/date.utils';
+import {expandISODate, todayAsISODate} from '../../common/date.utils';
 import {CurrencyInput} from '../currency-input';
 
-export const AddCashRecord: React.FC<PanelProps<string>> = ({onClose, id}) => {
+export const AddCashRecord: React.FC<PanelProps<BasicISODate>> = ({onClose, id}) => {
     const {draft, accounts, updateDate, updateAccount, submitForm} = useCashRecordsForm(onClose, id);
     const [showAllAccounts, setShowAllAccounts] = useState<boolean>(false);
 
@@ -25,7 +25,7 @@ export const AddCashRecord: React.FC<PanelProps<string>> = ({onClose, id}) => {
                         label={'Date'}
                         type="date"
                         onChange={updateDate}
-                        value={formatDay(draft.recordDate)}
+                        value={expandISODate(draft.recordDate)}
                         name="recordDate"/>
                 }
 
@@ -60,7 +60,7 @@ export const AddCashRecord: React.FC<PanelProps<string>> = ({onClose, id}) => {
 }
 
 interface Draft {
-    recordDate: string | Date;
+    recordDate: BasicISODate;
     accounts: Record<number, number>
 }
 function getAccountValue(draft: Draft, account: CashAccount) {
@@ -69,11 +69,11 @@ function getAccountValue(draft: Draft, account: CashAccount) {
 }
 
 
-function useCashRecordsForm(onClose: () => void, recordDate?: string) {
+function useCashRecordsForm(onClose: () => void, recordDate?: BasicISODate) {
     const [accounts, setAccounts] = useState<CashAccount[]>()
     const [draft, setDraft] = useState<Draft>({
-        recordDate: recordDate || formatDay(new Date()),
-        accounts: {}
+      recordDate: recordDate || todayAsISODate(),
+      accounts: {}
     })
 
     useEffect(() => {

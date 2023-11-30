@@ -25,7 +25,8 @@ import {
   FxTransactionDto,
   CashAssetAllocationHistory,
   StockAccountCashBalance,
-  StockAccountCashFlow
+  StockAccountCashFlow,
+  BasicISODate
 } from '@pim/common';
 import {all, beginTransaction, commitTransaction, get, getDb, rollbackTransaction, run} from './db.helpers';
 
@@ -74,18 +75,19 @@ export const insertPayment = async (payment: Payment) => {
     //TODO: validations - the fallback to null done here forces the db to reject
     //bad data but there should probably be a validation and sanitization step prior to getting here
     //empty string isn't a valid counterparty, 0 isn't a valid amount. 0 could theoretically be a note but
-    //unlikely. make sure to enable FK support in sqlite or categoryId won't be checked
-    const params = [
-        new Date(payment.paidDate), //TODO maybe save the data in yyyy-mm-dd so it's easier to use?
-        payment.incurredBeginDate ? new Date(payment.incurredBeginDate) : null,
-        payment.incurredEndDate ? new Date(payment.incurredEndDate) : null,
-        payment.counterparty || null,
-        payment.amount || null, // 0 and null are the functionally same thing here
-        payment.incurredAmount, // 0 is a valid amount and not the same as null, which is coalesced to the paid amount
-        payment.currency || null,
-        payment.categoryId,
-        payment.note || null
-    ]
+  //unlikely. make sure to enable FK support in sqlite or categoryId won't be checked
+  //dates should be in BasicISO (yyyymmdd), validation is a good idea
+  const params = [
+    payment.paidDate,
+    payment.incurredBeginDate ? payment.incurredBeginDate : null,
+    payment.incurredEndDate ? payment.incurredEndDate : null,
+    payment.counterparty || null,
+    payment.amount || null, // 0 and null are the functionally same thing here
+    payment.incurredAmount, // 0 is a valid amount and not the same as null, which is coalesced to the paid amount
+    payment.currency || null,
+    payment.categoryId,
+    payment.note || null
+  ]
     const db = await getDb(false);
 
     const {lastId} = await run(db, sql, params)
@@ -109,11 +111,12 @@ export const updatePayment = async (payment: Payment) => {
     //TODO: validations - the fallback to null done here forces the db to reject
     //bad data but there should probably be a validation and sanitization step prior to getting here
     //empty string isn't a valid counterparty, 0 isn't a valid amount. 0 could theoretically be a note but
-    //unlikely. make sure to enable FK support in sqlite or categoryId won't be checked
+  //unlikely. make sure to enable FK support in sqlite or categoryId won't be checked
+  //dates should be in BasicISO (yyyymmdd), validation is a good idea
     const params = [
-        new Date(payment.paidDate), //TODO maybe save the data in yyyy-mm-dd so it's easier to use?
-        payment.incurredBeginDate ? new Date(payment.incurredBeginDate) : null,
-        payment.incurredEndDate ? new Date(payment.incurredEndDate) : null,
+        payment.paidDate,
+        payment.incurredBeginDate ? payment.incurredBeginDate : null,
+        payment.incurredEndDate ? payment.incurredEndDate : null,
         payment.counterparty || null,
         payment.amount || null, // 0 and null are the functionally same thing here
         payment.incurredAmount, // 0 is a valid amount and not the same as null, which is coalesced to the paid amount
@@ -172,7 +175,7 @@ export const insertIncome = async (income: Income) => {
     //empty string isn't a valid counterparty, 0 isn't a valid amount. 0 could theoretically be a note but
     //unlikely.
     const params = [
-        new Date(income.paidDate), //TODO maybe save the data in yyyy-mm-dd so it's easier to use?
+        income.paidDate,
         income.source || null,
         income.amount || null,
         income.currency || null,
@@ -201,7 +204,7 @@ export const updateIncome = async (income: Income) => {
     //empty string isn't a valid counterparty, 0 isn't a valid amount. 0 could theoretically be a note but
     //unlikely.
     const params = [
-        new Date(income.paidDate), //TODO maybe save the data in yyyy-mm-dd so it's easier to use?
+        income.paidDate,
         income.source || null,
         income.amount || null,
         income.currency || null,
@@ -251,11 +254,11 @@ export const getCashAssetRecords = async (recordDate: string): Promise<CashAsset
     )
 }
 
-export const updateCashAssetRecords = async (recordDate: string, accountBalances: CashAssetRecord[]) => {
+export const updateCashAssetRecords = async (recordDate: BasicISODate, accountBalances: CashAssetRecord[]) => {
     const db = await getDb(false);
     await beginTransaction(db);
     try {
-        await run(db, 'delete from cash_assets_record where record_date = ?', [new Date(recordDate)])
+        await run(db, 'delete from cash_assets_record where record_date = ?', [recordDate])
         await Promise.all(
             accountBalances.map(ab =>
                 run(db,
@@ -263,7 +266,7 @@ export const updateCashAssetRecords = async (recordDate: string, accountBalances
                 insert into cash_assets_record(record_date, cash_account_id, amount)
                 values (?, ?, ?)
             `, [
-                        new Date(recordDate),
+                        recordDate,
                         ab.accountId,
                         ab.amount
                     ]
@@ -338,7 +341,7 @@ export const insertCashAssetAllocationRecord = async (allocationRecord: CashAsse
     //bad data but there should probably be a validation and sanitization step prior to getting here
     //empty string isn't a valid allocation, 0 isn't a valid amount.
     const params = [
-        new Date(allocationRecord.recordDate), //TODO maybe save the data in yyyy-mm-dd so it's easier to use?
+        allocationRecord.recordDate,
         allocationRecord.allocationCode || null,
         allocationRecord.amount || null,
         allocationRecord.currency || null,
@@ -374,38 +377,38 @@ export const getFuelLogSummary: () => Promise<FuelLogSummary> = async () => {
 export const insertFuelLog = async (fuelLogDto: NewFuelLogDto) => {
     //TODO do all this in a single transaction
 
-    const paymentId = await insertPayment({
-        id: -1, //For typescript, this is ignored
-        paidDate: fuelLogDto.timestamp.toString(),
-        //TODO counterparty should be settable, the categoryId should be based on the constants table, and
-        //the currency shouldn't be hardcoded (in general the fuel log feature is "single currency", fix this.
-        counterparty: 'Gas Station',
-        categoryId: 14,
-        currency: 'ILS',
-        amount: Math.round(fuelLogDto.price * fuelLogDto.liters * 100) / 100,
-	incurredAmount: null, //TODO this is a temporary condition
-        note: fuelLogDto.note
-    })
+  const paymentId = await insertPayment({
+    id: -1, //For typescript, this is ignored
+    paidDate: fuelLogDto.date,
+    //TODO counterparty should be settable, the categoryId should be based on the constants table, and
+    //the currency shouldn't be hardcoded (in general the fuel log feature is "single currency", fix this.
+    counterparty: 'Gas Station',
+    categoryId: 14,
+    currency: 'ILS',
+    amount: Math.round(fuelLogDto.price * fuelLogDto.liters * 100) / 100,
+    incurredAmount: null, //TODO this is a temporary condition
+    note: fuelLogDto.note
+  })
 
-    const sql = `
+  const sql = `
     insert into fuel_log 
         (timestamp, odometer, liters, is_full, note, payment_id)
     values (?,?,?,?,?,?)
   `
-    //TODO: validations - the fallback to null done here forces the db to reject
-    //bad data but there should probably be a validation and sanitization step prior to getting here
-    //empty string isn't a valid allocation, 0 isn't a valid amount.
-    const params = [
-        fuelLogDto.timestamp,
-        fuelLogDto.odometer,
-        fuelLogDto.liters,
-        fuelLogDto.isFull,
-        fuelLogDto.note,
-        paymentId
-    ];
-    const db = await getDb(false);
-    const {lastId} = await run(db, sql, params)
-    return {paymentId, fuelLogId: lastId}
+  //TODO: validations - the fallback to null done here forces the db to reject
+  //bad data but there should probably be a validation and sanitization step prior to getting here
+  //empty string isn't a valid allocation, 0 isn't a valid amount.
+  const params = [
+    fuelLogDto.timestamp,
+    fuelLogDto.odometer,
+    fuelLogDto.liters,
+    fuelLogDto.isFull,
+    fuelLogDto.note,
+    paymentId
+  ];
+  const db = await getDb(false);
+  const {lastId} = await run(db, sql, params)
+  return {paymentId, fuelLogId: lastId}
 }
 
 

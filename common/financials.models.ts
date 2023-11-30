@@ -7,12 +7,13 @@ export type StockAccountId = number;
 export type FxTransactionId = number;
 export type Currency = 'ILS' | 'USD';
 export type TaxCategory = 'Taxable' | 'Exempt' | 'Deferred';
+export type BasicISODate = number; // Format: 20231124
 
 export interface Payment {
   id: PaymentId;
-  paidDate: string;
-  incurredBeginDate?: string;
-  incurredEndDate?: string;
+  paidDate: BasicISODate;
+  incurredBeginDate?: BasicISODate;
+  incurredEndDate?: BasicISODate;
   amount: Money;
   incurredAmount: Money | null;
   currency: Currency;
@@ -23,9 +24,9 @@ export interface Payment {
 
 export interface vPayment {
   id: PaymentId;
-  paidDate: string;
-  incurredBeginDate?: string;
-  incurredEndDate?: string;
+  paidDate: BasicISODate;
+  incurredBeginDate?: BasicISODate;
+  incurredEndDate?: BasicISODate;
   ils: Money;
   usd: Money;
   counterparty: string;
@@ -42,7 +43,7 @@ export interface Category {
 }
 
 export interface CarSummary {
-  recordDate: string;
+  recordDate: BasicISODate;
   ils: Money;
   usd: Money;
 }
@@ -61,7 +62,7 @@ export interface CashAssetRecord {
 
 export interface Income {
   id: IncomeId;
-  paidDate: string;
+  paidDate: BasicISODate;
   source: string;
   amount: Money;
   currency: Currency;
@@ -77,7 +78,7 @@ export interface SpendingByCategory {
 
 export interface CashAssetAllocationRecord {
   // id: ;
-  recordDate: string;
+  recordDate: BasicISODate;
   amount: Money;
   currency: Currency;
   allocationCode: string;
@@ -91,7 +92,7 @@ export interface CashAssetAllocation {
 }
 
 export interface CashAssetAllocationHistory {
-  recordDate: string;
+  recordDate: BasicISODate;
   ils: Money;
   usd: Money;
   allocationCode: string;
@@ -109,8 +110,8 @@ export interface CashAllocationsDto {
 }
 
 export interface UnreportedSpending {
-  startDate: string;
-  endDate: string;
+  startDate: BasicISODate;
+  endDate: BasicISODate;
   ils: Money;
   usd: Money;
 }
@@ -143,6 +144,7 @@ export interface FuelLogDto {
 
 export interface NewFuelLogDto {
   id: number;
+  date: BasicISODate;
   timestamp: Date;
   odometer: number;
   liters: number;
@@ -182,7 +184,7 @@ export interface StockHoldingSummaryDto {
 export interface vFxHistory {
   id: FxTransactionId;
   accountName: string;
-  transactionDate: string; //datetime???
+  transactionDate: BasicISODate; //datetime???
   ils: Money;
   usd: Money;
   usdCommission: Money;
@@ -213,7 +215,7 @@ export interface StockAccountCashBalance {
 export interface StockAccountCashFlow {
     recordType: 'cash_flow' | 'stock_transaction'; //TODO add all types
     recordId: FxTransactionId | StockTransactionId; //TODO
-    date: string;
+    date: BasicISODate;
     ils: Money;
     usd: Money;
     description: string;
