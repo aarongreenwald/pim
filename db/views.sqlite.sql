@@ -367,8 +367,8 @@ select
 from stock_transaction
          left join v_stock_split_multipliers ss
                    on stock_transaction.ticker_symbol = ss.ticker_symbol
-                       and transaction_date >= ss.from_date
-                       and transaction_date < ss.to_date;
+                       and cast(strftime('%Y%m%d', transaction_date / 1000, 'unixepoch') as int) >= ss.from_date
+                       and cast(strftime('%Y%m%d', transaction_date / 1000, 'unixepoch') as int) < ss.to_date;
 
 
 ;drop view if exists v_stock_holdings

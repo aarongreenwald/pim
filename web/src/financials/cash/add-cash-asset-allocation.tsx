@@ -6,7 +6,7 @@ import {PrimaryButton, DefaultButton, Stack, TextField} from '@fluentui/react'
 import {PanelProps} from '../../common/panel.types';
 import {currencyRadioOptions, defaultCurrency} from '../currencies';
 import {horizontalChoiceGroup, stackTokens, StyledChoiceGroup} from '../styles';
-import {expandISODate, todayAsISODate} from '../../common/date.utils';
+import {expandISODate, todayAsISODate, collapseISODate} from '../../common/date.utils';
 import {CurrencyInput} from '../currency-input';
 
 export const AddCashAssetAllocation: React.FC<PanelProps<PaymentId>> = ({onClose}) => {
@@ -75,7 +75,7 @@ function useCaaForm() {
     const updateRecord = useCallback(({target}) => {
         setAllocation({
             ...allocation,
-            [target.name]: target.value
+           [target.name]: target.type == 'date' ? collapseISODate(target.value)  : target.value
         })
     }, [allocation])
     const submitForm = useCallback(async () => {

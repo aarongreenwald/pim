@@ -5,7 +5,7 @@ import * as React from 'react';
 import {useCallback, useEffect, useState} from 'react';
 import {BasicISODate, CashAccount} from '@pim/common';
 import {getActiveCashAccounts, getCashRecords, saveCashRecords} from '../../services/server-api';
-import {expandISODate, todayAsISODate} from '../../common/date.utils';
+import {collapseISODate, expandISODate, todayAsISODate} from '../../common/date.utils';
 import {CurrencyInput} from '../currency-input';
 
 export const AddCashRecord: React.FC<PanelProps<BasicISODate>> = ({onClose, id}) => {
@@ -97,7 +97,7 @@ function useCashRecordsForm(onClose: () => void, recordDate?: BasicISODate) {
     const updateDate = useCallback(({target}) => {
         setDraft({
             ...draft,
-            recordDate: target.value
+          recordDate: collapseISODate(target.value) as number
         })
     }, [draft])
 

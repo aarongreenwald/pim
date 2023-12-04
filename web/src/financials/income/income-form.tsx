@@ -6,7 +6,7 @@ import {PrimaryButton, DefaultButton, Stack, TextField} from '@fluentui/react'
 import {PanelProps} from '../../common/panel.types';
 import {horizontalChoiceGroup, stackTokens, StyledChoiceGroup} from '../styles';
 import {currencyRadioOptions, defaultCurrency} from '../currencies';
-import {expandISODate, todayAsISODate} from '../../common/date.utils';
+import {expandISODate, todayAsISODate, collapseISODate} from '../../common/date.utils';
 import {CurrencyInput} from '../currency-input';
 
 export const IncomeForm: React.FC<PanelProps<IncomeId>> = ({onClose, id}) => {
@@ -81,7 +81,7 @@ function useIncomeForm(onClose: () => void, incomeId?: IncomeId) {
     const updateIncome = useCallback(({target}) => {
         setIncome({
             ...income,
-            [target.name]: target.value
+           [target.name]: target.type == 'date' ? collapseISODate(target.value)  : target.value
         })
     }, [income])
     const submitForm = useCallback(async () => {
