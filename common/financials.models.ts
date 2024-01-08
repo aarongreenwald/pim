@@ -221,3 +221,10 @@ export interface StockAccountCashFlow {
     usd: Money;
     description: string;
 }
+
+export interface MarketData {
+  date: BasicISODate;
+  time: string;
+  tickerSymbol: string;
+  price: Money;
+}

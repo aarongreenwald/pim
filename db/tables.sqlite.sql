@@ -160,6 +160,14 @@ create table cash_assets_allocation(cash_assets_allocation_id integer primary ke
 
 );
 
+create table market_data (
+     date int NOT NULL
+   , time varchar(11) NULL
+   , ticker_symbol varchar(20) NOT NULL
+   , price decimale(19,4) NOT NULL
+   , unique(date, ticker_symbol)
+)
+
 create table financial_constants(
     code varchar(10) not null primary key,
     amount decimal(19,4) not null

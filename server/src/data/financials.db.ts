@@ -26,7 +26,8 @@ import {
   CashAssetAllocationHistory,
   StockAccountCashBalance,
   StockAccountCashFlow,
-  BasicISODate
+  BasicISODate,
+  MarketData
 } from '@pim/common';
 import {all, beginTransaction, commitTransaction, get, getDb, rollbackTransaction, run} from './db.helpers';
 
@@ -634,6 +635,24 @@ export const getStockAccountCashFlow = async(id: StockTransactionId) => {
 
     const db = await getDb(true)
     return await all<StockAccountCashFlow[]>(db, sql, [id])    
+}
+
+export const updateMarketData = async(marketData: MarketData[]) => {
+  const db = await getDb(false)
+  await beginTransaction(db)
+  await Promise.all(marketData.map(md => {
+    const sql = `insert into mark_date (date, time, ticker_symbol, price)
+                 values (?, ?, ?, ?)
+                 on conflict (date, ticker_symbol) do update set time=excluded.time, price=excluded.price`
+    const params = [
+      md.date,
+      md.time,
+      md.tickerSymbol,
+      md.price
+    ]
+    return run(db, sql, params)
+  }))
+  await commitTransaction(db)  
 }
 
 export const execQueryNoResults = async sql => {
