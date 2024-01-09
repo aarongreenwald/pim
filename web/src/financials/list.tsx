@@ -43,34 +43,50 @@ const formatFieldName = fieldName => {
     return spaces.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
 }
 
-const Currency = ({value, currencyCode}) => {
-    if (!value && value !== 0) return null;
-    return (
-        <StyledCurrency>
-            <span>{currencySymbols[currencyCode]}</span>
-            <span>{value?.toFixed(2)}</span>
-        </StyledCurrency>
-    );
+// Counts characters in a displayed number
+// Note: doesn't include the displayed thousands separators. In any case the font
+// isn't monospace so this just gets an estimate of the displayed width
+const countDigits = value =>
+  Math.floor(Math.log10(Math.abs(value) < 1 ? 1 : Math.abs(value))) + 1 + //Leading zeroes are displayed when values are between -1 and 1
+    (value < 0 ? 1 : 0) + //the minus sign
+    3; //decimal point plus the two digits after the decimal
+
+const CurrencyField = ({value, currencyCode, maxDigits}) => {
+  if (!value && value !== 0) return null;
+  return (
+    <StyledCurrency>
+      {/* This is a hack and not pixel-perfect. Better solution would be to use the maxDigits to set the
+      column width, and then use justify-content: space-between; on StyledCurrency */}
+      <span style={{position: 'absolute', marginRight: (maxDigits * 6) + 10}}>
+	{currencySymbols[currencyCode]}
+      </span>
+      <span>{value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+    </StyledCurrency>
+  );
 }
 
 const StyledCurrency = styled.span`
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
 `
 
 function isDateColumn(key: string) {
     return key.toLowerCase().includes('date') || key.toLowerCase() === 'timestamp';
 }
 
-function getColumnRenderer(key: string) {
-  const columnRenderer = (value) => isDateColumn(key) ? //TODO - consider putting the time portion in a tooltip or perhaps as part of the string
-    //TODO this converts to local time, which is wrong - none of the dates in this system are relative to the user's current location, the time in the database is always meant to be displayed as is
-    //it only seems ok because I am always ahead of UTC, so the day is the same. Set the client clock
-    //to less than UTC and days will all be off by one.
+function getColumnRenderer(key: string, data) {
+  let maxSize = 1;
+  if (currencyFields.has(key)) {
+    data.forEach(row => {
+      maxSize = Math.max(maxSize, countDigits(row[key]))
+    })
+  }
+  
+  const columnRenderer = (value) => isDateColumn(key) ?
     isoDateToFullDisplay(value[key]) :
     currencyFields.has(key) ?
-      <Currency value={value[key]} currencyCode={currencyFields.get(key)}/> :
-  value[key];
+      <CurrencyField value={value[key]} currencyCode={currencyFields.get(key)} maxDigits={maxSize}/> :
+      value[key];
   return columnRenderer; 
 }
 
@@ -104,10 +120,10 @@ export function List<T = unknown>({data,
         return keys.filter(fieldIsNotId).map(key => ({
             key,
             isFiltered: !!columnFilters[key],
-            minWidth: currencies.includes(key.toUpperCase()) ? 75 : 150,
-            maxWidth: currencies.includes(key.toUpperCase()) ? 75 : null,
+            minWidth: currencies.includes(key.toUpperCase()) ? 100 : 150,
+            maxWidth: currencies.includes(key.toUpperCase()) ? 100 : null,
             fieldName: key,
-            onRender: getColumnRenderer(key),
+            onRender: getColumnRenderer(key, data),
             name: formatFieldName(key),
             styles: currencyFields.has(key) ? { //style the header
                 root: {

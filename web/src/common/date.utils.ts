@@ -37,6 +37,8 @@ export function isoDateToFullDisplay(date: number) : string {
   if (expanded.length != 10) return date.toString() // shouldn't happen unless we have bad data in the DB
   return expanded
   // TODO this isn't staying in UTC, for some reason? I'd like a better format than expanded iso
+  //it only seems ok because I am always ahead of UTC, so the day is the same. Set the client clock
+  //to less than UTC and days will all be off by one.
   // return formatInTimeZone(expanded, 'UTC', 'yyyy-MM-dd iii')  
 }
 
