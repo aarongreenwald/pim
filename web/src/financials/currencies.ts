@@ -14,4 +14,8 @@ export const currencyRadioOptions = currencies.map(currency => ({
     text: currency.toUpperCase()
 }));
 
-export const currencyFields = currencies.map(c => c.toLowerCase());
+export const currencyFields = new Map();
+currencies.forEach(c => currencyFields.set(c.toLocaleLowerCase(), c.toLowerCase()));
+
+const additionalUsdFields = ['marketValue', 'costBasis', 'marketPrice', 'avgCostBasis', 'usdCommission']
+additionalUsdFields.forEach(field => currencyFields.set(field, 'usd'));

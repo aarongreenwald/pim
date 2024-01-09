@@ -416,7 +416,8 @@ export const insertFuelLog = async (fuelLogDto: NewFuelLogDto) => {
 export const getStockHoldingsSummary = async () => {
     const db = await getDb();
     const sql = `
-        select ticker_symbol tickerSymbol, tax_category taxCategory, quantity, cost_basis costBasis
+        select ticker_symbol tickerSymbol, tax_category taxCategory, quantity,
+               avg_cost_basis avgCostBasis, market_price marketPrice, cost_basis costBasis, market_value marketValue
         from v_stock_holdings_summary
     `;
     return all<StockHoldingSummaryDto>(db, sql)
@@ -616,10 +617,12 @@ export const updateFxTransaction = async (transaction: FxTransactionDto) => {
     await run(db, sql, params)
 }
 
+//TODO this should probably be renamed, because it's no longer just cash balances
 export const getStockAccountCashBalances = async() => {
-    const sql = `select account_id id, name accountName, ils, usd
-                 from v_stock_account_cash_balances cb
-                 left join stock_account sa on cb.account_id = sa.stock_account_id`
+  const sql = `select account_id id, sa.name accountName, ils, usd, cost_basis costBasis, market_value marketValue
+               from v_stock_account_cash_balances cb
+               left join stock_account sa on cb.account_id = sa.stock_account_id
+               left join v_stock_holdings_account_summary holdings on sa.stock_account_id = holdings.stock_account_id`
 
     const db = await getDb(true)
     return await all<StockAccountCashBalance[]>(db, sql)
@@ -641,7 +644,7 @@ export const updateMarketData = async(marketData: MarketData[]) => {
   const db = await getDb(false)
   await beginTransaction(db)
   await Promise.all(marketData.map(md => {
-    const sql = `insert into mark_date (date, time, ticker_symbol, price)
+    const sql = `insert into market_data (date, time, ticker_symbol, price)
                  values (?, ?, ?, ?)
                  on conflict (date, ticker_symbol) do update set time=excluded.time, price=excluded.price`
     const params = [

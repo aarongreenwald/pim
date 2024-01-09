@@ -11,7 +11,7 @@ import {
     Stack,
     TextField
 } from '@fluentui/react';
-import {currencyFields, currencySymbols} from './currencies';
+import {currencies, currencyFields, currencySymbols} from './currencies';
 import styled from '@emotion/styled';
 import {useDebouncedInput} from '../common/debounced-input.hook';
 import {collapseISODate, expandISODate, isoDateToFullDisplay} from '../common/date.utils';
@@ -33,9 +33,9 @@ const idFields = ['id', 'categoryId', 'recordId'];
 
 const fieldIsNotId = fieldName => !idFields.includes(fieldName)
 const formatFieldName = fieldName => {
-    if (currencyFields.includes(fieldName)) {
-        return fieldName.toUpperCase();
-    }
+  if (currencies.includes(fieldName.toUpperCase())) {
+    return fieldName.toUpperCase();
+  }
 
     const spaces = fieldName
         .split('_').join(' ') //underscores to spaces
@@ -68,8 +68,8 @@ function getColumnRenderer(key: string) {
     //it only seems ok because I am always ahead of UTC, so the day is the same. Set the client clock
     //to less than UTC and days will all be off by one.
     isoDateToFullDisplay(value[key]) :
-    currencyFields.includes(key) ?
-    <Currency value={value[key]} currencyCode={key}/> :
+    currencyFields.has(key) ?
+      <Currency value={value[key]} currencyCode={currencyFields.get(key)}/> :
   value[key];
   return columnRenderer; 
 }
@@ -104,12 +104,12 @@ export function List<T = unknown>({data,
         return keys.filter(fieldIsNotId).map(key => ({
             key,
             isFiltered: !!columnFilters[key],
-            minWidth: currencyFields.includes(key) ? 75 : 150,
-            maxWidth: currencyFields.includes(key) ? 75 : null,
+            minWidth: currencies.includes(key.toUpperCase()) ? 75 : 150,
+            maxWidth: currencies.includes(key.toUpperCase()) ? 75 : null,
             fieldName: key,
             onRender: getColumnRenderer(key),
             name: formatFieldName(key),
-            styles: currencyFields.includes(key) ? { //style the header
+            styles: currencyFields.has(key) ? { //style the header
                 root: {
                     textAlign: 'right',
                     width: '100%',
@@ -264,7 +264,7 @@ const FilterMenu: React.FC<FilterMenuProps> = (props) => {
                            }} />
             </>
         )
-    } else if (currencyFields.includes(column.key)) {
+    } else if (currencyFields.has(column.key)) {
         filterInputs = <CurrencyFilterMenu {...props} />
     }
 
@@ -306,7 +306,7 @@ function rowMatchesColumnFilters<T>(row: T, filters: ColumnFilters): boolean {
             }
         }
 
-        if (currencyFields.includes(key)) {
+        if (currencyFields.has(key)) {
             const filter = filters[key] as CurrencyColumnFilters;
             const amount = row[key];
             if (filter.min?.toString() !== '' && amount < filter.min) {

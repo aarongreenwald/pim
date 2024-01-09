@@ -168,7 +168,7 @@ export const setupFinancialsRoutes = (app: Express) => {
               .catch(errorHandler(res))
         })
 
-  app.put('/market-data', (req, res) =>
+  app.put('/market-data', jsonParser, (req, res) =>
     db.updateMarketData(req.body)
       .then(() => res.status(200).send())
       .catch(errorHandler(res))

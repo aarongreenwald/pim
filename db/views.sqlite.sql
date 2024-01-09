@@ -239,7 +239,7 @@ select
 	account_id,
 	case currency when 'ILS' then amount else null end ils,
 	case currency when 'USD' then amount else null end usd,
-	null description
+	note description
 from stock_account_cash_transaction
 union all
 select
@@ -348,6 +348,11 @@ with recursive split_multiples as (
 
 ) select * from split_multiples;
 
+drop view if exists v_current_market_data;
+create view v_current_market_data as
+with latest as (select ticker_symbol, max(date) date from market_data group by ticker_symbol)
+select md.* from market_data md inner join latest on md.ticker_symbol = latest.ticker_symbol and md.date = latest.date;
+
 -- Primary purpose of this view is to account for splits. It retroactively pretends that a transaction happened at half the price,
 -- with twice as many shares, so that holdings can be calculated. The commission doesn't change because it's not per-share, so the total
 -- amount spent on commissions does not change retroactively.
@@ -374,26 +379,40 @@ from stock_transaction
 ;drop view if exists v_stock_holdings
 ;create view v_stock_holdings as
 select
+    sa.stock_account_id,
     name,
     tax_category,
-    ticker_symbol,
+    st.ticker_symbol,
     sum(quantity) quantity,
     -- SELLs have a cost_basis and a unit_price, BUYs have only a unit price
     -- The cost_basis of the outstanding shares (currently held) is the sum of
     -- the buy price for all shares less the buy price for the shares sold. I have to check this. 
-    sum(coalesce(cost_basis, unit_price) * st.quantity) / sum(quantity) cost_basis
+    sum(coalesce(cost_basis, unit_price) * st.quantity) / sum(quantity) avg_cost_basis,
+    sum(coalesce(cost_basis, unit_price) * st.quantity) cost_basis,
+    md.price market_price,
+    sum(quantity) * md.price market_value    
 from v_stock_transactions st
          inner join stock_account sa on sa.stock_account_id = st.account_id
-group by sa.name, ticker_symbol, tax_category
-
+	 left join v_current_market_data md on st.ticker_symbol = md.ticker_symbol
+group by sa.stock_account_id, sa.name, st.ticker_symbol, tax_category
 
 ;drop view if exists v_stock_holdings_summary
 
 ;create view v_stock_holdings_summary as
-select ticker_symbol, tax_category, sum(quantity) quantity, sum(cost_basis * quantity) / sum(quantity) cost_basis
+select ticker_symbol,
+       tax_category,
+       sum(quantity) quantity,       
+       sum(cost_basis) / sum(quantity) avg_cost_basis,
+       sum(cost_basis) cost_basis,
+       sum(market_value) market_value, market_price
 from v_stock_holdings
 group by tax_category, ticker_symbol
 
+;drop view if exists v_stock_holdings_account_summary
+;create view v_stock_holdings_account_summary as
+select stock_account_id, name, tax_category, sum(cost_basis) cost_basis, sum(market_value) market_value
+from v_stock_holdings
+group by stock_account_id, name, tax_category
 
 -- Filter out anything not ILS for now so that I can assume the currency. 
 ;drop view if exists v_fx_history
