@@ -396,8 +396,8 @@ from v_stock_transactions st
 	 left join v_current_market_data md on st.ticker_symbol = md.ticker_symbol
 group by sa.stock_account_id, sa.name, st.ticker_symbol, tax_category
 
+-- stock holdings by ticker
 ;drop view if exists v_stock_holdings_summary
-
 ;create view v_stock_holdings_summary as
 select ticker_symbol,
        tax_category,
@@ -408,6 +408,20 @@ select ticker_symbol,
 from v_stock_holdings
 group by tax_category, ticker_symbol
 
+-- stock holdings by account/ticker
+;drop view if exists v_stock_holdings_account_ticker_summary
+;create view v_stock_holdings_account_ticker_summary as
+select stock_account_id,
+       name,
+       ticker_symbol,
+       sum(quantity) quantity,
+       sum(cost_basis) / sum(quantity) avg_cost_basis,
+       sum(cost_basis) cost_basis,
+       sum(market_value) market_value, market_price
+from v_stock_holdings
+group by stock_account_id, name, ticker_symbol
+
+-- total stock holdings by account
 ;drop view if exists v_stock_holdings_account_summary
 ;create view v_stock_holdings_account_summary as
 select stock_account_id, name, tax_category, sum(cost_basis) cost_basis, sum(market_value) market_value
