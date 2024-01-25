@@ -2,6 +2,7 @@ const fetch = require('node-fetch')
 
 const apiKey = 'polygonapikey'
 const symbols = ['AAPL', 'MSFT', 'SPY', 'C:USDILS']
+const DAYS = 30
 
 
 // Issue with this approach: it requires iterating over days and knowing if they're market days, or eating errors
@@ -28,7 +29,7 @@ const symbols = ['AAPL', 'MSFT', 'SPY', 'C:USDILS']
 
 function getData () {
     const today = new Date().toISOString().substring(0, 10)
-    const startDate = new Date(new Date() - 1000 * 60 * 60 * 24 * 7).toISOString().substring(0, 10)
+    const startDate = new Date(new Date() - 1000 * 60 * 60 * 24 * DAYS).toISOString().substring(0, 10)
     
     const processData = data => {
 	const isFx = data.ticker.substr(0,2) == "C:"	
@@ -41,8 +42,9 @@ function getData () {
 	}))
 }
 
-    symbols.forEach(symbol =>
-	fetch(`https://api.polygon.io/v2/aggs/ticker/${symbol}/range/1/day/${startDate}/${today}?apiKey=${apiKey}`)
+    return symbols.map(symbol => {
+	console.log(`Fetching data for symbol: ${symbol}`)
+	return fetch(`https://api.polygon.io/v2/aggs/ticker/${symbol}/range/1/day/${startDate}/${today}?apiKey=${apiKey}`)
 	    .then(res => res.json())
             .then(res => {
 		if (res.status === "OK") {
@@ -51,17 +53,29 @@ function getData () {
 		return res
 	    })
 	    .then(processData)
-//	    .then(console.log)
-	    .then(loadToDb)
-    )
+	    .catch(ex => {
+		console.error(`Failed to get data for symbol: ${symbol}`, ex)
+		return []
+	    })
+    })
 }
 
 // TODO auth
 function loadToDb(data) {
-    console.log('sending data to db: ', data)
+    // console.log('sending data to db: ', data)
+    const initializer = symbols.reduce((acc, item) => { acc[item] = 0; return acc}, {}) //so that there will be '0' values for failures
+    const summary = data.reduce((acc, item) => {
+	const symbol = item.tickerSymbol
+	acc[symbol] = acc[symbol] || 0 //just in case there's data that isn't in symbols
+	acc[symbol]++
+	return acc
+    }, initializer)
+    console.log('Sending data to db, row count: ', summary)
     return fetch(`http://localhost:4321/api/market-data`, {method: 'PUT', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(data)})
 	.then(res => { console.log('PIM response: ', res.status); return res.text() })
 	.then(console.log)
 }
 
-getData()
+Promise.all(getData())
+    .then(results => results.flat())
+    .then(loadToDb)
