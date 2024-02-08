@@ -216,6 +216,21 @@ export const setupNotesRoutes = (app: Express) => {
         }
     })
 
+  app.get('/notes/diary-path', decodeQueryParams(), async (req, res) => {    
+    try {
+      const date = req.query.date as string;
+      const createIfNotExists = (req.query.createIfNotExists as string) ? 1 : 0;
+      
+      const diaryPathScript = path.resolve(__dirname, '..', 'cli', 'diary-path.sh')
+      const diaryPath = await execute(`cd ${CONTENT_DIRECTORY} && ${diaryPathScript} ${date} ${createIfNotExists}`)
+      res.send({diaryPath})
+    } catch (ex) {
+      console.error(ex)
+      res.status(500).send(ex)
+    }
+  })
+
+  
     app.post('/notes/move', decodeQueryParams(), async (req, res) => {
         try {
             const from = req.query.from as string;
@@ -236,7 +251,6 @@ export const setupNotesRoutes = (app: Express) => {
             res.status(500).send(ex)
         }
     })
-
 }
 
 const decodeQueryParams = (...paramNames) => {

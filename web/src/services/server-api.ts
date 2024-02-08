@@ -32,7 +32,8 @@ import {
   StockHoldingSummaryDto,
   StockAccountCashBalance,
   StockAccountId,
-  StockAccountCashFlow
+  StockAccountCashFlow,
+  BasicISODate
 } from '@pim/common';
 
 const handleResponse = (res) => {
@@ -178,6 +179,10 @@ export const getRecentFiles = (): Promise<string[]> => get('notes/recent');
 
 export const renameDirectoryItem = (from: string, to: string): Promise<void> =>
     post(`notes/move?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`)
+
+export const getDiaryPath = (date: BasicISODate, createIfNotExists = false): Promise<string> =>
+  get<{diaryPath: string}>(`notes/diary-path?date=${date}&createIfNotExists=${createIfNotExists}`)
+    .then(res => res.diaryPath)
 
 // const debugSleep = (ms) => (...args) => new Promise(resolve => setTimeout(resolve, ms, args))
 
