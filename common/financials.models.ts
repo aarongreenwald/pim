@@ -93,9 +93,11 @@ export interface CashAssetAllocation {
 
 export interface CashAssetAllocationHistory {
   recordDate: BasicISODate;
+  allocationCode: string;
   ils: Money;
   usd: Money;
-  allocationCode: string;
+  ilsBalance: Money;
+  usdBalance: Money;
   note?: string;
 }
 

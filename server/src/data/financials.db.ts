@@ -306,7 +306,14 @@ export const getCashAssetsAllocationHistory = async (allocationCode  = null) => 
     const db = await getDb();
     return all<CashAssetAllocationHistory>(db,
 	`
-          select record_date recordDate, allocation_code allocationCode, ils, usd, note from v_cash_assets_allocation_history
+          select record_date recordDate,
+                 allocation_code allocationCode,
+                 ils,
+                 usd,
+                 running_total_ils ilsBalance,             
+                 running_total_usd usdBalance,
+                 note
+          from v_cash_assets_allocation_history
           ${allocationCode ? 'where allocation_code = ?' : ''}
           order by record_date desc
        `, [allocationCode].filter(Boolean))

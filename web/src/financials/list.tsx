@@ -27,6 +27,7 @@ interface ListProps<T = unknown> {
   idField?: string;
   searchableTextFields?: string[];
   onClick?: (row: T) => void;
+  columnsSelector?: (columnName: string) => boolean;
 }
 
 const idFields = ['id', 'categoryId', 'recordId'];
@@ -40,7 +41,13 @@ const formatFieldName = fieldName => {
   const spaces = fieldName
     .split('_').join(' ') //underscores to spaces
     .replace(/([a-z])([A-Z])/g, '$1 $2'); //camel case to spaces
-  return spaces.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+  return spaces.split(' ')
+    .map(word =>
+      currencies.includes(word.toUpperCase()) ?
+	word.toUpperCase() :
+	word.charAt(0).toUpperCase() + word.slice(1)
+    )
+    .join(' ');
 }
 
 // Counts characters in a displayed number
@@ -108,6 +115,7 @@ export function List<T = unknown>({data,
   sortData,
   idField,
   searchableTextFields,
+  columnsSelector,
   onClick}: PropsWithChildren<ListProps<T>>): JSX.Element {
 
     const [filterMenuColumn, setFilterMenuColumn] = useState<IColumn>(null)
@@ -117,7 +125,7 @@ export function List<T = unknown>({data,
       if (!data.length) return [];
 
       const keys = Object.keys(data[0]);
-      return keys.filter(fieldIsNotId).map(key => ({
+      return keys.filter(key => columnsSelector ? columnsSelector(key) : fieldIsNotId(key)).map(key => ({
         key,
         isFiltered: !!columnFilters[key],
         minWidth: currencies.includes(key.toUpperCase()) ? 100 : 150,
@@ -149,7 +157,7 @@ export function List<T = unknown>({data,
           sortData(newSort);
         }
       } as IColumn))
-    }, [data, sortConfig, sortData, columnFilters])
+    }, [data, sortConfig, sortData, columnFilters, columnsSelector])
 
     const {inputVal, debouncedValue, updateValue} = useDebouncedInput('');
     const filteredData = useMemo(() =>
