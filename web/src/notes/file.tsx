@@ -11,7 +11,7 @@ interface FileContentProps {
   path: string;
 }
 export const FileContent: React.FC<FileContentProps> = ({content, onSaveContent, onCommit, pendingCommit, path}) => {
-  const [editMode, setEditMode] = useState(false);
+  const [editMode, setEditMode] = useState(true);
 
   return editMode ?
     <FileEditor content={content} onSaveContent={onSaveContent} onExitEditor={() => setEditMode(false)} path={path}/> :
