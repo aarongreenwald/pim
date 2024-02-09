@@ -9,7 +9,8 @@ import {
     File,
     FileSystemItemType,
     GitStatus,
-    NotesSearchResults
+    NotesSearchResults,
+    DiaryInfo
 } from "@pim/common";
 import path from 'path';
 import bodyParser from 'body-parser';
@@ -331,6 +332,7 @@ async function gitPullRebase() {
 const getPath: (relativePath: string) => Promise<Directory | File> = async (relativePath) => {
     const {path, fullPath, isDirectory, directoryPath} = await getPathDetails(relativePath);
     const directoryInfo = await getDirectoryInfo(directoryPath)
+    const diaryInfo = getDiaryInfo(directoryInfo, isDirectory, path)
     const fileContent = isDirectory || isBinary(path as string) ? null : await fs.promises.readFile(fullPath, 'utf8');
     const gitChanges = await getGitChanges(fullPath)
 
@@ -355,6 +357,7 @@ const getPath: (relativePath: string) => Promise<Directory | File> = async (rela
         breadcrumbs: buildBreadcrumbs(path),
         directoryContents: directoryInfo,
         fileContent,
+        diaryInfo,
         pendingCommit: !!gitChanges.length,
         isPlainText: !isDirectory && mimeType(path) === 'text/plain'
     };
@@ -373,6 +376,32 @@ const getDirectoryInfo: (path: string) => Promise<DirectoryItem[]> = async (path
             throw `500 ${ex}`
         }
     }
+}
+
+const getDiaryInfo = (directoryInfo: DirectoryItem[], isDirectory: boolean, path: string): DiaryInfo | null => { 
+  if (!directoryInfo.find(f => f.name === ".diary")) {
+    return null
+  }
+
+  // TODO this assumes that the input directoryInfo array is already sorted (at least when it's a diary
+  // and that other than the .diary file, which is always first, there are no other non-diary entries in the directory
+  
+  if (isDirectory) {
+    return {
+      latest: directoryInfo[directoryInfo.length - 1],
+      prev: null,
+      next: null
+    }
+  } else {
+    const currIndex = directoryInfo.findIndex(x => x.name === path.split('/').pop())
+    return {
+      latest: directoryInfo[directoryInfo.length - 1],
+      prev: currIndex > 1 ? directoryInfo[currIndex - 1] : null,
+      next: currIndex < directoryInfo.length - 1 ? directoryInfo[currIndex + 1] : null
+    }
+  }
+  
+  //TODO if there is eventually relevant info in the .diary file, it can be read here as well
 }
 
 async function getPathDetails<P, ResBody, ReqBody, ReqQuery>(path: string) {

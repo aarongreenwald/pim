@@ -13,6 +13,7 @@ export interface FileSystemItem<T extends FileSystemItemType> {
     breadcrumbs: Breadcrumb[];
     directoryContents: DirectoryItem[];
     pendingCommit: boolean;
+    diaryInfo: DiaryInfo | null;
 }
 
 export interface DirectoryItem {
@@ -26,6 +27,12 @@ export interface DirectoryItem {
 export interface Breadcrumb {
     name: string;
     path: string;
+}
+
+export interface DiaryInfo {
+  latest: DirectoryItem;
+  prev: DirectoryItem | null;
+  next: DirectoryItem | null;
 }
 
 export type FileSystemItemType = 'F' | 'D';

@@ -36,11 +36,11 @@ export const Home: React.FC = () => {
             <StyledButtons>
                 <DefaultButton onClick={showAddPayment}>Add Payment</DefaultButton>
                 <DefaultButton onClick={showAddFuelLog}>Add Fuel Log</DefaultButton>
+                <DefaultButton onClick={loadTodayDiary}>{'Today\'s Diary'}</DefaultButton>
                 <Stack horizontal>
                     <DefaultButton onClick={() => history.push('/notes')}>View Notes</DefaultButton>
                     <DefaultButton iconProps={searchIcon} onClick={showSearchNotes}/>
                 </Stack>
-                <DefaultButton onClick={loadTodayDiary}>{'Today\'s Diary'}</DefaultButton>
             </StyledButtons>
             <Label>Recent Notes</Label>
             <RecentNotes />
