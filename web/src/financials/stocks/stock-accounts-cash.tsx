@@ -37,14 +37,14 @@ export const StockAccountsCash: React.FC = () => {
       <CommandBar items={commands} styles={commandBarStyles}/>
       {
 	stockAccountsCashBalances &&
-	  <List<StockAccountCashBalance>
+          <List<StockAccountCashBalance>
             onClick={account => setStockAccountId(account.id)}
             data={stockAccountsCashBalances} />
       }
       {
 	/* TODO add id field for performance, but it needs to be a compound field.*/
         stockAccountCashFlow &&
-	  <List<StockAccountCashFlow>
+          <List<StockAccountCashFlow>
             data={stockAccountCashFlow}
             onClick={({recordType, recordId}) => setSelectedItem({recordId, recordType})} /> 
       }
