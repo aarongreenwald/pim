@@ -10,82 +10,82 @@ import {FuelLogCard} from './fuel-log-card';
 import {PaymentForm} from '../payments/payment-form';
 
 export const FuelHistory: React.FC = () => {
-    const [fuelLog, setFuelLog] = useState<FuelLogDto>()
+  const [fuelLog, setFuelLog] = useState<FuelLogDto>()
 
-    const reloadData = useCallback(() => {
-        getFuelLog().then(setFuelLog)
-    }, [setFuelLog])
+  const reloadData = useCallback(() => {
+    getFuelLog().then(setFuelLog)
+  }, [setFuelLog])
 
-    useEffect(() => {
-        reloadData();
-    }, [reloadData])
+  useEffect(() => {
+    reloadData();
+  }, [reloadData])
 
-    const [addFuelLog, {setTrue: showAddFuelLog, setFalse: hideAddFuelLog}] = useBoolean(false)
-    const [selectedPayment, setSelectedPayment] = useState<PaymentId>(null)
-    const hideEditPayment = () => setSelectedPayment(null);
+  const [addFuelLog, {setTrue: showAddFuelLog, setFalse: hideAddFuelLog}] = useBoolean(false)
+  const [selectedPayment, setSelectedPayment] = useState<PaymentId>(null)
+  const hideEditPayment = () => setSelectedPayment(null);
 
-    const commands = useCommandBarCommands(showAddFuelLog, reloadData);
+  const commands = useCommandBarCommands(showAddFuelLog, reloadData);
 
-    return (
-        <>
-            <CommandBar items={commands} styles={commandBarStyles}/>
-            {
-                fuelLog && <FluentList
-                    items={fuelLog.fuelLog}
-                    onRenderCell={f =>
-                        <Text>
-                            <FuelLogCard fuelLog={f}
-                                         onViewPayment={() => setSelectedPayment(f.paymentId)}/>
-                        </Text>
-                    }
-                />
+  return (
+    <>
+      <CommandBar items={commands} styles={commandBarStyles}/>
+      {
+        fuelLog && <FluentList
+                     items={fuelLog.fuelLog}
+                     onRenderCell={f =>
+                       <Text>
+                         <FuelLogCard fuelLog={f}
+                           onViewPayment={() => setSelectedPayment(f.paymentId)}/>
+                       </Text>
+                     }
+                   />
 
-            }
+      }
 
-            {/*{*/}
+      {/*{*/}
 
-            {/*    fuelLog &&*/}
-            {/*        <List<FuelLog>*/}
-            {/*            data={fuelLog.fuelLog}*/}
-            {/*            idField={'id'} />*/}
-            {/*}*/}
+      {/*    fuelLog &&*/}
+      {/*        <List<FuelLog>*/}
+      {/*            data={fuelLog.fuelLog}*/}
+      {/*            idField={'id'} />*/}
+      {/*}*/}
 
-            <Panel
-                isOpen={addFuelLog}
-                headerText="Log Fuel"
-                onDismiss={hideAddFuelLog}>
-                <LogFuelForm onClose={hideAddFuelLog} onSave={reloadData} data={fuelLog?.fuelLog[0]}/>
-            </Panel>
+      <Panel
+        isOpen={addFuelLog}
+        headerText="Log Fuel"
+        onDismiss={hideAddFuelLog}>
+        <LogFuelForm onClose={hideAddFuelLog} onSave={reloadData} data={fuelLog?.fuelLog[0]}/>
+      </Panel>
 
-            <Panel
-                isOpen={!!selectedPayment}
-                headerText="Edit Payment"
-                onDismiss={hideEditPayment}>
-                <PaymentForm onClose={hideEditPayment} id={selectedPayment}/>
-            </Panel>
-        </>
+      <Panel
+        isOpen={!!selectedPayment}
+        headerText="Edit Payment"
+        onDismiss={hideEditPayment}>
+        <PaymentForm onClose={hideEditPayment} id={selectedPayment}/>
+      </Panel>
+    </>
 
-    )
+  )
 }
 
 
 function useCommandBarCommands(onAddFuelLog: () => void,
-                               reloadData: () => void): ICommandBarItemProps[] {
+  reloadData: () => void): ICommandBarItemProps[] {
     const commands = useMemo(() => (
-        [
-            {
-                split: true,
-                key: 'addFuelLog',
-                text: 'Log Fuel',
-                iconProps: {iconName: 'Add'},
-                onClick: onAddFuelLog,
-            },
-            {
-                key: 'refresh',
-                text: 'Refresh',
-                iconProps: {iconName: 'Refresh'},
-                onClick: reloadData
-            }
-        ]), [reloadData, onAddFuelLog])
+      [
+        {
+          split: true,
+          key: 'addFuelLog',
+          text: 'Log Fuel',
+          iconProps: {iconName: 'Add'},
+          onClick: onAddFuelLog,
+        },
+        {
+          key: 'refresh',
+          text: 'Refresh',
+          iconProps: {iconName: 'Refresh'},
+          onClick: reloadData
+        }
+      ]), [reloadData, onAddFuelLog])
     return commands;
-}
+  }

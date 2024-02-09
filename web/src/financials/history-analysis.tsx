@@ -6,25 +6,25 @@ import {List} from './list';
 import * as React from 'react';
 
 export const HistoryAnalysis: React.FC = () => {
-    const [selectedCategory, setSelectedCategory] = useState<CategoryId>(null)
-    const [byCategoryData, setByCategoryData ] = useState<SpendingByCategory[]>(null);
+  const [selectedCategory, setSelectedCategory] = useState<CategoryId>(null)
+  const [byCategoryData, setByCategoryData ] = useState<SpendingByCategory[]>(null);
 
-    useEffect(() => {
-        if (selectedCategory) {
-            getSpendingByCategory(selectedCategory).then(setByCategoryData)
-        }
+  useEffect(() => {
+    if (selectedCategory) {
+      getSpendingByCategory(selectedCategory).then(setByCategoryData)
+    }
 
-    }, [selectedCategory])
-    return (
-        <>
-            <CategoryDropdown value={selectedCategory} onChange={setSelectedCategory} />
-            {
-                byCategoryData &&
-                    <List
-                        data={byCategoryData}
-                        idField={'id'}
-                    />
-            }
-        </>
-    )
+  }, [selectedCategory])
+  return (
+    <>
+      <CategoryDropdown value={selectedCategory} onChange={setSelectedCategory} />
+      {
+        byCategoryData &&
+          <List
+            data={byCategoryData}
+            idField={'id'}
+          />
+      }
+    </>
+  )
 }

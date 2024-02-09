@@ -14,56 +14,56 @@ import {PaymentForm} from '../financials/payments/payment-form';
 import {todayAsISODate} from '../common/date.utils';
 
 export const Home: React.FC = () => {
-    const [addPayment, {setTrue: showAddPayment, setFalse: hideAddPayment}] = useBoolean(false)
-    const [addFuelLog, {setTrue: showAddFuelLog, setFalse: hideAddFuelLog}] = useBoolean(false)
-    const [searchNotes, {setTrue: showSearchNotes, setFalse: hideSearchNotes}] = useBoolean(false)
-    const [fuelLog, setFuelLog] = useState<FuelLogDto>(null)
-    const history = useHistory();
+  const [addPayment, {setTrue: showAddPayment, setFalse: hideAddPayment}] = useBoolean(false)
+  const [addFuelLog, {setTrue: showAddFuelLog, setFalse: hideAddFuelLog}] = useBoolean(false)
+  const [searchNotes, {setTrue: showSearchNotes, setFalse: hideSearchNotes}] = useBoolean(false)
+  const [fuelLog, setFuelLog] = useState<FuelLogDto>(null)
+  const history = useHistory();
 
-    const reloadFuelLog = useCallback(() => {
-        getFuelLog(1).then(setFuelLog)
-    }, [setFuelLog])
-    useEffect(reloadFuelLog, [reloadFuelLog])
+  const reloadFuelLog = useCallback(() => {
+    getFuelLog(1).then(setFuelLog)
+  }, [setFuelLog])
+  useEffect(reloadFuelLog, [reloadFuelLog])
 
-    const loadTodayDiary = useCallback(() => {
-        const today = todayAsISODate()
-        getDiaryPath(today, true)
-            .then(path => history.push(`/notes?path=${encodeURIComponent(path)}`))
-    }, [history])
+  const loadTodayDiary = useCallback(() => {
+    const today = todayAsISODate()
+    getDiaryPath(today, true)
+      .then(path => history.push(`/notes?path=${encodeURIComponent(path)}`))
+  }, [history])
 
-    return (
-        <div>
-            <StyledButtons>
-                <DefaultButton onClick={showAddPayment}>Add Payment</DefaultButton>
-                <DefaultButton onClick={showAddFuelLog}>Add Fuel Log</DefaultButton>
-                <DefaultButton onClick={loadTodayDiary}>{'Today\'s Diary'}</DefaultButton>
-                <Stack horizontal>
-                    <DefaultButton onClick={() => history.push('/notes')}>View Notes</DefaultButton>
-                    <DefaultButton iconProps={searchIcon} onClick={showSearchNotes}/>
-                </Stack>
-            </StyledButtons>
-            <Label>Recent Notes</Label>
-            <RecentNotes />
+  return (
+    <div>
+      <StyledButtons>
+        <DefaultButton onClick={showAddPayment}>Add Payment</DefaultButton>
+        <DefaultButton onClick={showAddFuelLog}>Add Fuel Log</DefaultButton>
+        <DefaultButton onClick={loadTodayDiary}>{'Today\'s Diary'}</DefaultButton>
+        <Stack horizontal>
+          <DefaultButton onClick={() => history.push('/notes')}>View Notes</DefaultButton>
+          <DefaultButton iconProps={searchIcon} onClick={showSearchNotes}/>
+        </Stack>
+      </StyledButtons>
+      <Label>Recent Notes</Label>
+      <RecentNotes />
 
-            <Panel
-                isOpen={addPayment}
-                headerText="Add Payment"
-                isBlocking={false}
-                onDismiss={hideAddPayment}>
-                <PaymentForm onClose={hideAddPayment}/>
-            </Panel>
+      <Panel
+        isOpen={addPayment}
+        headerText="Add Payment"
+        isBlocking={false}
+        onDismiss={hideAddPayment}>
+        <PaymentForm onClose={hideAddPayment}/>
+      </Panel>
 
-            <Panel
-                isOpen={addFuelLog}
-                headerText="Log Fuel"
-                onDismiss={hideAddFuelLog}>
-                <LogFuelForm onClose={hideAddFuelLog} onSave={reloadFuelLog} data={fuelLog?.fuelLog[0]}/>
-            </Panel>
+      <Panel
+        isOpen={addFuelLog}
+        headerText="Log Fuel"
+        onDismiss={hideAddFuelLog}>
+        <LogFuelForm onClose={hideAddFuelLog} onSave={reloadFuelLog} data={fuelLog?.fuelLog[0]}/>
+      </Panel>
 
-            <Search show={searchNotes} onDismiss={hideSearchNotes}/>
+      <Search show={searchNotes} onDismiss={hideSearchNotes}/>
 
-        </div>
-    )
+    </div>
+  )
 }
 
 const SPACING = 8;

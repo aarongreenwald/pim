@@ -8,33 +8,33 @@ import {formatDay, formatTime, isMidnight} from '../../common/date.utils';
 //TODO finish extracting the inline styles to styled component,s reuse the margin/spacing sizes and colors
 export const FuelLogCard: React.FC<FuelLogCardProps> = ({fuelLog, onViewPayment}) => {
 
-    return (
-        <StyledCard>
-            <div style={{borderBottom: '1px solid #ccc', marginBottom: 4}}>
-                <span>
-                    {formatDay(fuelLog.timestamp)}
-                </span>
-                <span style={{marginLeft: 4, fontSize: 'smaller'}}>
-                    {!isMidnight(fuelLog.timestamp) && formatTime(fuelLog.timestamp)}
-                </span>
-            </div>
-            <div style={{display: 'flex', justifyContent: 'space-between'}}>
-                <StyledCardColumn>
-                    <span style={{fontSize: 'x-large', marginRight: 4, alignSelf: 'center'}}>{fuelLog.kilometersPerLiter?.toFixed(2)}</span>
-                    <span style={{alignSelf: 'flex-end', fontSize: 'small'}}>km/l</span>
-                </StyledCardColumn>
-                <StyledCardColumn>
-                    <CardValue value={fuelLog.odometer} iconName={'Clock'} suffix={'km'} />
-                    <CardValue value={fuelLog.liters} iconName={'DropShapeSolid'} suffix={'l'} />
-                </StyledCardColumn>
-                <div>
-                    <CardValue value={fuelLog.kilometers} suffix={'km'} />
-                    <CardValue value={fuelLog.totalCost.toFixed(2)} suffix={currencySymbols[fuelLog.currency.toLowerCase()]} onClick={onViewPayment} />
-                </div>
-            </div>
-            <StyledNote>{fuelLog.note}</StyledNote>
-        </StyledCard>
-    )
+  return (
+    <StyledCard>
+      <div style={{borderBottom: '1px solid #ccc', marginBottom: 4}}>
+        <span>
+          {formatDay(fuelLog.timestamp)}
+        </span>
+        <span style={{marginLeft: 4, fontSize: 'smaller'}}>
+          {!isMidnight(fuelLog.timestamp) && formatTime(fuelLog.timestamp)}
+        </span>
+      </div>
+      <div style={{display: 'flex', justifyContent: 'space-between'}}>
+        <StyledCardColumn>
+          <span style={{fontSize: 'x-large', marginRight: 4, alignSelf: 'center'}}>{fuelLog.kilometersPerLiter?.toFixed(2)}</span>
+          <span style={{alignSelf: 'flex-end', fontSize: 'small'}}>km/l</span>
+        </StyledCardColumn>
+        <StyledCardColumn>
+          <CardValue value={fuelLog.odometer} iconName={'Clock'} suffix={'km'} />
+          <CardValue value={fuelLog.liters} iconName={'DropShapeSolid'} suffix={'l'} />
+        </StyledCardColumn>
+        <div>
+          <CardValue value={fuelLog.kilometers} suffix={'km'} />
+          <CardValue value={fuelLog.totalCost.toFixed(2)} suffix={currencySymbols[fuelLog.currency.toLowerCase()]} onClick={onViewPayment} />
+        </div>
+      </div>
+      <StyledNote>{fuelLog.note}</StyledNote>
+    </StyledCard>
+  )
 }
 
 const StyledCard = styled.div`
@@ -63,22 +63,22 @@ const StyledNote = styled(StyledSmaller)`
 `
 
 const CardValue = ({value, iconName = null, suffix = null, onClick = null}) => (
-    <StyledCardValue>
-        {
-            iconName && <StyledSmaller><FontIcon iconName={iconName} /> </StyledSmaller>
-        }
-        {
-            onClick ?
-                <Link onClick={onClick}>{value}</Link> :
-                value
-        }
-        {
-            suffix && <StyledSmaller> {suffix}</StyledSmaller>
-        }
-    </StyledCardValue>
+  <StyledCardValue>
+    {
+      iconName && <StyledSmaller><FontIcon iconName={iconName} /> </StyledSmaller>
+    }
+    {
+      onClick ?
+        <Link onClick={onClick}>{value}</Link> :
+        value
+    }
+    {
+      suffix && <StyledSmaller> {suffix}</StyledSmaller>
+    }
+  </StyledCardValue>
 )
 
 interface FuelLogCardProps {
-    fuelLog: FuelLog;
-    onViewPayment: (paymentId: PaymentId) => void;
+  fuelLog: FuelLog;
+  onViewPayment: (paymentId: PaymentId) => void;
 }

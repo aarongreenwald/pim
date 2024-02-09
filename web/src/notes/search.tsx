@@ -11,82 +11,82 @@ import {NotesSearchResults} from '@pim/common';
 import {fileIconName} from './icons';
 
 interface SearchProps {
-    show: boolean;
-    onDismiss: () => void;
+  show: boolean;
+  onDismiss: () => void;
 }
 
 export const Search: React.FC<SearchProps> = ({show, onDismiss}) => {
-    const {inputVal, debouncedValue, updateValue} = useDebouncedInput('')
-    const [excludeHidden, setExcludeHidden] = useState(true);
-    const [searchResults, setSearchResults] = useState<NotesSearchResults>(null)
-    useEffect(() => {
-        if (debouncedValue?.length < 3) {
-            setSearchResults(null)
-            return;
+  const {inputVal, debouncedValue, updateValue} = useDebouncedInput('')
+  const [excludeHidden, setExcludeHidden] = useState(true);
+  const [searchResults, setSearchResults] = useState<NotesSearchResults>(null)
+  useEffect(() => {
+    if (debouncedValue?.length < 3) {
+      setSearchResults(null)
+      return;
+    }
+
+    searchNotes(debouncedValue, excludeHidden).then(setSearchResults)
+  }, [debouncedValue, excludeHidden])
+
+  return (
+    <Panel isOpen={show} 
+      onDismiss={onDismiss} 
+      isHiddenOnDismiss
+      isBlocking={false}
+      onRenderHeader={() =>
+        (
+          <Stack styles={headerStackStyles}>
+            <SearchBox value={inputVal}
+              onChange={(_, val) => updateValue(val)}/>
+            <Toggle checked={!excludeHidden}
+              onChange={(_, val) => setExcludeHidden(!val)}
+              label={'Include hidden'}/>
+          </Stack>
+        )}>
+      <FocusZone>
+        {
+          searchResults?.names.map(item => <DirectoryItemSearchResult key={item.path} item={item} onDismiss={onDismiss}/>)
         }
-
-        searchNotes(debouncedValue, excludeHidden).then(setSearchResults)
-    }, [debouncedValue, excludeHidden])
-
-    return (
-        <Panel isOpen={show} 
-               onDismiss={onDismiss} 
-               isHiddenOnDismiss
-               isBlocking={false}
-               onRenderHeader={() =>
-                   (
-                       <Stack styles={headerStackStyles}>
-                           <SearchBox value={inputVal}
-                                      onChange={(_, val) => updateValue(val)}/>
-                           <Toggle checked={!excludeHidden}
-                                   onChange={(_, val) => setExcludeHidden(!val)}
-                                   label={'Include hidden'}/>
-                       </Stack>
-                   )}>
-            <FocusZone>
-            {
-               searchResults?.names.map(item => <DirectoryItemSearchResult key={item.path} item={item} onDismiss={onDismiss}/>)
-            }
-            {
-                searchResults?.contents.map((result) =>
-                    <StyledSearchContentResult key={`${result.path}`} to={`/notes/?path=${encodeURIComponent(result.path)}`} onClick={onDismiss}>
-                        <div className="search-result-card">
-                            <StyledSearchCardHeader>{result.path}</StyledSearchCardHeader>
-                            <StyledSearchCardBody>
-                            {
-                                result.items.map((item, i) =>
-                                    <div key={item.lineNumber}>
-                                        <ReactMarkdown>{item.text}</ReactMarkdown>
-                                        {
-                                            i !== result.items.length - 1 && <hr />
-                                        }
-                                    </div>)
-                            }
-                            </StyledSearchCardBody>
-                        </div>
-                    </StyledSearchContentResult>
-                )
-            }
-            </FocusZone>
-        </Panel>
-    )
+        {
+          searchResults?.contents.map((result) =>
+            <StyledSearchContentResult key={`${result.path}`} to={`/notes/?path=${encodeURIComponent(result.path)}`} onClick={onDismiss}>
+              <div className="search-result-card">
+                <StyledSearchCardHeader>{result.path}</StyledSearchCardHeader>
+                <StyledSearchCardBody>
+                  {
+                    result.items.map((item, i) =>
+                      <div key={item.lineNumber}>
+                        <ReactMarkdown>{item.text}</ReactMarkdown>
+                        {
+                          i !== result.items.length - 1 && <hr />
+                        }
+                      </div>)
+                  }
+                </StyledSearchCardBody>
+              </div>
+            </StyledSearchContentResult>
+          )
+        }
+      </FocusZone>
+    </Panel>
+  )
 }
 
 const headerStackStyles = {
-    root: {
-        flexGrow: 1,
-        marginLeft: 24 //hack - needs to match the panel content padding
-    }
+  root: {
+    flexGrow: 1,
+    marginLeft: 24 //hack - needs to match the panel content padding
+  }
 };
 
 const DirectoryItemSearchResult = ({item, onDismiss}) => {
-    return (
-        <StyledSearchResult to={`/notes/?path=${encodeURIComponent(item.path)}`} onClick={onDismiss}>
-            <div className="search-result-card">
-                <Icon iconName={fileIconName}/> {item.fileName}
-            </div>
-        </StyledSearchResult>
-    )
+  return (
+    <StyledSearchResult to={`/notes/?path=${encodeURIComponent(item.path)}`} onClick={onDismiss}>
+      <div className="search-result-card">
+        <Icon iconName={fileIconName}/> {item.fileName}
+      </div>
+    </StyledSearchResult>
+  )
 }
 
 const CARD_SPACING = '6px';

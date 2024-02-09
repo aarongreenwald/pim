@@ -10,15 +10,15 @@ import {Navigation} from './header/navigation';
 initializeIcons();
 
 const App = ({onLogout}) => {
-    const [shouldShowNav, {setTrue: showNav, setFalse: hideNav}] = useBoolean(false)
-    return (
-        <>
-            <Router>
-                <Header showNav={showNav} onLogout={onLogout}/>
-                <Navigation showNav={showNav} shouldShowNav={shouldShowNav} hideNav={hideNav}/>
-            </Router>
-        </>
-    );
+  const [shouldShowNav, {setTrue: showNav, setFalse: hideNav}] = useBoolean(false)
+  return (
+    <>
+      <Router>
+        <Header showNav={showNav} onLogout={onLogout}/>
+        <Navigation showNav={showNav} shouldShowNav={shouldShowNav} hideNav={hideNav}/>
+      </Router>
+    </>
+  );
 }
 
 const AppWithLogin = withLogin(App);

@@ -9,142 +9,142 @@ import {commandBarStyles} from '../styles';
 import {useBoolean} from '@fluentui/react-hooks';
 
 export const Payments: React.FC = () => {
-    const {
-        payments,
-        sortConfig,
-        onSortPayments,
-        reloadData
-    } = useSortablePayments();
-    const [addPayment, {setTrue: showAddPayment, setFalse: hideAddPayment}] = useBoolean(false)
+  const {
+    payments,
+    sortConfig,
+    onSortPayments,
+    reloadData
+  } = useSortablePayments();
+  const [addPayment, {setTrue: showAddPayment, setFalse: hideAddPayment}] = useBoolean(false)
 
-    const commands = useCommandBarCommands(showAddPayment, reloadData);
+  const commands = useCommandBarCommands(showAddPayment, reloadData);
 
-    const [selectedItem, setSelectedItem] = useState<PaymentId>(null)
-    const hideEditPayment = () => setSelectedItem(null);
+  const [selectedItem, setSelectedItem] = useState<PaymentId>(null)
+  const hideEditPayment = () => setSelectedItem(null);
 
-    return (
-        <>
-            <CommandBar items={commands} styles={commandBarStyles}/>
-            {
+  return (
+    <>
+      <CommandBar items={commands} styles={commandBarStyles}/>
+      {
 
-                payments &&
-                    <List<vPayment>
-                        data={payments}
-                        onClick={(item) => setSelectedItem(item.id)}
-                        sortConfig={sortConfig}
-                        sortData={onSortPayments}
-                        searchableTextFields={textFields}
-                        idField={'id'} />
-            }
-            {
+        payments &&
+          <List<vPayment>
+            data={payments}
+            onClick={(item) => setSelectedItem(item.id)}
+            sortConfig={sortConfig}
+            sortData={onSortPayments}
+            searchableTextFields={textFields}
+            idField={'id'} />
+      }
+      {
 
-                <Panel
-                    isOpen={addPayment}
-                    headerText="Add Payment"
-                    isBlocking={false}
-                    onDismiss={hideAddPayment}>
-                    <PaymentForm onClose={hideAddPayment}/>
-                </Panel>
-            }
-            {
-                <Panel
-                    isOpen={!!selectedItem}
-                    headerText="Edit Payment"
-                    isBlocking={false}
-                    onDismiss={hideEditPayment}>
-                    <PaymentForm onClose={hideEditPayment} id={selectedItem}/>
-                </Panel>
-            }
-        </>
+        <Panel
+          isOpen={addPayment}
+          headerText="Add Payment"
+          isBlocking={false}
+          onDismiss={hideAddPayment}>
+          <PaymentForm onClose={hideAddPayment}/>
+        </Panel>
+      }
+      {
+        <Panel
+          isOpen={!!selectedItem}
+          headerText="Edit Payment"
+          isBlocking={false}
+          onDismiss={hideEditPayment}>
+          <PaymentForm onClose={hideEditPayment} id={selectedItem}/>
+        </Panel>
+      }
+    </>
 
-    )
+  )
 }
 
 /*
-    Much of this can be generalized for use outside of payments,
-    the sorting logic could be part of the table and the reload
-    is only necessary because I don't have a store
+Much of this can be generalized for use outside of payments,
+the sorting logic could be part of the table and the reload
+is only necessary because I don't have a store
  */
 function useSortablePayments() {
-    const [payments, setPayments] = useState<vPayment[]>()
-    const [sortConfig, setSortConfig] = useState<SortConfig>(defaultPaymentsSortConfig)
+  const [payments, setPayments] = useState<vPayment[]>()
+  const [sortConfig, setSortConfig] = useState<SortConfig>(defaultPaymentsSortConfig)
 
-    const onSortPayments = useCallback((config: SortConfig) => {
-        setSortConfig(config)
-    }, [])
+  const onSortPayments = useCallback((config: SortConfig) => {
+    setSortConfig(config)
+  }, [])
 
-    const reloadData = useCallback(() => {
-        getPayments()
-            .then(data => sortPayments(data, sortConfig))
-            .then(setPayments)
-    }, [sortConfig])
+  const reloadData = useCallback(() => {
+    getPayments()
+      .then(data => sortPayments(data, sortConfig))
+      .then(setPayments)
+  }, [sortConfig])
 
-    useEffect(() => {
-        if (payments && sortConfig) {
-            setPayments(sortPayments(payments, sortConfig))
-        }
-        //payments is NOT a dependency of this effect or we'll get an infinite loop
-        //the only way payments is modified outside of sorting is on load/refresh
-        //and the sorting is done there separately
-    }, [sortConfig]) //eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    if (payments && sortConfig) {
+      setPayments(sortPayments(payments, sortConfig))
+    }
+    //payments is NOT a dependency of this effect or we'll get an infinite loop
+    //the only way payments is modified outside of sorting is on load/refresh
+    //and the sorting is done there separately
+  }, [sortConfig]) //eslint-disable-line react-hooks/exhaustive-deps
 
 
-    useEffect(() => {
-        getPayments()
-            .then(data => sortPayments(data, defaultPaymentsSortConfig))
-            .then(setPayments)
-    }, [])
-    return {payments, sortConfig, onSortPayments, reloadData};
+  useEffect(() => {
+    getPayments()
+      .then(data => sortPayments(data, defaultPaymentsSortConfig))
+      .then(setPayments)
+  }, [])
+  return {payments, sortConfig, onSortPayments, reloadData};
 }
 
 const sortPayments = (payments: vPayment[], sortConfig: SortConfig) => {
-    const newPayments = [...payments];
-    const sortFn =
-        sortConfig.direction === SortDirection.asc ?
-            (a, b) => a[sortConfig.fieldName] > b[sortConfig.fieldName] ? 1 : -1 :
-            (a, b) => a[sortConfig.fieldName] < b[sortConfig.fieldName] ? 1 : -1
+  const newPayments = [...payments];
+  const sortFn =
+    sortConfig.direction === SortDirection.asc ?
+      (a, b) => a[sortConfig.fieldName] > b[sortConfig.fieldName] ? 1 : -1 :
+      (a, b) => a[sortConfig.fieldName] < b[sortConfig.fieldName] ? 1 : -1
 
-    newPayments.sort(sortFn)
+  newPayments.sort(sortFn)
 
-    return newPayments;
+  return newPayments;
 }
 
 function useCommandBarCommands(onAddPayment: () => void,
-                               reloadData: () => void): ICommandBarItemProps[] {
+  reloadData: () => void): ICommandBarItemProps[] {
     const commands = useMemo(() => (
-        [
-            {
-                split: true,
-                key: 'newPayment',
-                text: 'Payment',
-                iconProps: {iconName: 'Add'},
-                onClick: onAddPayment,
-                // subMenuProps: {
-                //     items: [
-                //         {
-                //             key: 'newIncome',
-                //             text: 'Income',
-                //             onClick: onAddIncome,
-                //             iconProps: { iconName: 'Money' },
-                //         },
-                //         {
-                //             key: 'newCashAssets',
-                //             text: 'Cash balances',
-                //             onClick: onAddCar,
-                //             iconProps: { iconName: 'AddToShoppingList' },
-                //         },
-                //     ]
-                // },
-            },
-            {
-                key: 'refresh',
-                text: 'Refresh',
-                iconProps: {iconName: 'Refresh'},
-                onClick: reloadData
-            }
-        ]), [reloadData, onAddPayment])
+      [
+        {
+          split: true,
+          key: 'newPayment',
+          text: 'Payment',
+          iconProps: {iconName: 'Add'},
+          onClick: onAddPayment,
+          // subMenuProps: {
+          //     items: [
+          //         {
+          //             key: 'newIncome',
+          //             text: 'Income',
+          //             onClick: onAddIncome,
+          //             iconProps: { iconName: 'Money' },
+          //         },
+          //         {
+          //             key: 'newCashAssets',
+          //             text: 'Cash balances',
+          //             onClick: onAddCar,
+          //             iconProps: { iconName: 'AddToShoppingList' },
+          //         },
+          //     ]
+          // },
+        },
+        {
+          key: 'refresh',
+          text: 'Refresh',
+          iconProps: {iconName: 'Refresh'},
+          onClick: reloadData
+        }
+      ]), [reloadData, onAddPayment])
     return commands;
-}
+  }
 
 const textFields = ['counterparty', 'note', 'categoryName']
 

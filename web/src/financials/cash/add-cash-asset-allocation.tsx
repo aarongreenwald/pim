@@ -10,79 +10,79 @@ import {expandISODate, todayAsISODate, collapseISODate} from '../../common/date.
 import {CurrencyInput} from '../currency-input';
 
 export const AddCashAssetAllocation: React.FC<PanelProps<PaymentId>> = ({onClose}) => {
-    const {allocation, updateRecord, updateCurrency, submitForm} = useCaaForm();
+  const {allocation, updateRecord, updateCurrency, submitForm} = useCaaForm();
 
-    if (!updateRecord) return null; //TODO show a spinner
+  if (!updateRecord) return null; //TODO show a spinner
 
-    return (
-      <form>
-        <Stack tokens={stackTokens}>
-            <TextField
-               label="Date"
-               type="date"
-               onChange={updateRecord}
-               value={expandISODate(allocation.recordDate)}
-               name="recordDate"/>
+  return (
+    <form>
+      <Stack tokens={stackTokens}>
+        <TextField
+          label="Date"
+          type="date"
+          onChange={updateRecord}
+          value={expandISODate(allocation.recordDate)}
+          name="recordDate"/>
 
-            <TextField
-                label="Allocation Code"
-                name="allocationCode"
-                value={allocation.allocationCode}
-                onChange={updateRecord}
-            />
+        <TextField
+          label="Allocation Code"
+          name="allocationCode"
+          value={allocation.allocationCode}
+          onChange={updateRecord}
+        />
 
-            <CurrencyInput
-                amount={allocation.amount}
-                currency={allocation.currency}
-                name="amount"
-                onChange={updateRecord}
-            />
+        <CurrencyInput
+          amount={allocation.amount}
+          currency={allocation.currency}
+          name="amount"
+          onChange={updateRecord}
+        />
 
-            <StyledChoiceGroup
-                selectedKey={allocation.currency}
-                label="Currency"
-                styles={horizontalChoiceGroup}
-                onChange={updateCurrency}
-                options={currencyRadioOptions}/>
+        <StyledChoiceGroup
+          selectedKey={allocation.currency}
+          label="Currency"
+          styles={horizontalChoiceGroup}
+          onChange={updateCurrency}
+          options={currencyRadioOptions}/>
 
-            <TextField
-                label="Notes"
-                name="note"
-                value={allocation.note}
-                multiline
-                onChange={updateRecord}/>
+        <TextField
+          label="Notes"
+          name="note"
+          value={allocation.note}
+          multiline
+          onChange={updateRecord}/>
 
-            <Stack horizontal tokens={stackTokens}>
-                <PrimaryButton onClick={submitForm}>Save</PrimaryButton>
-                <DefaultButton onClick={onClose}>Cancel</DefaultButton>
-            </Stack>
-
+        <Stack horizontal tokens={stackTokens}>
+          <PrimaryButton onClick={submitForm}>Save</PrimaryButton>
+          <DefaultButton onClick={onClose}>Cancel</DefaultButton>
         </Stack>
+
+      </Stack>
     </form>
   )
 }
 
 function useCaaForm() {
-    const [allocation, setAllocation] = useState<CashAssetAllocationRecord>(initializeRecord())
+  const [allocation, setAllocation] = useState<CashAssetAllocationRecord>(initializeRecord())
 
-    const updateCurrency = useCallback((_, {key}) => {
-        setAllocation({
-            ...allocation,
-            currency: key
-        })
-    }, [allocation])
+  const updateCurrency = useCallback((_, {key}) => {
+    setAllocation({
+      ...allocation,
+      currency: key
+    })
+  }, [allocation])
 
-    const updateRecord = useCallback(({target}) => {
-        setAllocation({
-            ...allocation,
-           [target.name]: target.type == 'date' ? collapseISODate(target.value)  : target.value
-        })
-    }, [allocation])
-    const submitForm = useCallback(async () => {
-        await saveAllocationRecord(allocation)
-        setAllocation(initializeRecord())
-    }, [allocation])
-    return {allocation, updateRecord, updateCurrency, submitForm};
+  const updateRecord = useCallback(({target}) => {
+    setAllocation({
+      ...allocation,
+      [target.name]: target.type == 'date' ? collapseISODate(target.value)  : target.value
+    })
+  }, [allocation])
+  const submitForm = useCallback(async () => {
+    await saveAllocationRecord(allocation)
+    setAllocation(initializeRecord())
+  }, [allocation])
+  return {allocation, updateRecord, updateCurrency, submitForm};
 }
 
 function initializeRecord(): CashAssetAllocationRecord {

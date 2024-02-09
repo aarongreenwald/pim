@@ -6,15 +6,15 @@ import {getCashAssetAllocationHistory} from '../../services/server-api';
 import {List} from '../list';
 
 export const CashAllocationHistory: React.FC<PanelProps<string>> = ({id}) => {
-    const [allocationHistory, setAllocationHistory] = useState<CashAssetAllocationHistory[]>(null)
-    useEffect(() => {
-        getCashAssetAllocationHistory(id).then(setAllocationHistory);
-    }, [id])
+  const [allocationHistory, setAllocationHistory] = useState<CashAssetAllocationHistory[]>(null)
+  useEffect(() => {
+    getCashAssetAllocationHistory(id).then(setAllocationHistory);
+  }, [id])
 
 
-    return (
-	allocationHistory &&
-	<List<CashAssetAllocationHistory>
-            data={allocationHistory} />
-    )
+  return (
+    allocationHistory &&
+      <List<CashAssetAllocationHistory>
+        data={allocationHistory} />
+  )
 }

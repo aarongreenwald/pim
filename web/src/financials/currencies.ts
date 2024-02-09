@@ -1,17 +1,17 @@
 export const currencies = [
-    'USD', 'ILS'
+  'USD', 'ILS'
 ]
 
 export const currencySymbols = {
-    ils: '₪',
-    usd: '$'
+  ils: '₪',
+  usd: '$'
 }
 
 export const defaultCurrency = 'ILS'
 
 export const currencyRadioOptions = currencies.map(currency => ({
-    key: currency.toUpperCase(),
-    text: currency.toUpperCase()
+  key: currency.toUpperCase(),
+  text: currency.toUpperCase()
 }));
 
 export const currencyFields = new Map();
