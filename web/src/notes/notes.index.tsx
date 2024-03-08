@@ -6,7 +6,8 @@ import {
   getNotes,
   gitPull,
   gitPush,
-  saveFileContent
+  saveFileContent,
+  getDiaryPath
 } from '../services/server-api';
 import {IconButton, Label, Spinner} from '@fluentui/react';
 import {useLocation} from 'react-router';
@@ -17,7 +18,8 @@ import {Breadcrumbs} from './breadcrumbs';
 import {Search} from './search';
 import {downloadIcon, searchIcon, uploadIcon} from './icons';
 import {RecentNotes} from './recent-notes';
-import {Link} from 'react-router-dom';
+import {Link, useHistory} from 'react-router-dom';
+import {todayAsISODate} from '../common/date.utils';
 
 export const Notes: React.FC = () => {
 
@@ -70,8 +72,8 @@ export const Notes: React.FC = () => {
       <div style={{display: 'flex', justifyContent: 'space-between'}}>
         {
           diaryInfo && type === 'F' &&
-            <DiaryPrevNext diaryInfo={diaryInfo} directory={parentDirectory} />	    
-	}
+            <DiaryPrevNext diaryInfo={diaryInfo} directory={parentDirectory} />
+        }
       </div>
       <IconButton iconProps={searchIcon} title="Search" onClick={() => setShowSearch(true)} />
       {
@@ -98,15 +100,28 @@ export const Notes: React.FC = () => {
 };
 
 const DiaryPrevNext: React.FC<{diaryInfo: DiaryInfo; directory: string}> = ({diaryInfo, directory}) => {
+  const history = useHistory()
+  const loadTodayDiary = useCallback(() => {
+    const today = todayAsISODate()
+    getDiaryPath(today, true)
+      .then(path => history.push(`/notes?path=${encodeURIComponent(path)}`))
+  }, [history])
+
+  const today = todayAsISODate() //TODO consider memoizing? If there are #perf issues start here
+
   return (
     <>
       {
-	diaryInfo.prev &&
+        diaryInfo.prev &&
           <Link to={`/notes?path=${encodeURIComponent(`${directory}/${diaryInfo.prev.name}`)}`}>{`<< ${diaryInfo.prev.name}`}</Link>
       }
       {
         diaryInfo.next &&
           <Link to={`/notes?path=${encodeURIComponent(`${directory}/${diaryInfo.next.name}`)}`}>{`${diaryInfo.next.name} >>`}</Link>
+      }
+      {
+        !diaryInfo.next && today.toString() != diaryInfo.latest.name && // we're at the end and the latest (ie current) isn't already today's diary
+          <a href="#" onClick={loadTodayDiary}>{'Today >>'}</a>
       }
     </>
   )
