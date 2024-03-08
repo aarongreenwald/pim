@@ -3,15 +3,15 @@ import {DefaultButton, Stack, Panel, Label} from '@fluentui/react';
 import {RecentNotes} from '../notes/recent-notes';
 import {useBoolean} from '@fluentui/react-hooks';
 import {useCallback, useEffect, useState} from 'react';
-import {getFuelLog, getDiaryPath} from '../services/server-api';
+import {getFuelLog} from '../services/server-api';
 import {FuelLogDto} from '@pim/common';
 import {Search} from '../notes/search';
 import {searchIcon} from '../notes/icons';
+import {useLoadTodayDiary} from '../notes/todays-diary'
 import {useHistory} from 'react-router-dom'
 import styled from '@emotion/styled';
 import {LogFuelForm} from '../financials/fuel-log/log-fuel-form';
 import {PaymentForm} from '../financials/payments/payment-form';
-import {todayAsISODate} from '../common/date.utils';
 
 export const Home: React.FC = () => {
   const [addPayment, {setTrue: showAddPayment, setFalse: hideAddPayment}] = useBoolean(false)
@@ -25,11 +25,7 @@ export const Home: React.FC = () => {
   }, [setFuelLog])
   useEffect(reloadFuelLog, [reloadFuelLog])
 
-  const loadTodayDiary = useCallback(() => {
-    const today = todayAsISODate()
-    getDiaryPath(today, true)
-      .then(path => history.push(`/notes?path=${encodeURIComponent(path)}`))
-  }, [history])
+  const loadTodayDiary = useLoadTodayDiary()
 
   return (
     <div>

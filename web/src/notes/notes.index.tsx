@@ -6,8 +6,7 @@ import {
   getNotes,
   gitPull,
   gitPush,
-  saveFileContent,
-  getDiaryPath
+  saveFileContent
 } from '../services/server-api';
 import {IconButton, Label, Spinner} from '@fluentui/react';
 import {useLocation} from 'react-router';
@@ -18,8 +17,9 @@ import {Breadcrumbs} from './breadcrumbs';
 import {Search} from './search';
 import {downloadIcon, searchIcon, uploadIcon} from './icons';
 import {RecentNotes} from './recent-notes';
-import {Link, useHistory} from 'react-router-dom';
+import {Link} from 'react-router-dom';
 import {todayAsISODate} from '../common/date.utils';
+import {useLoadTodayDiary} from './todays-diary';
 
 export const Notes: React.FC = () => {
 
@@ -100,13 +100,7 @@ export const Notes: React.FC = () => {
 };
 
 const DiaryPrevNext: React.FC<{diaryInfo: DiaryInfo; directory: string}> = ({diaryInfo, directory}) => {
-  const history = useHistory()
-  const loadTodayDiary = useCallback(() => {
-    const today = todayAsISODate()
-    getDiaryPath(today, true)
-      .then(path => history.push(`/notes?path=${encodeURIComponent(path)}`))
-  }, [history])
-
+  const loadTodayDiary = useLoadTodayDiary()
   const today = todayAsISODate() //TODO consider memoizing? If there are #perf issues start here
 
   return (
