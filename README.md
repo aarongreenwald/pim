@@ -7,3 +7,6 @@ For running web locally you need GITHUB_TOKEN on the path but it's not used, so 
 * The db tables are currency agnostic, _except_ `fx_transaction` which assumes a constant home currency. Still, it doesn't specify what it is. 
 * Code (including views in db) hardcode ILS (foreign) and USD (local).
 
+### TODO
+
+* Nightly marketdata

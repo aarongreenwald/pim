@@ -13,13 +13,12 @@ from b2sdk.v2 import *
 
 TODO
 
-
+* Connect to the remote PIM db so a copy isn't required for this. Latency will be an issue so consider this carefully.
 * Decide how to handle git/svn repos. 
    * Review skipped repos
    * Log/document structure of the zipped repos
 * Deduping repos
 * Cleaning files
-* Merge drought/pim
 * Build frontend
 * mimetypes might be able to be improved. 
 * Find a better method to upload large files so that I can validate the hashes. Perhaps the lower level API will allow this?
@@ -31,7 +30,8 @@ TODO
    * I'm not sure how db inserts compare to updates, but the reads seem very fast. Still, I could load the entiredb into memory at the start and not 
 hit the disk again unless there's a change. 
    * The `find` is trivial. 
-* Dry run mode - document required updates and exit. 
+* Dry run mode - document required updates and exit.
+
 
 Notes
 
