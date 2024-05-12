@@ -230,3 +230,15 @@ export interface MarketData {
   tickerSymbol: string;
   price: Money;
 }
+
+export interface TransferCashToStockAccountDto {
+  leaveDate: BasicISODate;
+  arriveDate: BasicISODate;
+  amount: Money;
+  currency: Currency;
+  categoryId: CategoryId; //TODO pull out of financial constants, shouldn't be necessary
+  cashAllocationCode:  string;
+  stockAccountId: StockAccountId;
+  stockAccountName: string; //TODO retrieve server side, shouldn't be necessary
+  note: string;
+}

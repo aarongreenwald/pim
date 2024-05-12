@@ -173,4 +173,10 @@ export const setupFinancialsRoutes = (app: Express) => {
       .then(() => res.status(200).send())
       .catch(errorHandler(res))
   )
+
+  app.post('/compound-transactions/cash-stock-accounts-fund-transfer', (req, res) => {
+    db.transferCashToStockAccount(req.body)
+      .then(() => res.status(200).send())
+      .catch(errorHandler(res))
+  })
 }

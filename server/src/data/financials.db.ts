@@ -27,9 +27,11 @@ import {
   StockAccountCashBalance,
   StockAccountCashFlow,
   BasicISODate,
-  MarketData
+  MarketData,
+  TransferCashToStockAccountDto
 } from '@pim/common';
 import {all, beginTransaction, commitTransaction, get, getDb, rollbackTransaction, run} from './db.helpers';
+import sqlite from 'sqlite3'; // for types
 
 export const getAllPayments: () => Promise<vPayment[]> = async () => {
   const db = await getDb();
@@ -67,7 +69,7 @@ export const getPayment: (id: PaymentId) => Promise<Payment> = async id => {
         id)
 }
 
-export const insertPayment = async (payment: Payment) => {
+export const insertPayment = async (payment: Payment, db: sqlite.Database | null  = null) => {
     const sql = `
     insert into payment
         (paid_date, incurred_begin_date, incurred_end_date, counterparty, amount, incurred_amount, currency, category_id, note)
@@ -89,7 +91,7 @@ export const insertPayment = async (payment: Payment) => {
     payment.categoryId,
     payment.note || null
   ]
-    const db = await getDb(false);
+    db = db || await getDb(false);
 
     const {lastId} = await run(db, sql, params)
     return lastId;
@@ -339,7 +341,7 @@ export const getSpendingByCategory = async (rootCategoryId: CategoryId) => {
         `, [rootCategoryId])
 }
 
-export const insertCashAssetAllocationRecord = async (allocationRecord: CashAssetAllocationRecord) => {
+export const insertCashAssetAllocationRecord = async (allocationRecord: CashAssetAllocationRecord, db: sqlite.Database | null = null) => {
     const sql = `
     insert into cash_assets_allocation
         (record_date, allocation_code, amount, currency, note)
@@ -355,7 +357,7 @@ export const insertCashAssetAllocationRecord = async (allocationRecord: CashAsse
         allocationRecord.currency || null,
         allocationRecord.note || null
     ]
-    const db = await getDb(false);
+    db = db || await getDb(false);
 
     const {lastId} = await run(db, sql, params)
     return lastId
@@ -663,6 +665,56 @@ export const updateMarketData = async(marketData: MarketData[]) => {
     return run(db, sql, params)
   }))
   await commitTransaction(db)  
+}
+
+export const transferCashToStockAccount = async(dto: TransferCashToStockAccountDto) => {
+  // Withdrawals can use this function as well in reverse, but note that the transaction MUST be
+  // performed against a cash allocation, not Unallocated.
+  
+  // TODO consider if this should be more generic, supporting transfers between any two accounts.
+  // perhaps StockAccounts and CashAccounts should be merged into a single entity with a type
+  // There's a form of simplicity achieved by separating them if it more closely matches the mental
+  // model and usage patterns.
+
+  const db = await getDb(false)
+  await beginTransaction(db)
+
+  // TODO consider foreign keys or some kind of better link between these records.
+
+  insertPayment({
+    id: -1, //for TS
+    paidDate: dto.leaveDate,
+    counterparty: dto.stockAccountName,
+    amount: dto.amount,
+    incurredAmount: null, //probably default but less ambiguous this way
+    currency: dto.currency,
+    categoryId: dto.categoryId,
+    note: dto.note
+  }, db)
+
+
+  insertCashAssetAllocationRecord({
+    recordDate: dto.leaveDate,
+    allocationCode: dto.cashAllocationCode,
+    amount: dto.amount * -1,
+    currency: dto.currency,
+    note: dto.note
+  }, db)
+  
+  const sql = `
+      insert into stock_account_cash_transaction (transaction_date, account_id, currency, amount, note)
+      values (?, ?, ?, ?, ?)
+    `
+  const params = [
+    dto.arriveDate,
+    dto.stockAccountId,
+    dto.currency,
+    dto.amount,
+    dto.note
+  ]
+  run(db, sql, params)
+  
+  await commitTransaction(db)
 }
 
 export const execQueryNoResults = async sql => {
