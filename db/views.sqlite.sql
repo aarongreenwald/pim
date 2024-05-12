@@ -104,7 +104,13 @@ having coalesce(usd, 0) <> 0 or coalesce(ils, 0) <> 0;
 select record_date,
        allocation_code,
        case currency when 'USD' then amount else null end usd,
+       sum(case currency when 'USD' then amount else null end)
+           over (partition by allocation_code order by record_date asc	      
+	         rows between unbounded preceding and current row) running_total_usd,
        case currency when 'ILS' then amount else null end ils,
+       sum(case currency when 'ILS' then amount else null end)
+           over (partition by allocation_code order by record_date asc	      
+	         rows between unbounded preceding and current row) running_total_ils,
        note
 from cash_assets_allocation;
 
