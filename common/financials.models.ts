@@ -236,9 +236,8 @@ export interface TransferCashToStockAccountDto {
   arriveDate: BasicISODate;
   amount: Money;
   currency: Currency;
-  categoryId: CategoryId; //TODO pull out of financial constants, shouldn't be necessary
+  categoryId: CategoryId; //TODO put a default in FinancialConstants
   cashAllocationCode:  string;
   stockAccountId: StockAccountId;
-  stockAccountName: string; //TODO retrieve server side, shouldn't be necessary
   note: string;
 }

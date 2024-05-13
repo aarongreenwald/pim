@@ -174,7 +174,7 @@ export const setupFinancialsRoutes = (app: Express) => {
       .catch(errorHandler(res))
   )
 
-  app.post('/compound-transactions/cash-stock-accounts-fund-transfer', (req, res) => {
+  app.post('/compound-transactions/cash-stock-accounts-fund-transfer', jsonParser, (req, res) => {
     db.transferCashToStockAccount(req.body)
       .then(() => res.status(200).send())
       .catch(errorHandler(res))

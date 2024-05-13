@@ -20,6 +20,7 @@ import {
   StockHoldingSummaryDto,
   StockTransactionId,
   StockAccountDto,
+  StockAccountId,
   FxTransactionId,
   vFxHistory,
   FxTransactionDto,
@@ -477,6 +478,15 @@ export const getStockAccounts = async () => {
     return all<StockAccountDto>(db, sql)
 }
 
+export const getStockAccount = async (id: StockAccountId) => {
+  const db = await getDb();
+  const sql = `
+        select stock_account_id id, name, tax_category taxCategory 
+        from stock_account where stock_account_id = ?
+  `;
+  return get<StockAccountDto>(db, sql, [id])
+}
+
 export const insertStockTransaction = async (transaction: StockTransactionDto) => {
     const sql = `
     insert into main.stock_transaction
@@ -668,13 +678,22 @@ export const updateMarketData = async(marketData: MarketData[]) => {
 }
 
 export const transferCashToStockAccount = async(dto: TransferCashToStockAccountDto) => {
-  // Withdrawals can use this function as well in reverse, but note that the transaction MUST be
-  // performed against a cash allocation, not Unallocated.
+  // Withdrawals can use this function as well in reverse..
   
   // TODO consider if this should be more generic, supporting transfers between any two accounts.
   // perhaps StockAccounts and CashAccounts should be merged into a single entity with a type
   // There's a form of simplicity achieved by separating them if it more closely matches the mental
   // model and usage patterns.
+
+  if (dto.arriveDate < dto.leaveDate) {
+    throw `Cannot transferCashToStockAccount with arriveDate (${dto.arriveDate}) before leaveDate (${dto.leaveDate})`
+  }
+
+  if (dto.amount === 0) {
+    throw `Cannot transferCashToStockAccount with amoiunt === 0`
+  }
+
+  const stockAccountName = (await getStockAccount(dto.stockAccountId)).name
 
   const db = await getDb(false)
   await beginTransaction(db)
@@ -684,7 +703,7 @@ export const transferCashToStockAccount = async(dto: TransferCashToStockAccountD
   insertPayment({
     id: -1, //for TS
     paidDate: dto.leaveDate,
-    counterparty: dto.stockAccountName,
+    counterparty: stockAccountName,
     amount: dto.amount,
     incurredAmount: null, //probably default but less ambiguous this way
     currency: dto.currency,
@@ -692,14 +711,17 @@ export const transferCashToStockAccount = async(dto: TransferCashToStockAccountD
     note: dto.note
   }, db)
 
-
-  insertCashAssetAllocationRecord({
-    recordDate: dto.leaveDate,
-    allocationCode: dto.cashAllocationCode,
-    amount: dto.amount * -1,
-    currency: dto.currency,
-    note: dto.note
-  }, db)
+  if (dto.cashAllocationCode) {
+    // Theoretically it's allowed to transfer funds without acting against an allocation, ie
+    // moving from/to Unallocated. In that case cashAllocationCode should be falsy. 
+    insertCashAssetAllocationRecord({
+      recordDate: dto.leaveDate,
+      allocationCode: dto.cashAllocationCode,
+      amount: dto.amount * -1,
+      currency: dto.currency,
+      note: dto.note
+    }, db)
+  }
   
   const sql = `
       insert into stock_account_cash_transaction (transaction_date, account_id, currency, amount, note)

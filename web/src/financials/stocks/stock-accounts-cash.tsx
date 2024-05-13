@@ -7,6 +7,7 @@ import {useBoolean} from '@fluentui/react-hooks';
 import {commandBarStyles} from '../styles';
 import {StocksForm} from './stocks-form';
 import {FxForm} from '../fx/fx-form';
+import {CashStockAccountFundsTransferForm} from './cash-stock-account-funds-transform-form';
 import {StockAccountCashBalance, StockAccountId, StockAccountCashFlow} from '@pim/common';
 
 export const StockAccountsCash: React.FC = () => {
@@ -26,8 +27,8 @@ export const StockAccountsCash: React.FC = () => {
     }
   }, [stockAccountId])
 
-  const [addStockAccountCashTransaction, {setTrue: showAddStockAccountCashTransaction, setFalse: hideAddItem}] = useBoolean(false)
-  const commands = useCommandBarCommands(showAddStockAccountCashTransaction, reloadData);
+  const [transferFunds, {setTrue: showTransferFunds, setFalse: hideTransferFunds}] = useBoolean(false)
+  const commands = useCommandBarCommands(showTransferFunds, reloadData);
 
   const [selectedItem, setSelectedItem] = useState<{recordId: number; recordType: string}>(null) //TODO type
   const hideEditItem = () => setSelectedItem(null);
@@ -36,13 +37,13 @@ export const StockAccountsCash: React.FC = () => {
     <>
       <CommandBar items={commands} styles={commandBarStyles}/>
       {
-	stockAccountsCashBalances &&
+        stockAccountsCashBalances &&
           <List<StockAccountCashBalance>
             onClick={account => setStockAccountId(account.id)}
             data={stockAccountsCashBalances} />
       }
       {
-	/* TODO add id field for performance, but it needs to be a compound field.*/
+        /* TODO add id field for performance, but it needs to be a compound field.*/
         stockAccountCashFlow &&
           <List<StockAccountCashFlow>
             data={stockAccountCashFlow}
@@ -65,30 +66,30 @@ export const StockAccountsCash: React.FC = () => {
         </Panel>
       }
       {
-        /* TODO support editing other record types from here as well.*/
+        /* TODO support editing other record types from here as well, especially StockAccountCashTransaction which is not editable anywhere else*/
       }
       {
         <Panel
-          isOpen={addStockAccountCashTransaction}
-          headerText="Add Stock Account Cash Transaction"
-          onDismiss={hideAddItem}>
-          <div>TODO create this form. It is not critical because a transfer form should be more useful anyway. </div>
+          isOpen={transferFunds}
+          headerText="Transfer Cash"
+          onDismiss={hideTransferFunds}>
+          <CashStockAccountFundsTransferForm onClose={hideTransferFunds} />
         </Panel>
       }
     </>
   )
 }
 
-function useCommandBarCommands(onAddTransaction: () => void,
+function useCommandBarCommands(onTransferFunds: () => void,
   reloadData: () => void): ICommandBarItemProps[] {
     const commands = useMemo(() => (
       [
         {
           split: true,
-          key: 'newStockAccountCashTransaction',
-          text: 'Cash Transaction',
-          iconProps: {iconName: 'Add'},
-          onClick: onAddTransaction,
+          key: 'newCashStockAccountFundsTransfer',
+          text: 'Transfer Funds',
+          iconProps: {iconName: 'Add'}, //TODO a better icon? 
+          onClick: onTransferFunds,
         },
         {
           key: 'refresh',
@@ -96,6 +97,6 @@ function useCommandBarCommands(onAddTransaction: () => void,
           iconProps: {iconName: 'Refresh'},
           onClick: reloadData
         }
-      ]), [reloadData, onAddTransaction])
+      ]), [reloadData, onTransferFunds])
     return commands;
   }
