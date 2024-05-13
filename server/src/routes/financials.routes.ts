@@ -148,6 +148,15 @@ export const setupFinancialsRoutes = (app: Express) => {
   app.get('/stock-accounts/:id/cash-flow', (req, res) =>
       db.getStockAccountCashFlow((req.params as any).id).then(data => res.send(JSON.stringify(data))))
     
+  app.route('/stock-accounts/cash-transactions/:id')
+    .get((req, res) =>
+      db.getStockAccountCashTransaction((req.params as any).id).then(data => res.send(JSON.stringify(data))))
+    .put(jsonParser, (req, res) =>
+      db.updateStockAccountCashTransaction(req.body) // use the id from inside the body, instead of the url, they should be the same anyway. TODO assert this. 
+	.then(() => res.status(200).send())
+	.catch(errorHandler(res)))
+
+      
   app.get('/fx-history', (req, res) =>
     db.getFxHistory().then(data => res.send(JSON.stringify(data)))
   )

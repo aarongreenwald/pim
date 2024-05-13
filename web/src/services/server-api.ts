@@ -34,7 +34,9 @@ import {
   StockAccountId,
   StockAccountCashFlow,
   BasicISODate,
-  TransferCashToStockAccountDto
+  TransferCashToStockAccountDto,
+  StockAccountCashTransactionId,
+  StockAccountCashTransaction
 } from '@pim/common';
 
 const handleResponse = (res) => {
@@ -133,6 +135,12 @@ export const getStockAccountCashFlow: (accountId: StockAccountId) => Promise<Sto
 
 export const saveTransferCashToStockAccount: (dto: TransferCashToStockAccountDto) => Promise<void> = (dto) =>
   post('compound-transactions/cash-stock-accounts-fund-transfer', dto);
+
+export const getStockAccountCashTransaction: (id: StockAccountCashTransactionId) => Promise<StockAccountCashTransaction> = (id) =>
+  get(`stock-accounts/cash-transactions/${id}`)
+
+export const saveStockAccountCashTransaction: (transaction: StockAccountCashTransaction) => Promise<void> = (transaction) =>
+  put(`stock-accounts/cash-transactions/${transaction.id}`, transaction)
 
 export const getAllCategories = (): Promise<Category[]> =>
   get('categories', )

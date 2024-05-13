@@ -5,6 +5,7 @@ export type IncomeId = number;
 export type StockTransactionId = number;
 export type StockAccountId = number;
 export type FxTransactionId = number;
+export type StockAccountCashTransactionId = number;
 export type Currency = 'ILS' | 'USD';
 export type TaxCategory = 'Taxable' | 'Exempt' | 'Deferred';
 export type BasicISODate = number; // Format: 20231124
@@ -239,5 +240,14 @@ export interface TransferCashToStockAccountDto {
   categoryId: CategoryId; //TODO put a default in FinancialConstants
   cashAllocationCode:  string;
   stockAccountId: StockAccountId;
+  note: string;
+}
+
+export interface StockAccountCashTransaction {
+  id: StockAccountCashTransactionId;
+  transactionDate: BasicISODate;
+  accountId: StockAccountId;
+  amount: Money;
+  currency: Currency;
   note: string;
 }

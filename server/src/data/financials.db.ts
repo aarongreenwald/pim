@@ -29,10 +29,13 @@ import {
   StockAccountCashFlow,
   BasicISODate,
   MarketData,
-  TransferCashToStockAccountDto
+  TransferCashToStockAccountDto,
+  StockAccountCashTransactionId,
+  StockAccountCashTransaction
 } from '@pim/common';
 import {all, beginTransaction, commitTransaction, get, getDb, rollbackTransaction, run} from './db.helpers';
 import sqlite from 'sqlite3'; // for types
+import {assert} from 'console';
 
 export const getAllPayments: () => Promise<vPayment[]> = async () => {
   const db = await getDb();
@@ -657,6 +660,32 @@ export const getStockAccountCashFlow = async(id: StockTransactionId) => {
 
     const db = await getDb(true)
     return await all<StockAccountCashFlow[]>(db, sql, [id])    
+}
+
+export const getStockAccountCashTransaction = async(id: StockAccountCashTransactionId) => {
+  const sql = `select transaction_id id,
+                      transaction_date transactionDate, account_id accountId,
+                      currency, amount, note
+               from stock_account_cash_transaction where transaction_id = ?`
+  const db = await getDb(true)
+  return await get<StockAccountCashTransaction>(db, sql, [id])
+}
+
+export const updateStockAccountCashTransaction = async(transaction: StockAccountCashTransaction) => {
+
+  assert(transaction.id > 0, `Cannot update StockAccountCashTransaction with id = ${transaction.id}`)
+  const sql = `update stock_account_cash_transaction
+                      set transaction_date = ?, account_id = ?, currency = ?, amount = ?, note = ?
+                      where transaction_id = ?`
+  const db = await getDb(false)
+  return await run(db, sql, [
+    transaction.transactionDate,
+    transaction.accountId,
+    transaction.currency,
+    transaction.amount,
+    transaction.note || null,
+    transaction.id
+  ])
 }
 
 export const updateMarketData = async(marketData: MarketData[]) => {

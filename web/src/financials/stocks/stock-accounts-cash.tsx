@@ -9,6 +9,7 @@ import {StocksForm} from './stocks-form';
 import {FxForm} from '../fx/fx-form';
 import {CashStockAccountFundsTransferForm} from './cash-stock-account-funds-transform-form';
 import {StockAccountCashBalance, StockAccountId, StockAccountCashFlow} from '@pim/common';
+import {StockAccountCashTransactionForm} from './stock-account-cash-form';
 
 export const StockAccountsCash: React.FC = () => {
   const [stockAccountsCashBalances, setStockAccountsCashBalances] = useState<StockAccountCashBalance[]>([]);
@@ -66,7 +67,15 @@ export const StockAccountsCash: React.FC = () => {
         </Panel>
       }
       {
-        /* TODO support editing other record types from here as well, especially StockAccountCashTransaction which is not editable anywhere else*/
+        <Panel
+          isOpen={selectedItem && selectedItem.recordType === 'cash_flow'}
+          headerText="Edit Stock Account Cash Transaction"
+          onDismiss={hideEditItem}>
+          <StockAccountCashTransactionForm onClose={hideEditItem} id={selectedItem && selectedItem.recordId} />
+        </Panel>
+      }
+      {
+        /* TODO support editing other record types from here as well */
       }
       {
         <Panel
