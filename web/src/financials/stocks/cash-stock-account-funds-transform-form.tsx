@@ -21,14 +21,14 @@ export const CashStockAccountFundsTransferForm: React.FC<PanelProps> = ({onClose
           label={'Leave Date'}
           type="date"
           onChange={updateDto}
-          value={dto.leaveDate ? expandISODate(dto.leaveDate) : undefined}
+          value={dto.cashAccountDate ? expandISODate(dto.cashAccountDate) : undefined}
           name="leaveDate"/>
 
         <TextField
           label={'Arrive Date'}
           type="date"
           onChange={updateDto}
-          value={dto.arriveDate ? expandISODate(dto.arriveDate) : undefined}
+          value={dto.stockAccountDate ? expandISODate(dto.stockAccountDate) : undefined}
           name="arriveDate"/>
             
         <StockAccountDropdown value={dto.stockAccountId} onChange={updateAccount}/>
@@ -123,8 +123,8 @@ function initializeDto(): TransferCashToStockAccountDto {
     currency: defaultCurrency,
     categoryId: null,
     cashAllocationCode: '',
-    leaveDate: todayAsISODate() as number,
-    arriveDate: todayAsISODate() as number, //TODO default to tomorrow
+    cashAccountDate: todayAsISODate() as number,
+    stockAccountDate: todayAsISODate() as number, //TODO default to tomorrow
     amount: null,
     note: '',
   };

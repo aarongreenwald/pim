@@ -714,10 +714,6 @@ export const transferCashToStockAccount = async(dto: TransferCashToStockAccountD
   // There's a form of simplicity achieved by separating them if it more closely matches the mental
   // model and usage patterns.
 
-  if (dto.arriveDate < dto.leaveDate) {
-    throw `Cannot transferCashToStockAccount with arriveDate (${dto.arriveDate}) before leaveDate (${dto.leaveDate})`
-  }
-
   if (dto.amount === 0) {
     throw `Cannot transferCashToStockAccount with amoiunt === 0`
   }
@@ -731,7 +727,7 @@ export const transferCashToStockAccount = async(dto: TransferCashToStockAccountD
 
   insertPayment({
     id: -1, //for TS
-    paidDate: dto.leaveDate,
+    paidDate: dto.cashAccountDate,
     counterparty: stockAccountName,
     amount: dto.amount,
     incurredAmount: null, //probably default but less ambiguous this way
@@ -744,7 +740,7 @@ export const transferCashToStockAccount = async(dto: TransferCashToStockAccountD
     // Theoretically it's allowed to transfer funds without acting against an allocation, ie
     // moving from/to Unallocated. In that case cashAllocationCode should be falsy. 
     insertCashAssetAllocationRecord({
-      recordDate: dto.leaveDate,
+      recordDate: dto.cashAccountDate,
       allocationCode: dto.cashAllocationCode,
       amount: dto.amount * -1,
       currency: dto.currency,
@@ -757,7 +753,7 @@ export const transferCashToStockAccount = async(dto: TransferCashToStockAccountD
       values (?, ?, ?, ?, ?)
     `
   const params = [
-    dto.arriveDate,
+    dto.stockAccountDate,
     dto.stockAccountId,
     dto.currency,
     dto.amount,

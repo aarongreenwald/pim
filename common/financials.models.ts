@@ -233,8 +233,8 @@ export interface MarketData {
 }
 
 export interface TransferCashToStockAccountDto {
-  leaveDate: BasicISODate;
-  arriveDate: BasicISODate;
+  cashAccountDate: BasicISODate;
+  stockAccountDate: BasicISODate;
   amount: Money;
   currency: Currency;
   categoryId: CategoryId; //TODO put a default in FinancialConstants
