@@ -18,18 +18,18 @@ export const CashStockAccountFundsTransferForm: React.FC<PanelProps> = ({onClose
     <form>
       <Stack tokens={stackTokens}>
         <TextField
-          label={'Leave Date'}
+          label={'Cash Account Date'}
           type="date"
           onChange={updateDto}
           value={dto.cashAccountDate ? expandISODate(dto.cashAccountDate) : undefined}
-          name="leaveDate"/>
+          name="cashAccountDate"/>
 
         <TextField
-          label={'Arrive Date'}
+          label={'Stock Account Date'}
           type="date"
           onChange={updateDto}
           value={dto.stockAccountDate ? expandISODate(dto.stockAccountDate) : undefined}
-          name="arriveDate"/>
+          name="stockAccountDate"/>
             
         <StockAccountDropdown value={dto.stockAccountId} onChange={updateAccount}/>
 
