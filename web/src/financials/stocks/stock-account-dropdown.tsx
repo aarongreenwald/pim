@@ -7,9 +7,10 @@ import {getStockAccounts} from '../../services/server-api';
 interface StockAccountDropdownProps {
   value: StockAccountId;
   onChange: (id: StockAccountId) => void;
+  label?: string;
 }
 
-export const StockAccountDropdown: React.FC<StockAccountDropdownProps> = ({value, onChange}) => {
+export const StockAccountDropdown: React.FC<StockAccountDropdownProps> = ({value, onChange, label = 'Account'}) => {
   const [accounts, setAccounts] = useState<StockAccountDto[]>()
   useEffect(() => {
     getStockAccounts().then(setAccounts)
@@ -24,7 +25,7 @@ export const StockAccountDropdown: React.FC<StockAccountDropdownProps> = ({value
     <ComboBox
       autoComplete="on"
       placeholder="Select account"
-      label={'Account'}
+      label={label}
       selectedKey={value}
       onChange={(ev, option) => onChange(option.key as unknown as number)}
       onRenderOption={(option) => <>{option.data.name}</>}

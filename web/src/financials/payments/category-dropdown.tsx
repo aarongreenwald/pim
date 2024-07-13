@@ -8,9 +8,10 @@ interface CategoryDropdownProps {
   value: CategoryId;
   onChange: (id: CategoryId) => void;
   showLabel?: boolean;
+  label?: string;
 }
 
-export const CategoryDropdown: React.FC<CategoryDropdownProps> = ({value, onChange, showLabel}) => {
+export const CategoryDropdown: React.FC<CategoryDropdownProps> = ({value, onChange, showLabel, label = 'Category'}) => {
   const categories = useCategories();
   const options = useMemo(() => categories?.map(category => ({
     key: category.id,
@@ -22,7 +23,7 @@ export const CategoryDropdown: React.FC<CategoryDropdownProps> = ({value, onChan
     <ComboBox
       autoComplete="on"
       placeholder="Select category"
-      label={showLabel && 'Category'}
+      label={showLabel && label}
       selectedKey={value}
       onChange={(ev, option) => onChange(option.key as unknown as number)}
       onRenderOption={(option) => <>{option.data.hierarchicalName}</>}

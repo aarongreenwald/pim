@@ -31,7 +31,7 @@ export const CashStockAccountFundsTransferForm: React.FC<PanelProps> = ({onClose
           value={dto.stockAccountDate ? expandISODate(dto.stockAccountDate) : undefined}
           name="stockAccountDate"/>
             
-        <StockAccountDropdown value={dto.stockAccountId} onChange={updateAccount}/>
+        <StockAccountDropdown value={dto.stockAccountId} onChange={updateAccount} label="Stock Account"/>
 
         <TextField
           label="Cash Allocation"
@@ -42,6 +42,7 @@ export const CashStockAccountFundsTransferForm: React.FC<PanelProps> = ({onClose
 
         <CategoryDropdown
           showLabel
+          label="Cash Category"
           value={dto.categoryId}
           onChange={updateCategory} />
           
@@ -56,6 +57,7 @@ export const CashStockAccountFundsTransferForm: React.FC<PanelProps> = ({onClose
           amount={dto.amount}
           currency={dto.currency}
           name="amount"
+          placeholder="amount > 0: Stock --> Cash"
           onChange={updateDto}
         />
 
