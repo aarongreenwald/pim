@@ -356,8 +356,20 @@ with recursive split_multiples as (
 
 drop view if exists v_current_market_data;
 create view v_current_market_data as
-with latest as (select ticker_symbol, max(date) date from market_data group by ticker_symbol)
-select md.* from market_data md inner join latest on md.ticker_symbol = latest.ticker_symbol and md.date = latest.date;
+-- Avg price is hardcoded to five years prior to today. Ideally this would be a TVF
+-- once migrating to a better db
+with rolling as (
+select ticker_symbol,
+       max(date) date,
+       min(date) start_date,
+       count(*)  count_dates,
+       avg(price) avg_price
+from market_data
+where date >= cast(strftime('%Y%m%d', date()) as int) - 5e4
+group by ticker_symbol)
+select rolling.*, price
+from rolling inner join market_data md
+     on rolling.ticker_symbol = md.ticker_symbol and rolling.date = md.date
 
 -- Primary purpose of this view is to account for splits. It retroactively pretends that a transaction happened at half the price,
 -- with twice as many shares, so that holdings can be calculated. The commission doesn't change because it's not per-share, so the total
