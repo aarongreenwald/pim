@@ -101,15 +101,16 @@ having coalesce(usd, 0) <> 0 or coalesce(ils, 0) <> 0;
 
 ;drop view if exists v_cash_assets_allocation_history;
 ;create view v_cash_assets_allocation_history as
-select record_date,
+select cash_assets_allocation_id,
+       record_date,
        allocation_code,
        case currency when 'USD' then amount else null end usd,
        sum(case currency when 'USD' then amount else null end)
-           over (partition by allocation_code order by record_date asc	      
+           over (partition by allocation_code order by record_date asc, cash_assets_allocation_id asc
 	         rows between unbounded preceding and current row) running_total_usd,
        case currency when 'ILS' then amount else null end ils,
        sum(case currency when 'ILS' then amount else null end)
-           over (partition by allocation_code order by record_date asc	      
+           over (partition by allocation_code order by record_date asc, cash_assets_allocation_id asc 
 	         rows between unbounded preceding and current row) running_total_ils,
        note
 from cash_assets_allocation;
@@ -145,7 +146,9 @@ all_data as (
      select ils * -1, usd * -1
      from caa_summary
  )
-select sum(ils) ils, sum(usd) usd
+select sum(ils) ils,
+       sum(usd) usd,
+       coalesce(sum(usd), 0) * (select price from v_current_market_data where ticker_symbol = 'USDILS') + coalesce(sum(ils), 0) total_ils
 from all_data
 ;
 
@@ -213,7 +216,11 @@ having p.start_date > 0;
 
 /*
  TODO check that this is right. It would be better to leave the currency unpivoted until later,
- as a future improvement. Also, consider a way to expose the breakdown of allocations at a given date
+ as a future improvement. To see the breakdown of allocations at a given date, see scripts/allocations.sql
+
+The problem with this is that it captures the unallocated cash only at the moment of the CAR, right 
+before new income lands and the allocations are updated. See v_cash_balances_history for a richer approach
+that's heavier and even less well tested.
  */
 ;drop view if exists v_unallocated_cash_history
 ;create view v_unallocated_cash_history as
@@ -230,6 +237,94 @@ having p.start_date > 0;
           , car.usd - alloc.usd usd
      from v_car_summary car
               inner join car_date_allocations alloc on car.record_date = alloc.record_date
+
+
+;drop view if exists v_cash_balances_history
+/*
+UNTESTED, PROBABLY BUGGY
+
+Running totals of cash balances (latest CAR + income - spending) as well as the unallocated amounts.
+
+TODO this can be spun off to another view that shows cash flow and how the cash balances changed,
+with the following changes:
+     undo the grouping by date so all spending/income records appear and add columns:
+     	  record_id (source table's record id)
+	  record_type
+	  note with some text describing the record
+	  usd/ils (currently commented)
+
+Then to further roll up those records to date (current view) can be done by
+summing the usd/ils columns and taking the last of the running columns per date.
+
+But then replace the usd/ils in the CAR rows with unreported spending, perhaps. Then the usd/ils columns
+become summable and the running totals are also easier to calculate. As it stands, the usd/ils columns
+don't really make sense both becausee the CAR rows can't be summed with the others and because they are
+only one record from the given date, not the sum of the entire date
+
+The join to get the unallocated_cash columns is probably expensive, work on a better way to do this if it's
+an issue. Note: Currently this only shows rows for CAR/income/spending, not changes in allocations -
+allocations are just brought along as an add-on so the unallocated_cash can be shown.
+Use the allocations script to see how allocations change over time.
+*/
+
+;create view v_cash_balances_history as
+with cash_flow_by_date as ( --spending and income 
+     select paid_date date,
+       -1 * sum(usd) usd,
+       -1 * sum(ils) ils,
+       payment_id id
+     from v_payment
+     group by paid_date
+     union all
+     select paid_date,
+        sum(case currency when 'USD' then amount else 0 end) usd,
+        sum(case currency when 'ILS' then amount else 0 end) ils,
+	income_id id
+     from income
+     group by paid_date
+),
+car as ( --cash snapshots
+    select record_date, usd, ils,
+    	   row_number() over(order by record_date) car_rw
+    from v_car_summary
+),
+car_and_cash_flow as (
+    select record_date date, usd, ils, car_rw, 0 id from car
+    union all
+    select date, usd, ils, null car_rw, id from cash_flow_by_date
+),
+with_car_buckets as ( --attach cashflow rows to the car record preceding them
+select date, usd, ils,
+       row_number() over(order by date asc, id asc) rw,
+       max(car_rw) over (order by date asc rows between unbounded preceding and current row) car_rw
+from car_and_cash_flow),
+with_running_totals as (
+  select *,
+       sum(usd) over (partition by car_rw order by date, rw asc rows between unbounded preceding and current row) running_usd,
+       sum(ils) over (partition by car_rw order by date, rw asc rows between unbounded preceding and current row) running_ils
+       from with_car_buckets),       
+total_allocated_cash_by_date as (
+  select record_date,
+  sum(ils) over ( order by record_date asc rows between unbounded preceding and current row) ils,
+  sum(usd) over ( order by record_date asc rows between unbounded preceding and current row) usd
+from v_cash_assets_allocation_history),
+with_tac as ( --combine the main result with total_allocated_cash_by_date for the date in the main result
+select wrt.*,
+       tac.ils tac_ils, tac.usd tac_usd,
+       row_number() over (partition by wrt.date order by rw desc, tac.record_date desc) tac_rw
+from with_running_totals wrt
+     left join total_allocated_cash_by_date tac on wrt.date >= tac.record_date
+)
+select date,  running_usd, running_ils,
+       -- debugging columns
+       -- usd, ils,
+       -- tac_usd, tac_ils,
+       -- car_rw, tac_rw,
+       running_usd - tac_usd unallocated_usd,
+       running_ils - tac_ils unallocated_ils
+from with_tac where tac_rw = 1
+
+
 
 /*
 TODO once the issue with timestamps is sorted out, this might need to be fixed.
