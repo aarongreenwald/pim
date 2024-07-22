@@ -26,6 +26,14 @@
 				    (insert-to-pim-grid-buffer ',bufname data ',keymap ',temp-buffer))
 				(message "Succeeded on %s, result: %s" pim-host  data))))))
 
+(defun pim-sql-show-view (view-name &optional keymap)
+  "Helper function - selects an entire table/view and displays it in a temporary buffer"
+  (pim-run-query (concat "select * from " view-name) view-name 0 keymap t))
+
+(defun pim-sql-show-query (query bufname &optional keymap)
+  "Helper function - runs a readonly query and displays it in a temporary buffer"
+  (pim-run-query query bufname 0 keymap t))
+
 (defun pim-exec-query-selection ()
   "Run the query under the point with readonly permissions and put the result in a pim-grid buffer."
   (interactive)

@@ -38,8 +38,6 @@
   ;; open-table-buffer expects passed buffer to exist if it doesn't
   (get-buffer-create bufname)
   (pop-to-buffer bufname)
-
-  (setq pim-grid-data (list headers data-list))
   
   (let* ((column-model (generate-column-model headers))
     (data data-list)
@@ -76,6 +74,7 @@
 
     (pim-grid-mode 1)
     (if temp-buffer (local-set-key (kbd "q") 'kill-buffer-and-window))
+    (setq pim-grid-data (list headers data-list))
     ))
 
 
@@ -126,8 +125,8 @@ So this will have to do.
 ;;       nil)))
 
 (defun pim-query-get-column-by-name (col-name)
-  (cl-position col-name (nth 0 pim-grid-data) :test 'string-equal)
-  )
+  ;; TODO error handling when pim-grid-data is nil.
+  (cl-position col-name (nth 0 pim-grid-data) :test 'string-equal))
 
 (defun pim-query-get-selected-cell-name ()
   (interactive)

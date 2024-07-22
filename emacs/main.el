@@ -24,4 +24,5 @@
 (load-pim-file "./drive.el")
 (load-pim-file "./utils.el")
 (load-pim-file "./sql.el")
+(load-pim-file "./financials.el")
 (load-pim-file "./server-api.el")
