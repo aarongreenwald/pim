@@ -29,9 +29,9 @@
 
 (defun pim-dir-grid-keymap ()
   (setq map (make-sparse-keymap))
-  (define-key map (kbd "r") 'pim-refresh-dir)
+  (define-key map (kbd "r") 'pim-dir-refresh)
   (define-key map (kbd "g") 'pim-dir-grid-open-dir)
-  (define-key map (kbd "b") 'pim-back-dir)
+  (define-key map (kbd "b") 'pim-dir-back)
   (define-key map (kbd "f") 'pim-dir-get-all-filenames-for-hash)
   (define-key map (kbd "v") 'pim-dir-get-versions-for-filename)
   map)
@@ -44,13 +44,13 @@
   (pim-dir-ls fullname)
   )
 
-(defun pim-refresh-dir ()
+(defun pim-dir-refresh ()
   (interactive)
   (pim-dir-ls pim-dir-current-dir)
   )
 
 
-(defun pim-back-dir ()
+(defun pim-dir-back ()
   "Given a pim-dir directory (eg pim-dir-current-dir is available), load pim-dir
 for the parent directory"
   (interactive)

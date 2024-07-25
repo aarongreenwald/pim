@@ -14,7 +14,7 @@
 (defun pim-run-query (query bufname write-mode &optional keymap temp-buffer)
   (setq json-array-type 'list) ;; should be a let-binding here, but for some reason it stopped working in emacs 29
   (pim-api-request 'post "queries/exec"
-		   :body  `(("format" . "list")
+		   :body  `(("format" . "list") ;; TODO eliminate, rely on the header instead.
 			    ("sql" . ,query)
 			    ("writeMode" . ,write-mode))
 		   :as #'json-read
@@ -33,6 +33,17 @@
 (defun pim-sql-show-query (query bufname &optional keymap)
   "Helper function - runs a readonly query and displays it in a temporary buffer"
   (pim-run-query query bufname 0 keymap t))
+
+(defun pim-sql-show-endpoint (url bufname &optional keymap)
+  "Helper function - calls an endpoint (GET) and displays the results in a temporary buffer"
+  (setq json-array-type 'list) ;; should be a let-binding here, but for some reason it stopped working in emacs 29
+  (pim-api-request 'get url
+		   :as #'json-read
+		   :then `(lambda (data)
+			    (progn
+			      (message "Succeeded on %s%s" pim-host ',url)
+			      (insert-to-pim-grid-buffer ',bufname data ',keymap t))
+			    )))
 
 (defun pim-exec-query-selection ()
   "Run the query under the point with readonly permissions and put the result in a pim-grid buffer."

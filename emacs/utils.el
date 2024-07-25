@@ -96,8 +96,6 @@
   (interactive)
   (shell-command "echo hello"))
 
-(global-set-key [f9] 'query-pim)
-
 (defun create-note ()
   (interactive)
   (shell-command "echo hello")

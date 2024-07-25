@@ -102,17 +102,12 @@
 
 Ideally this would be a major mode derived from ctbl:table-mode 
 but that breaks the state inside the mode (ctbl:component etc)
-So this will have to do. 
+So this will have to do. Always enables `pim-mode' as well.
 "
   :init-value nil
   :lighter " pim-grid"
-
+  :after-hook (pim-mode 1)
   )
-
-(add-hook 'pim-grid-mode-on-hook
-	  (lambda ()
-	    (display-line-numbers-mode 0)
-	    ))
 
 ;; Sample code for processing data
 ;; (defun ctbl:cp-get-selected-data-cell (component)
@@ -219,6 +214,23 @@ keeps stats (sum/count/average) on the selected cells."
 		     " | Sum: " (number-to-string (nth 1 pim-grid-mark-stats))
 		     " | Avg: " (number-to-string (nth 2 pim-grid-mark-stats))))
 )
+
+(defun pim-grid--add-to-map-row-action (map func col-name) 
+  "Add an action that will take effect anywhere on the row. Value in `col-name' is what will be passed to `func'"
+  ;; TODO automatically document the key in the buffer's help or somewhere else, ideally based on func's comment
+  (define-key map (kbd "SPC") `(lambda ()
+				 (interactive)
+				 (,func (pim-query-get-column-value-from-selected-row ',col-name)))))
+
+
+(cl-defun pim-grid--create-keymap (&key row-action)
+  "Create a keymap for pim-grid with specific row/cell actions"
+  (let ((map (make-sparse-keymap)))
+    (if row-action
+	(pim-grid--add-to-map-row-action map (nth 0 row-action) (nth 1 row-action)))
+    ;; TODO support cell-actions as well
+    map))
+
 
 ;; TODO this pollutes ctbl, if I could get pim-grid to work as a major/minor mode
 ;; reliably this can be moved to there. 
