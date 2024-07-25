@@ -19,3 +19,9 @@ export const asArrays = data => {
         ...(data.map(row => keys.map(key => row[key])))
     ]
 }
+
+export function serialize(data, req) {
+    return req.headers['x-pim-aslist'] ?
+      JSON.stringify(asArrays(data)) :
+      JSON.stringify(data)
+  }

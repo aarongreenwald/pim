@@ -108,11 +108,6 @@ export interface UnallocatedCash {
   usd: Money;
 }
 
-export interface CashAllocationsDto {
-  unallocatedCashSnapshot: UnallocatedCash;
-  cashAssetsAllocation: CashAssetAllocation[];
-}
-
 export interface UnreportedSpending {
   startDate: BasicISODate;
   endDate: BasicISODate;

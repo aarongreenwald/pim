@@ -2,7 +2,7 @@ import config from '../config/config';
 import {
   CarSummary,
   CashAccount,
-  CashAllocationsDto,
+  CashAssetAllocation,
   CashAssetAllocationRecord,
   CashAssetAllocationHistory,
   CashAssetRecord,
@@ -85,7 +85,7 @@ export const saveCashRecords = (recordDate: string | number | Date, accountBalan
 
 export const getCashRecords = (recordDate: string | number | Date): Promise<CashAssetRecord[]> => get(`car/records?recordDate=${recordDate}`)
 
-export const getCashAllocations = (): Promise<CashAllocationsDto> =>
+export const getCashAllocations = (): Promise<CashAssetAllocation[]> =>
   get('cash-allocations')
 
 export const getCashAssetAllocationHistory = (allocationCode: string): Promise<CashAssetAllocationHistory[]> =>

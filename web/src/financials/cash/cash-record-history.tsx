@@ -17,16 +17,7 @@ export const CashRecordHistory: React.FC = () => {
   const [unreportedSpending, setUnreportedSpending] = useState<UnreportedSpending[]>(null);
   const reloadData = useCallback(() => {
     getCarSummary().then(setCarSummary);
-    getCashAllocations().then(({cashAssetsAllocation, unallocatedCashSnapshot}) => {
-      setCashAllocations([
-        ...cashAssetsAllocation,
-        {
-          allocationCode: 'Unallocated',
-          ils: unallocatedCashSnapshot.ils,
-          usd: unallocatedCashSnapshot.usd
-        }
-      ])
-    })
+    getCashAllocations().then(data => setCashAllocations(data));
     getUnreportedSpending().then(setUnreportedSpending);
   }, [])
   useEffect(() => {reloadData()}, [reloadData])

@@ -73,7 +73,7 @@
 		      (ctbl:show-cell-in-tooltip)))
 
     (pim-grid-mode 1)
-    (if temp-buffer (local-set-key (kbd "q") 'kill-buffer-and-window))
+    (if temp-buffer (local-set-key (kbd "q") 'bury-buffer)) ;; TODO kill-buffer? bury-buffer? kill-buffer-and-window? experiment
     (setq pim-grid-data (list headers data-list))
     ))
 
