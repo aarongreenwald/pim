@@ -57,7 +57,7 @@ export const CashStockAccountFundsTransferForm: React.FC<PanelProps> = ({onClose
           amount={dto.amount}
           currency={dto.currency}
           name="amount"
-          placeholder="amount > 0: Stock --> Cash"
+          placeholder="Cash --> Stock Acct: amount > 0"
           onChange={updateDto}
         />
 

@@ -44,7 +44,7 @@
     (model 
      (make-ctbl:model
       :column-model column-model
-      :data data))
+      :data (format-data headers data)))
     component)    
 
     (setq component
@@ -77,10 +77,56 @@
     (setq pim-grid-data (list headers data-list))
     ))
 
+(defun format-money (val)
+  (if val
+      (format "%.2f" val)
+    ""))
+
+(defun format-data (headers data)
+  ;; THIS IS MODIFYING THE data - it should return a new copy, or the underlying numeric data becomes
+  ;; a string and difficult to deal with.
+  ;; OTOH - maybe rounding the floats is good for marked cells and other places. Consider behavior
+  ;; more thoroughly, this is just a POC - I probably need to configure different fields with different
+  ;; precisions - quantity in stock-holdings-summary should be %.4f
+  ;; unitPrice in stock-transactions - 4? Commission: ?? fxrates? 
+  (let ((index 0)
+	(money-field-indices '(-1 ))
+	(res))
+    (dolist (name headers)
+
+      (if (member name money-fields)
+	  (setq money-field-indices (cons index money-field-indices))
+	)
+      (setq index (+ 1 index)))
+    
+    (defun format-cell (val)
+      (setq res (if (member index money-field-indices)
+		    (format-money val)
+		  val))
+      (setq index (+ 1 index))
+      res)
+			
+    (defun format-row(row)
+      (setq index 0)
+      (mapcar 'format-cell row)
+      )
+    (mapcar 'format-row data)))
 
 (defun generate-column-model (headers)
   "Expects a list of headers"
   (mapcar #'generate-column headers))
+
+(setq numeric-fields '("usd" "ils" "amount"
+		       "size" "unitPrice"
+		       "commission" "costBasis"
+		       "usdCommission"
+		       "marketValue" "avgCostBasis"
+		       "quantity" "marketPrice"))
+
+(setq money-fields '("avgCostBasis" "costBasis" "marketValue"
+		     "ils" "usd" "amount"
+		     "usdCommission"))
+
 
 (defun generate-column (name)
   ;; TODO can I show elipsis when the width truncated?
@@ -91,7 +137,7 @@
    ;;   :min-width 50
    :max-width (cond ((member name '("sha1" "sha256")) 15)
 		(40))
-   :align (cond ((member name '("usd" "ils" "amount" "size")) 'right)
+   :align (cond ((member name numeric-fields) 'right)
 		('left))
    ;; :click-hooks ;;header click hooks
    ))

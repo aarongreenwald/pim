@@ -363,7 +363,8 @@ select
 	null ils,
 	 --positive quantities are purchases (outflow), negative qty are sales (income), commissions are always positive and are outflow
 	(-1 * unit_price * quantity) - coalesce(commission, 0) as usd,
-	case when quantity > 0 then 'B ' else 'S ' end || quantity || ' ' || ticker_symbol  || ' @ $' || unit_price as description
+	-- note that we show values unadjusted values for splits here. We can switch to v_stock_transaction to get adjusted values but I'm not sure what's preferable. 
+	case when quantity > 0 then 'B ' else 'S ' end || abs(quantity) || ' ' || ticker_symbol  || ' @ $' || unit_price as description
 from stock_transaction
 union all
 select
@@ -449,6 +450,18 @@ with recursive split_multiples as (
 
 ) select * from split_multiples;
 
+drop view if exists v_market_data;
+create view v_market_data as
+ select md.ticker_symbol,
+ 	date,
+	price / coalesce(multiplier, 1) price,
+	-- these are just for documentation/debugging purposes
+	price unadjusted_price,
+	multiplier split_multiplier
+    from market_data md left join v_stock_split_multipliers ssm
+    	 on md.ticker_symbol = ssm.ticker_symbol and md.date >= ssm.from_date and md.date < ssm.to_date;
+
+
 drop view if exists v_current_market_data;
 create view v_current_market_data as
 -- Avg price is hardcoded to five years prior to today. Ideally this would be a TVF
@@ -459,11 +472,11 @@ select ticker_symbol,
        min(date) start_date,
        count(*)  count_dates,
        avg(price) avg_price
-from market_data
+from v_market_data
 where date >= cast(strftime('%Y%m%d', date()) as int) - 5e4
 group by ticker_symbol)
 select rolling.*, price
-from rolling inner join market_data md
+from rolling inner join v_market_data md
      on rolling.ticker_symbol = md.ticker_symbol and rolling.date = md.date
 
 -- Primary purpose of this view is to account for splits. It retroactively pretends that a transaction happened at half the price,

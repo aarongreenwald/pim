@@ -457,6 +457,10 @@ export const getStockTransactions = async () => {
 
 export const getStockTransaction = async (transactionId: StockTransactionId) => {
     const db = await getDb();
+  // This query does NOT use the view because it should be unadjusted for splits when getting
+  // a single transaction for the edit form
+  // TODO consider a way for this to be less confusing, maybe the view should also include the original values,
+  // and in the form we can show the values from the view and indicate original / adjusted values in the UI
     const sql = `
         select stock_transaction_id id,
                account_id accountId,
@@ -466,7 +470,7 @@ export const getStockTransaction = async (transactionId: StockTransactionId) => 
                unit_price unitPrice,
                cost_basis costBasis,
                commission
-        from v_stock_transactions
+        from stock_transaction
         where stock_transaction_id = ?
     `;
     return get<StockTransactionDto>(db, sql, transactionId)
