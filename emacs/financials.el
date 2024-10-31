@@ -14,15 +14,16 @@
   (interactive)
   (pim-sql-show-endpoint "stock-accounts/cash-balances"
 			 "stock-account-cash-balances"
-			 (pim-grid--create-keymap :row-action (list 'pim-fin--stock-account-cash-flow "id"))))
+			 (pim-grid--create-keymap :row-action (list 'pim-fin--stock-account-cash-flow
+								    "id" "accountName"))))
 (pim--add-to-home 'pim-fin-stock-accounts-cash-balances (kbd "s c") "Stock Cash by Account" "Stocks")
 
-(defun pim-fin--stock-account-cash-flow (account-id)
+(defun pim-fin--stock-account-cash-flow (account-id name)
   ;; if not absolutely trivial use the web server via pim-sql-show-endpoint
   (pim-sql-show-query (format "select * from v_stock_account_cash_flow where account_id = %d
                                order by transaction_date desc, transaction_time desc, record_id desc"
 			      account-id)
-		      "stock-account-cash-flow"))
+		      (format "stock-account-cash-flow (%s)" name)))
 
 (defun pim-fin-stock-holdings-summary ()
   (interactive)
