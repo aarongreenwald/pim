@@ -1,9 +1,11 @@
 
 (defun pim-fin-stock-holdings-account-summary ()
-  ;; TODO remove? The only thing this has that the poorly named stock-accounts-cash-balances endpoint does not have is the tax category
+  ;; TODO merge with stock-accounts-cash-balances, they're fundamentally the same except that this has taxCategory
+  ;; and that they have different row actions. Maybe that's enough of a reason for separation?
+  ;; Or merge, add taxCategory to the endpoint, rename it to stock-accounts/summary, and decide which is a row actions and which is a cell action. . 
   (interactive)
   (pim-sql-show-view "v_stock_holdings_account_summary"
-		     (pim-grid--create-keymap :row-action (list 'pim-fin--stock-account-cash-flow "stock_account_id"))))
+		     (pim-grid--create-keymap :row-action (list 'pim-fin--stock-account-holdings-summary "stock_account_id"))))
 (pim--add-to-home 'pim-fin-stock-holdings-account-summary (kbd "s a") "Stock Holdings by Account" "Stocks")
 
 
@@ -26,6 +28,12 @@
   (pim-sql-show-endpoint "stock-holdings-summary"
 			 "stock-holdings-summary"))
 (pim--add-to-home 'pim-fin-stock-holdings-summary (kbd "s s") "Stock Holdings Summary" "Stocks")
+
+(defun pim-fin--stock-account-holdings-summary (account-id)
+  (pim-sql-show-query (format "select * from v_stock_holdings_account_ticker_summary
+                               where stock_account_id = %d"
+			      account-id)
+		      "stock-account-holdings-summary"))
 
 (defun pim-fin-stock-transactions ()
   (interactive)
