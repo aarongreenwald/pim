@@ -261,19 +261,20 @@ keeps stats (sum/count/average) on the selected cells."
 		     " | Avg: " (number-to-string (nth 2 pim-grid-mark-stats))))
 )
 
-(defun pim-grid--add-to-map-row-action (map func col-name) 
-  "Add an action that will take effect anywhere on the row. Value in `col-name' is what will be passed to `func'"
+(defun pim-grid--add-to-map-row-action (map func &rest col-names) 
+  "Add an action that will take effect anywhere on the row. Values in `col-names' will be passed to `func'"
   ;; TODO automatically document the key in the buffer's help or somewhere else, ideally based on func's comment
   (define-key map (kbd "SPC") `(lambda ()
 				 (interactive)
-				 (,func (pim-query-get-column-value-from-selected-row ',col-name)))))
+				 (apply ',func (mapcar 'pim-query-get-column-value-from-selected-row ',col-names ))
+				 )))
 
 
 (cl-defun pim-grid--create-keymap (&key row-action)
   "Create a keymap for pim-grid with specific row/cell actions"
   (let ((map (make-sparse-keymap)))
     (if row-action
-	(pim-grid--add-to-map-row-action map (nth 0 row-action) (nth 1 row-action)))
+	(apply 'pim-grid--add-to-map-row-action (cons map row-action)))
     ;; TODO support cell-actions as well
     map))
 

@@ -5,7 +5,8 @@
   ;; Or merge, add taxCategory to the endpoint, rename it to stock-accounts/summary, and decide which is a row actions and which is a cell action. . 
   (interactive)
   (pim-sql-show-view "v_stock_holdings_account_summary"
-		     (pim-grid--create-keymap :row-action (list 'pim-fin--stock-account-holdings-summary "stock_account_id"))))
+		     (pim-grid--create-keymap :row-action (list 'pim-fin--stock-account-holdings-summary
+								"stock_account_id" "name"))))
 (pim--add-to-home 'pim-fin-stock-holdings-account-summary (kbd "s a") "Stock Holdings by Account" "Stocks")
 
 
@@ -29,11 +30,11 @@
 			 "stock-holdings-summary"))
 (pim--add-to-home 'pim-fin-stock-holdings-summary (kbd "s s") "Stock Holdings Summary" "Stocks")
 
-(defun pim-fin--stock-account-holdings-summary (account-id)
+(defun pim-fin--stock-account-holdings-summary (account-id name)
   (pim-sql-show-query (format "select * from v_stock_holdings_account_ticker_summary
                                where stock_account_id = %d"
 			      account-id)
-		      "stock-account-holdings-summary"))
+		      (format "stock-account-holdings-summary (%s)" name)))
 
 (defun pim-fin-stock-transactions ()
   (interactive)
