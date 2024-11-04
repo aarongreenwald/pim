@@ -58,5 +58,16 @@ Function also verifies the available cookie is still valid, if not performs a lo
 		 ("x-pim-aslist" . 1))
       :body (if body (json-encode body) nil)
       :as (or as #'json-read)
+      :else (lambda (error)
+	      ;; if the only error is the response error, show only the body
+	      ;; because that's usually what's interesting. TODO consider searching
+	      ;; for the text SQLITE_ERROR and if it exists showing only the sql error
+	      (if (or (plz-error-curl-error error)
+		      (plz-error-message error))
+		  (message "%s" error)
+		(message "%s" (concat "HTTP error: "
+				      (plz-response-body (plz-error-response error)))))
+
+	      )
       :then then)))
 
