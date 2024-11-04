@@ -90,6 +90,7 @@ export interface CashAssetAllocation {
   allocationCode: string;
   ils: Money;
   usd: Money;
+  totalUsd?: Money;
   totalIls?: Money;
 }
 

@@ -94,7 +94,9 @@ from rollup_category rc left join category c on rc.category_id = c.category_id
 ;create view v_cash_assets_allocation as
 select allocation_code,
        sum(case currency when 'USD' then amount else null end) usd,
-       sum(case currency when 'ILS' then amount else null end) ils
+       sum(case currency when 'ILS' then amount else null end) ils,
+       coalesce(sum(ils), 0) / (select price * 1.0 from v_current_market_data where ticker_symbol = 'USDILS') + coalesce(sum(usd), 0) total_usd,
+       coalesce(sum(usd), 0) * (select price from v_current_market_data where ticker_symbol = 'USDILS') + coalesce(sum(ils), 0) total_ils
 from cash_assets_allocation
 group by allocation_code
 having coalesce(usd, 0) <> 0 or coalesce(ils, 0) <> 0;
@@ -148,6 +150,7 @@ all_data as (
  )
 select sum(ils) ils,
        sum(usd) usd,
+       coalesce(sum(ils), 0) / (select price * 1.0 from v_current_market_data where ticker_symbol = 'USDILS') + coalesce(sum(usd), 0) total_usd,
        coalesce(sum(usd), 0) * (select price from v_current_market_data where ticker_symbol = 'USDILS') + coalesce(sum(ils), 0) total_ils
 from all_data
 ;
