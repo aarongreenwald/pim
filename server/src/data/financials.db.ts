@@ -294,7 +294,7 @@ export const getCashAssetsAllocation = async () => {
 
 export const getUnallocatedCashSnapshot = async () => {
   const db = await getDb();
-  return get<CashAssetAllocation>(db, 'select usd, ils total_usd totalUsd, total_ils totatIls from v_unallocated_cash_snapshot')
+  return get<CashAssetAllocation>(db, 'select usd, ils, total_usd totalUsd, total_ils totatIls from v_unallocated_cash_snapshot')
 }
 
 export const getUnreportedSpending = async () => {
