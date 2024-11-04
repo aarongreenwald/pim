@@ -289,12 +289,12 @@ export const updateCashAssetRecords = async (recordDate: BasicISODate, accountBa
 
 export const getCashAssetsAllocation = async () => {
   const db = await getDb();
-  return all<CashAssetAllocation>(db, 'select allocation_code allocationCode, ils, usd, total_ils, total_usd from v_cash_assets_allocation')
+  return all<CashAssetAllocation>(db, 'select allocation_code allocationCode, usd, ils, total_usd totalUsd, total_ils totalIls from v_cash_assets_allocation')
 }
 
 export const getUnallocatedCashSnapshot = async () => {
   const db = await getDb();
-  return get<CashAssetAllocation>(db, 'select ils, usd, total_usd, total_ils from v_unallocated_cash_snapshot')
+  return get<CashAssetAllocation>(db, 'select usd, ils total_usd totalUsd, total_ils totatIls from v_unallocated_cash_snapshot')
 }
 
 export const getUnreportedSpending = async () => {

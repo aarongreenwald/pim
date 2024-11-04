@@ -71,7 +71,7 @@
   (interactive)
   (pim-sql-show-endpoint "car/summary"
 			 "car-summary"))
-(pim--add-to-home 'pim-fin-car-summary (kbd "c a") "Cash Assets" "Cash")
+(pim--add-to-home 'pim-fin-car-summary (kbd "c a") "Cash Assets History" "Cash")
 
 (defun pim-fin-cash-allocations ()
   (interactive)

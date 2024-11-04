@@ -91,15 +91,19 @@ from rollup_category rc left join category c on rc.category_id = c.category_id
                         left join category r on rc.root_category_id = r.category_id
 
 ;drop view if exists v_cash_assets_allocation;
+
 ;create view v_cash_assets_allocation as
-select allocation_code,
+with d as (
+     select allocation_code,
        sum(case currency when 'USD' then amount else null end) usd,
-       sum(case currency when 'ILS' then amount else null end) ils,
-       coalesce(sum(ils), 0) / (select price * 1.0 from v_current_market_data where ticker_symbol = 'USDILS') + coalesce(sum(usd), 0) total_usd,
-       coalesce(sum(usd), 0) * (select price from v_current_market_data where ticker_symbol = 'USDILS') + coalesce(sum(ils), 0) total_ils
-from cash_assets_allocation
-group by allocation_code
-having coalesce(usd, 0) <> 0 or coalesce(ils, 0) <> 0;
+       sum(case currency when 'ILS' then amount else null end) ils
+     from cash_assets_allocation
+     group by allocation_code
+     having coalesce(usd, 0) <> 0 or coalesce(ils, 0) <> 0)
+select *,
+       coalesce(ils, 0) / (select price * 1.0 from v_current_market_data where ticker_symbol = 'USDILS') + coalesce(usd, 0) total_usd,
+       coalesce(usd, 0) * (select price from v_current_market_data where ticker_symbol = 'USDILS') + coalesce(ils, 0) total_ils
+from d;
 
 ;drop view if exists v_cash_assets_allocation_history;
 ;create view v_cash_assets_allocation_history as
@@ -124,6 +128,7 @@ from cash_assets_allocation;
  booked on the day they ocurred, CAR is as of midnight of the record date.
  */
 drop view if exists v_unallocated_cash_snapshot;
+
 create view v_unallocated_cash_snapshot as
 with caa_summary as (
     select sum(ils) ils, sum(usd) usd

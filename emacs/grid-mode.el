@@ -120,11 +120,13 @@
 		       "size" "unitPrice"
 		       "commission" "costBasis"
 		       "usdCommission"
+		       "totalIls" "totalUsd"
 		       "marketValue" "avgCostBasis"
 		       "quantity" "marketPrice"))
 
 (setq money-fields '("avgCostBasis" "costBasis" "marketValue"
 		     "ils" "usd" "amount"
+		     "totalIls" "totalUsd"
 		     "usdCommission"))
 
 
