@@ -1,22 +1,40 @@
+(cl-defun pim--add-action (title 
+			   &key kb sql-view endpoint query row-action
+			   bufname
+			   section description)
+  "
+Only title, kb, and exactly one of sql-view/endpoint/query is required.
+"
+  (setq bufname (or bufname
+		    (downcase (replace-regexp-in-string " " "-" title))
+		    ))
+  (pim--add-to-home `(lambda () (interactive)
+		       ;; TODO this could be written better
+		       (when ',sql-view
+			 (pim-sql-show-view ',sql-view (pim-grid--create-keymap :row-action ',row-action)))
+		       (when ',endpoint
+			 (pim-sql-show-endpoint ',endpoint ',bufname (pim-grid--create-keymap :row-action ',row-action)))
+		       (when ',query
+			 (pim-sql-show-query ',query ',bufname (pim-grid--create-keymap :row-action ',row-action))))
+		    kb title section description))
 
-(defun pim-fin-stock-holdings-account-summary ()
-  ;; TODO merge with stock-accounts-cash-balances, they're fundamentally the same except that this has taxCategory
-  ;; and that they have different row actions. Maybe that's enough of a reason for separation?
-  ;; Or merge, add taxCategory to the endpoint, rename it to stock-accounts/summary, and decide which is a row actions and which is a cell action. . 
-  (interactive)
-  (pim-sql-show-view "v_stock_holdings_account_summary"
-		     (pim-grid--create-keymap :row-action (list 'pim-fin--stock-account-holdings-summary
-								"stock_account_id" "name"))))
-(pim--add-to-home 'pim-fin-stock-holdings-account-summary (kbd "s a") "Stock Holdings by Account" "Stocks")
+(pim--add-action "Stock Holdings by Account"
+		 ;; TODO merge with stock-accounts-cash-balances, they're fundamentally the same except that this has taxCategory
+		 ;; and that they have different row actions. Maybe that's enough of a reason for separation?
+		 ;; Or merge, add taxCategory to the endpoint, rename it to stock-accounts/summary, and decide which is a row actions and which is a cell action. . 
+		 :kb (kbd "s a")
+		 :sql-view "v_stock_holdings_account_summary"
+		 :row-action (list 'pim-fin--stock-account-holdings-summary "stock_account_id" "name")
+		 :section "Stocks"
+		 :description "Summary of stock holdings by account - shows the v_stock_holdings_account_summary view")
 
+(pim--add-action "Stock Cash by Account"
+		 :kb (kbd "s c")
+		 :endpoint "stock-accounts/cash-balances"
+		 :row-action (list 'pim-fin--stock-account-cash-flow "id" "accountName")
+		 :section "Stocks"
+		 :description "Similar to stock holdings by account")
 
-(defun pim-fin-stock-accounts-cash-balances ()
-  (interactive)
-  (pim-sql-show-endpoint "stock-accounts/cash-balances"
-			 "stock-account-cash-balances"
-			 (pim-grid--create-keymap :row-action (list 'pim-fin--stock-account-cash-flow
-								    "id" "accountName"))))
-(pim--add-to-home 'pim-fin-stock-accounts-cash-balances (kbd "s c") "Stock Cash by Account" "Stocks")
 
 (defun pim-fin--stock-account-cash-flow (account-id name)
   ;; if not absolutely trivial use the web server via pim-sql-show-endpoint
