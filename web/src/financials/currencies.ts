@@ -20,5 +20,5 @@ currencies.forEach(c => currencyFields.set(c.toLocaleLowerCase(), c.toLowerCase(
 const additionalUsdFields = ['marketValue', 'costBasis', 'marketPrice', 'avgCostBasis', 'usdCommission', 'usdBalance', 'totalUsd']
 additionalUsdFields.forEach(field => currencyFields.set(field, 'usd'));
 
-const additionalIlsFields = ['ilsBalance', 'totalUsd']
+const additionalIlsFields = ['ilsBalance', 'totalIls']
 additionalIlsFields.forEach(field => currencyFields.set(field, 'ils'));
