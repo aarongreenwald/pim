@@ -31,19 +31,19 @@ export const AddCashAssetAllocation: React.FC<PanelProps<PaymentId>> = ({onClose
           onChange={updateRecord}
         />
 
-        <CurrencyInput
-          amount={allocation.amount}
-          currency={allocation.currency}
-          name="amount"
-          onChange={updateRecord}
-        />
-
         <StyledChoiceGroup
           selectedKey={allocation.currency}
           label="Currency"
           styles={horizontalChoiceGroup}
           onChange={updateCurrency}
           options={currencyRadioOptions}/>
+
+	<CurrencyInput
+          amount={allocation.amount}
+          currency={allocation.currency}
+          name="amount"
+          onChange={updateRecord}
+        />
 
         <TextField
           label="Notes"
