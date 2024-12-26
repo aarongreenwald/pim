@@ -2,16 +2,21 @@ import {PanelProps} from '../../common/panel.types';
 import {DefaultButton, Label, PrimaryButton, Stack, TextField} from '@fluentui/react';
 import {stackTokens} from '../styles';
 import * as React from 'react';
-import {useCallback, useState} from 'react';
-import {FuelLog, NewFuelLogDto} from '@pim/common';
-import {saveFuelLog} from '../../services/server-api';
+import {useCallback, useState, useEffect} from 'react';
+import {FuelLog, NewFuelLogDto, DropdownItemDto} from '@pim/common';
+import {saveFuelLog, getVehicles} from '../../services/server-api';
+import {Dropdown} from '../../common/dropdown';
 import {CurrencyInput} from '../currency-input';
 import {FuelLogPreviewCard} from './fuel-log-preview-card';
 import {todayAsISODate} from '../../common/date.utils';
 
 export const LogFuelForm: React.FC<PanelProps<number, FuelLog>> = ({onClose, onSave, data}) => {
   const previousFuelLog = data;
-  const {fuelLog, updateFuelLog, submitForm} = useLogFuelForm(onClose, onSave);
+  const {fuelLog, updateFuelLog, updateVehicle, submitForm} = useLogFuelForm(onClose, onSave);
+  const [vehicles, setVehicles] = useState<DropdownItemDto[]>()
+  useEffect(() => {
+    getVehicles().then(setVehicles)
+  }, [])
   const km = Math.max(fuelLog.odometer - previousFuelLog?.odometer, 0);
   const kml = fuelLog.liters ? km / fuelLog.liters : null;
   const totalCost = fuelLog.liters * fuelLog.price;
@@ -26,6 +31,13 @@ export const LogFuelForm: React.FC<PanelProps<number, FuelLog>> = ({onClose, onS
         {/*    onChange={updateFuelLog}*/}
         {/*    value={fuelLog.timestamp?.toString()}*/}
         {/*    name="timestamp"/>*/}
+
+        <Dropdown
+          items={vehicles}
+          onChange={updateVehicle}
+          label="Vehicle"
+          value={fuelLog.vehicleId}
+        />
 
         <TextField
           label="Odometer"
@@ -84,13 +96,21 @@ function useLogFuelForm(onClose: () => void, onSave: () => void) {
     })
   }, [fuelLog])
 
+  const updateVehicle = useCallback((id: number) => {
+    setFuelLog({
+      ...fuelLog,
+      vehicleId: id
+    })
+  }, [fuelLog]);
+
+
   const submitForm = useCallback(async () => {
     await saveFuelLog(fuelLog)
     onSave()
     onClose()
   }, [fuelLog, onClose, onSave])
 
-  return {fuelLog, updateFuelLog, submitForm};
+  return {fuelLog, updateFuelLog, updateVehicle, submitForm};
 }
 
 function initializeFuelLog(): NewFuelLogDto {
@@ -102,6 +122,7 @@ function initializeFuelLog(): NewFuelLogDto {
     odometer: 0,
     liters: 0,
     note: '',
-    isFull: true
+    isFull: true,
+    vehicleId: null
   };
 }

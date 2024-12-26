@@ -31,7 +31,8 @@ import {
   MarketData,
   TransferCashToStockAccountDto,
   StockAccountCashTransactionId,
-  StockAccountCashTransaction
+  StockAccountCashTransaction,
+  DropdownItemDto
 } from '@pim/common';
 import {all, beginTransaction, commitTransaction, get, getDb, rollbackTransaction, run} from './db.helpers';
 import sqlite from 'sqlite3'; // for types
@@ -367,37 +368,53 @@ export const insertCashAssetAllocationRecord = async (allocationRecord: CashAsse
     return lastId
 }
 
-export const getFuelLog: (pageSize?: number) => Promise<FuelLog[]> = async (pageSize) => {
+export const getVehicles: () => Promise<DropdownItemDto[]> = async () => {
+  const sql = `select vehicle_id id, name, is_primary [default] from vehicle where active = 1`
+  const db = await getDb()
+  return all<DropdownItemDto>(db, sql)
+}
+
+export const getFuelLog: (pageSize?: number, vehicleId?: number) => Promise<FuelLog[]> = async (pageSize, vehicleId) => {
     const db = await getDb();
     const sql = `
         select fuel_log_id id, timestamp, km_per_liter kilometersPerLiter, odometer, liters, kilometers, note, is_full isFull, payment_id paymentId
             , amount totalCost
             , currency
         from v_fuel_log
-        ${pageSize ? `limit ${pageSize}` : ''}
+        ${vehicleId ? `where vehicle_id = ?` : `where is_primary = 1`}
+        ${pageSize ? `limit ${pageSize}` : ''  /* TODO injection protection */ }
     `;
-    return all<FuelLog>(db, sql)
+  return all<FuelLog>(db, sql, [vehicleId])
 }
 
-export const getFuelLogSummary: () => Promise<FuelLogSummary> = async () => {
+export const getFuelLogSummary: () => Promise<FuelLogSummary[]> = async () => {
     const db = await getDb();
     const sql = `
-        select liters, kilometers, kilometers_per_liter kilometersPerLiter, ils
+        select vehicle_id vehicleId, vehicle_name vehicleName,
+               liters, kilometers, kilometers_per_liter kilometersPerLiter, ils
         from v_fuel_log_summary
     `;
-    return get<FuelLogSummary>(db, sql)
+    return all<FuelLogSummary>(db, sql)
+}
+
+const getFuelCategory = async (fuelLogDto: NewFuelLogDto) => {
+  const db = await getDb();
+  const sql = `select fuel_category_id id from vehicle where vehicle_id = ?`
+  return get<{id: number}>(db, sql, [fuelLogDto.vehicleId])
 }
 
 export const insertFuelLog = async (fuelLogDto: NewFuelLogDto) => {
-    //TODO do all this in a single transaction
+  //TODO do all this in a single transaction
+
+  const fuelCategory = await getFuelCategory(fuelLogDto)
 
   const paymentId = await insertPayment({
     id: -1, //For typescript, this is ignored
     paidDate: fuelLogDto.date,
-    //TODO counterparty should be settable, the categoryId should be based on the constants table, and
+    //TODO counterparty should be settable and
     //the currency shouldn't be hardcoded (in general the fuel log feature is "single currency", fix this.
     counterparty: 'Gas Station',
-    categoryId: 14,
+    categoryId: fuelCategory.id,
     currency: 'ILS',
     amount: Math.round(fuelLogDto.price * fuelLogDto.liters * 100) / 100,
     incurredAmount: null, //TODO this is a temporary condition
@@ -406,8 +423,8 @@ export const insertFuelLog = async (fuelLogDto: NewFuelLogDto) => {
 
   const sql = `
     insert into fuel_log 
-        (timestamp, odometer, liters, is_full, note, payment_id)
-    values (?,?,?,?,?,?)
+        (timestamp, odometer, liters, is_full, note, payment_id, vehicle_id)
+    values (?,?,?,?,?,?,?)
   `
   //TODO: validations - the fallback to null done here forces the db to reject
   //bad data but there should probably be a validation and sanitization step prior to getting here
@@ -418,7 +435,8 @@ export const insertFuelLog = async (fuelLogDto: NewFuelLogDto) => {
     fuelLogDto.liters,
     fuelLogDto.isFull,
     fuelLogDto.note,
-    paymentId
+    paymentId,
+    fuelLogDto.vehicleId
   ];
   const db = await getDb(false);
   const {lastId} = await run(db, sql, params)

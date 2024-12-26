@@ -173,6 +173,15 @@ create table financial_constants(
     amount decimal(19,4) not null
 );
 
+create table vehicle(
+     vehicle_id integer primary key not null
+   , name text not null
+   , type char not null
+   , is_primary boolean not null default false
+   , active boolean NOT NULL default true --when false, hidden from the input form in the UI, but everything else works as normal
+   , fuel_category_id integer not null references category
+)
+
 create table fuel_log(
     fuel_log_id integer primary key not null
     ,timestamp datetime NOT NULL --todo change to a timestamp? Need to consider how this is displayed when I travel, perhaps historical data should be recorded from the local perspective and shown from the local perspective? 
@@ -181,7 +190,9 @@ create table fuel_log(
     ,is_full boolean NOT NULL DEFAULT TRUE
     ,note text NULL
     ,payment_id integer NOT NULL REFERENCES payment
+    ,vehicle_id integer not null references vehicle
 );
+
 
 /*
  Timestamp semantics:

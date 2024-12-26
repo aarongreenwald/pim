@@ -36,7 +36,8 @@ import {
   BasicISODate,
   TransferCashToStockAccountDto,
   StockAccountCashTransactionId,
-  StockAccountCashTransaction
+  StockAccountCashTransaction,
+  DropdownItemDto
 } from '@pim/common';
 
 const handleResponse = (res) => {
@@ -154,6 +155,9 @@ export const saveAllocationRecord = (allocation: CashAssetAllocationRecord): Pro
 export function getSpendingByCategory(rootCategoryId: CategoryId): Promise<SpendingByCategory[]> {
   return get(`analysis/spending-by-category?rootCategoryId=${rootCategoryId}`)
 }
+
+export const getVehicles: () => Promise<DropdownItemDto[]> = () =>
+  get('vehicles')
 
 export const getFuelLog: (pageSize?: number) => Promise<{ fuelLog: FuelLog[]; summary: FuelLogSummary }> = (pageSize) =>
   get(`fuel-log${pageSize ? `?pageSize=${pageSize}` : ''}`);

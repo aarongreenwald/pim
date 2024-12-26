@@ -99,6 +99,10 @@ export const setupFinancialsRoutes = (app: Express) => {
         db.getSpendingByCategory((req.query as any).rootCategoryId).then(data => res.send(serialize(data, req)))
     })
 
+    app.get('/vehicles', (req, res) => {
+      db.getVehicles().then(data => res.send(serialize(data, req)))
+    })
+  
     app.route('/fuel-log')
         .get((req, res) => {
             const pageSize = parseInt(req.query.pageSize as string);

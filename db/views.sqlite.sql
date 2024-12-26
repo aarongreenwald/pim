@@ -398,11 +398,13 @@ group by account_id
 
 
 ;drop view if exists v_fuel_log
+
 ;create view v_fuel_log as
     -- TODO handle is_full = false
     with withkm as (
         select *
-             , odometer - lag(odometer) over (order by odometer asc) kilometers
+	      -- TODO check the edges of this
+             , odometer - lag(odometer) over (partition by vehicle_id order by odometer asc) kilometers
         from fuel_log
     ) select
         fuel_log_id
@@ -416,18 +418,25 @@ group by account_id
            , withkm.payment_id
            , payment.amount
            , payment.currency
+	   , vehicle.vehicle_id
+	   , vehicle.name vehicle_name
+	   , vehicle.is_primary
     from withkm
         left join payment on withkm.payment_id = payment.payment_id
+	left join vehicle on withkm.vehicle_id = vehicle.vehicle_id
     order by odometer desc
 
 --For now assume all entries are in the same currency
 ;drop view if exists v_fuel_log_summary
+
 ;create view v_fuel_log_summary as
-    select sum(kilometers) kilometers,
+    select vehicle_id, vehicle_name,
+	   sum(kilometers) kilometers,
            sum(liters) liters,
            sum(amount) ils,
            sum(kilometers) * 1.0 / sum(liters) kilometers_per_liter
     from v_fuel_log
+    group by vehicle_id, vehicle_name
 
 ;drop view if exists v_stock_split_multipliers
 ;create view v_stock_split_multipliers as

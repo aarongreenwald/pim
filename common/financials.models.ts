@@ -10,6 +10,12 @@ export type Currency = 'ILS' | 'USD';
 export type TaxCategory = 'Taxable' | 'Exempt' | 'Deferred';
 export type BasicISODate = number; // Format: 20231124
 
+export interface DropdownItemDto {
+  id: number;
+  name: string;
+  default: boolean;
+}
+
 export interface Payment {
   id: PaymentId;
   paidDate: BasicISODate;
@@ -131,6 +137,8 @@ export interface FuelLog {
 }
 
 export interface FuelLogSummary {
+  vehicleId: number;
+  vehicleName: string;
   liters: number;
   kilometers: number;
   kilometersPerLiter: number;
@@ -151,6 +159,7 @@ export interface NewFuelLogDto {
   price: Money;
   note?: string;
   isFull: boolean;
+  vehicleId: number;
 }
 
 export interface StockAccountDto {
