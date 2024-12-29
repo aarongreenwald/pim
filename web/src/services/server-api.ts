@@ -159,8 +159,8 @@ export function getSpendingByCategory(rootCategoryId: CategoryId): Promise<Spend
 export const getVehicles: () => Promise<DropdownItemDto[]> = () =>
   get('vehicles')
 
-export const getFuelLog: (pageSize?: number) => Promise<{ fuelLog: FuelLog[]; summary: FuelLogSummary }> = (pageSize) =>
-  get(`fuel-log${pageSize ? `?pageSize=${pageSize}` : ''}`);
+export const getFuelLog: (vehicleId?: number, pageSize?: number) => Promise<{ fuelLog: FuelLog[]; summary: FuelLogSummary }> = (vehicleId, pageSize) =>
+  get(`fuel-log?vehicleId=${vehicleId}${pageSize ? `&pageSize=${pageSize}` : ''}`);
 
 
 export const saveFuelLog = (fuelLog: NewFuelLogDto): Promise<void> =>

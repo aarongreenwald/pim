@@ -374,7 +374,7 @@ export const getVehicles: () => Promise<DropdownItemDto[]> = async () => {
   return all<DropdownItemDto>(db, sql)
 }
 
-export const getFuelLog: (pageSize?: number, vehicleId?: number) => Promise<FuelLog[]> = async (pageSize, vehicleId) => {
+export const getFuelLog: (vehicleId?: number, pageSize?: number) => Promise<FuelLog[]> = async (vehicleId, pageSize) => {
     const db = await getDb();
     const sql = `
         select fuel_log_id id, timestamp, km_per_liter kilometersPerLiter, odometer, liters, kilometers, note, is_full isFull, payment_id paymentId
