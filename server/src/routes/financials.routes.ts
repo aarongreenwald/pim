@@ -117,6 +117,10 @@ export const setupFinancialsRoutes = (app: Express) => {
               .catch(errorHandler(res))
         })
 
+    app.get('/fuel-log/latest', (req, res) => {
+      db.getLatestFuelLog().then(data => res.send(serialize(data, req)))
+    })
+
     app.get('/stock-holdings-summary', (req, res) => {
         db.getStockHoldingsSummary()
           .then(data => res.send(serialize(data, req)))

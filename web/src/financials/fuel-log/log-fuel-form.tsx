@@ -3,20 +3,29 @@ import {DefaultButton, Label, PrimaryButton, Stack, TextField} from '@fluentui/r
 import {stackTokens} from '../styles';
 import * as React from 'react';
 import {useCallback, useState, useEffect} from 'react';
-import {FuelLog, NewFuelLogDto, DropdownItemDto} from '@pim/common';
-import {saveFuelLog, getVehicles} from '../../services/server-api';
+import {FuelLog, NewFuelLogDto, DropdownItemDto, LatestFuelLogsDto} from '@pim/common';
+import {saveFuelLog, getVehicles, getLatestFuelLogs} from '../../services/server-api';
 import {Dropdown} from '../../common/dropdown';
 import {CurrencyInput} from '../currency-input';
 import {FuelLogPreviewCard} from './fuel-log-preview-card';
 import {todayAsISODate} from '../../common/date.utils';
 
-export const LogFuelForm: React.FC<PanelProps<number, FuelLog>> = ({onClose, onSave, data}) => {
-  const previousFuelLog = data;
+export const LogFuelForm: React.FC<PanelProps<number, FuelLog>> = ({onClose, onSave}) => {
+
   const {fuelLog, updateFuelLog, updateVehicle, submitForm} = useLogFuelForm(onClose, onSave);
   const [vehicles, setVehicles] = useState<DropdownItemDto[]>()
+  const [latestFuelLogs, setLatestFuelLogs] = useState<LatestFuelLogsDto>()
+  
   useEffect(() => {
     getVehicles().then(setVehicles)
   }, [])
+
+  useEffect(() => {
+    getLatestFuelLogs().then(setLatestFuelLogs)
+  }, [])
+
+
+  const previousFuelLog = latestFuelLogs && fuelLog ? latestFuelLogs[fuelLog.vehicleId] : null;
   const km = Math.max(fuelLog.odometer - previousFuelLog?.odometer, 0);
   const kml = fuelLog.liters ? km / fuelLog.liters : null;
   const totalCost = fuelLog.liters * fuelLog.price;

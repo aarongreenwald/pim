@@ -32,7 +32,8 @@ import {
   TransferCashToStockAccountDto,
   StockAccountCashTransactionId,
   StockAccountCashTransaction,
-  DropdownItemDto
+  DropdownItemDto,
+  LatestFuelLogsDto
 } from '@pim/common';
 import {all, beginTransaction, commitTransaction, get, getDb, rollbackTransaction, run} from './db.helpers';
 import sqlite from 'sqlite3'; // for types
@@ -395,6 +396,19 @@ export const getFuelLogSummary: () => Promise<FuelLogSummary[]> = async () => {
         from v_fuel_log_summary
     `;
     return all<FuelLogSummary>(db, sql)
+}
+
+export const getLatestFuelLog: () => Promise<LatestFuelLogsDto> = async () => {
+  const db = await getDb();
+  const sql = `
+      select vehicle_id vehicleId, max(odometer) odometer from v_fuel_log group by vehicle_id
+  `
+  const data = await all<{vehicleId: string; odometer: number}>(db, sql)
+  const res: LatestFuelLogsDto = data.reduce((acc, item) => {
+    acc[item.vehicleId] = { odometer: item.odometer }
+    return acc
+  }, {})
+  return res
 }
 
 const getFuelCategory = async (fuelLogDto: NewFuelLogDto) => {

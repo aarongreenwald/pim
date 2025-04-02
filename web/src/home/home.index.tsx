@@ -2,9 +2,6 @@ import * as React from 'react';
 import {DefaultButton, Stack, Panel, Label} from '@fluentui/react';
 import {RecentNotes} from '../notes/recent-notes';
 import {useBoolean} from '@fluentui/react-hooks';
-import {useCallback, useEffect, useState} from 'react';
-import {getFuelLog} from '../services/server-api';
-import {FuelLogDto} from '@pim/common';
 import {Search} from '../notes/search';
 import {searchIcon} from '../notes/icons';
 import {useLoadTodayDiary} from '../notes/todays-diary'
@@ -17,13 +14,7 @@ export const Home: React.FC = () => {
   const [addPayment, {setTrue: showAddPayment, setFalse: hideAddPayment}] = useBoolean(false)
   const [addFuelLog, {setTrue: showAddFuelLog, setFalse: hideAddFuelLog}] = useBoolean(false)
   const [searchNotes, {setTrue: showSearchNotes, setFalse: hideSearchNotes}] = useBoolean(false)
-  const [fuelLog, setFuelLog] = useState<FuelLogDto>(null)
   const history = useHistory();
-
-  const reloadFuelLog = useCallback(() => {
-    getFuelLog(1).then(setFuelLog)
-  }, [setFuelLog])
-  useEffect(reloadFuelLog, [reloadFuelLog])
 
   const loadTodayDiary = useLoadTodayDiary()
 
@@ -53,7 +44,7 @@ export const Home: React.FC = () => {
         isOpen={addFuelLog}
         headerText="Log Fuel"
         onDismiss={hideAddFuelLog}>
-        <LogFuelForm onClose={hideAddFuelLog} onSave={reloadFuelLog} data={fuelLog?.fuelLog[0]}/>
+        <LogFuelForm onClose={hideAddFuelLog}/>
       </Panel>
 
       <Search show={searchNotes} onDismiss={hideSearchNotes}/>

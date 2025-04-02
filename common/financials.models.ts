@@ -136,6 +136,12 @@ export interface FuelLog {
   currency: Currency;
 }
 
+export interface LatestFuelLogsDto {
+  [vehicleId: string]: {
+    odometer: number;
+  }
+}
+
 export interface FuelLogSummary {
   vehicleId: number;
   vehicleName: string;

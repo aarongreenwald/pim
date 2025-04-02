@@ -10,6 +10,7 @@ import {
   CategoryId,
   FuelLog,
   FuelLogSummary,
+  LatestFuelLogsDto,
   NewFuelLogDto,
   Income,
   IncomeId,
@@ -162,6 +163,8 @@ export const getVehicles: () => Promise<DropdownItemDto[]> = () =>
 export const getFuelLog: (vehicleId?: number, pageSize?: number) => Promise<{ fuelLog: FuelLog[]; summary: FuelLogSummary }> = (vehicleId, pageSize) =>
   get(`fuel-log?vehicleId=${vehicleId}${pageSize ? `&pageSize=${pageSize}` : ''}`);
 
+export const getLatestFuelLogs: () => Promise<LatestFuelLogsDto> = () =>
+  get('fuel-log/latest')
 
 export const saveFuelLog = (fuelLog: NewFuelLogDto): Promise<void> =>
   post('fuel-log', fuelLog)

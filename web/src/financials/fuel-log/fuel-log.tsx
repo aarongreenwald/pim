@@ -70,7 +70,7 @@ export const FuelHistory: React.FC = () => {
         isOpen={addFuelLog}
         headerText="Log Fuel"
         onDismiss={hideAddFuelLog}>
-        <LogFuelForm onClose={hideAddFuelLog} onSave={reloadData} data={fuelLog?.fuelLog[0]}/>
+        <LogFuelForm onClose={hideAddFuelLog} onSave={reloadData}/>
       </Panel>
 
       <Panel
