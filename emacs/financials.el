@@ -2,20 +2,23 @@
 			   &key kb sql-view endpoint query row-action
 			   bufname
 			   section description)
-  "
-Only title, kb, and exactly one of sql-view/endpoint/query is required.
-"
+  "Only title, kb, and exactly one of sql-view/endpoint/query is required."
   (setq bufname (or bufname
 		    (downcase (replace-regexp-in-string " " "-" title))
 		    ))
   (pim--add-to-home `(lambda () (interactive)
 		       ;; TODO this could be written better
-		       (when ',sql-view
-			 (pim-sql-show-view ',sql-view (pim-grid--create-keymap :row-action ',row-action)))
-		       (when ',endpoint
-			 (pim-sql-show-endpoint ',endpoint ',bufname (pim-grid--create-keymap :row-action ',row-action)))
-		       (when ',query
-			 (pim-sql-show-query ',query ',bufname (pim-grid--create-keymap :row-action ',row-action))))
+		       (let ((func))
+			 (when ',sql-view
+			   (setq func `(lambda () (interactive) (pim-sql-show-view ',',sql-view)))
+			   (pim-sql-show-view ',sql-view
+					      (pim-grid--create-keymap :row-action ',row-action :refresh-cb func)))
+			 (when ',endpoint
+			   (setq func `(lambda () (interactive) (pim-sql-show-endpoint ',',endpoint ',',bufname)))
+			   (pim-sql-show-endpoint ',endpoint ',bufname (pim-grid--create-keymap :row-action ',row-action :refresh-cb func)))
+			 (when ',query
+			   (setq func `(lambda () (interactive) (pim-sql-show-query ',',query ',',bufname)))
+			   (pim-sql-show-query ',query ',bufname (pim-grid--create-keymap :row-action ',row-action :refresh-cb func)))))
 		    kb title section description))
 
 (pim--add-action "Stock Holdings by Account"
@@ -35,6 +38,20 @@ Only title, kb, and exactly one of sql-view/endpoint/query is required.
 		 :section "Stocks"
 		 :description "Similar to stock holdings by account")
 
+(pim--add-action "Stock Holdings Summary"
+		 :kb (kbd "s s")
+		 :endpoint "stock-holdings-summary"
+		 :row-action (list 'pim-fin--stock-transactions-filtered "tickerSymbol" "taxCategory")
+		 :section "Stocks"
+		 :description "Stock holdings across accounts")
+
+(defun pim-fin--stock-transactions-filtered (tickerSymbol taxCategory)
+  (pim-sql-show-query (format "select * from v_stock_transactions st
+                               inner join stock_account sa on st.account_id = sa.stock_account_id
+                               where ticker_symbol = '%s' and tax_category = '%s'"
+			      tickerSymbol taxCategory)
+		      (format "stock_transactions (%s, %s)" tickerSymbol taxCategory)))
+
 
 (defun pim-fin--stock-account-cash-flow (account-id name)
   ;; if not absolutely trivial use the web server via pim-sql-show-endpoint
@@ -42,12 +59,6 @@ Only title, kb, and exactly one of sql-view/endpoint/query is required.
                                order by transaction_date desc, transaction_time desc, record_id desc"
 			      account-id)
 		      (format "stock-account-cash-flow (%s)" name)))
-
-(defun pim-fin-stock-holdings-summary ()
-  (interactive)
-  (pim-sql-show-endpoint "stock-holdings-summary"
-			 "stock-holdings-summary"))
-(pim--add-to-home 'pim-fin-stock-holdings-summary (kbd "s s") "Stock Holdings Summary" "Stocks")
 
 (defun pim-fin--stock-account-holdings-summary (account-id name)
   (pim-sql-show-query (format "select * from v_stock_holdings_account_ticker_summary

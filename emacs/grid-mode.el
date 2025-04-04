@@ -272,12 +272,17 @@ keeps stats (sum/count/average) on the selected cells."
 				 )))
 
 
-(cl-defun pim-grid--create-keymap (&key row-action)
+(cl-defun pim-grid--create-keymap (&key row-action refresh-cb)
   "Create a keymap for pim-grid with specific row/cell actions"
   (let ((map (make-sparse-keymap)))
     (if row-action
 	(apply 'pim-grid--add-to-map-row-action (cons map row-action)))
     ;; TODO support cell-actions as well
+    (if refresh-cb
+	(define-key map (kbd "g") `(lambda () (interactive)
+				     (message "Refreshing...")
+				     (,refresh-cb)
+				 )))
     map))
 
 
