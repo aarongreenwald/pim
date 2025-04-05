@@ -230,4 +230,29 @@ create table filename(
     sha256 not null references file,
     accessed timestamp null, --poorly named, this is only updated when the row is updated, should be called "recorded" or something
     unique(name, created) --primary key - this is a "file version"
+);
+
+create table user(user_id integer primary key not null
+  , login_id varchar(50) not null
+  , name varchar(50) not null
+  , is_admin boolean not null default false --todo constraint only one true in table
+);
+
+create table split_payment(split_payment_id integer primary key not null
+  ,paid_date int not null
+  ,amount decimal(19,4) not null
+  ,incurred_begin_date int null --if empty assume the paid_date
+  ,incurred_end_date int null --if empty assume the incurred_begin_date
+  ,paid_by_user int not null references user
+  ,currency char(3) not null default 'ILS'
+  -- todo add categories? attachments? tags?
+  ,note text null
+);
+
+create table split_payment_part(
+    split_payment_id int not null references split_payment
+  , user_id int not null references user
+  , incurred_amount decimal(19,4) not null
+  , unique(split_payment_id, user_id) -- the primary key
+  -- todo - constraint that the total of the parts for a payment_id is the amount in split_payment
 )

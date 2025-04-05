@@ -611,3 +611,24 @@ select * from file where sha256 not in (select sha256 from filename)
 ;create view v_orphaned_filenames as
 select * from filename where sha256 not in (select sha256 from file)
 
+;drop view if exists v_split_payment
+
+;create view v_split_payment as
+select
+ sp.split_payment_id
+ , sp.paid_date --todo incurred dates
+ , sp.paid_by_user
+ , u.name paid_by --convenience, consider removing because names aren't available in the parts field
+ , sp.currency
+ , sp.amount
+ , sp.note
+ , parts.parts
+ , parts.total_amount assigned_amount
+ from split_payment sp
+       left join user u on sp.paid_by_user = u.user_id
+       left join (
+       	    select split_payment_id spid
+	           , sum(incurred_amount) total_amount
+		   , json_group_object(user_id, incurred_amount) parts
+       from split_payment_part group by split_payment_id) parts
+       on sp.split_payment_id = parts.spid
